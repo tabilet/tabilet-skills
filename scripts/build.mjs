@@ -1,0 +1,12 @@
+import { build } from 'esbuild';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { stage, root } from './upstream.mjs';
+await stage();
+const notices = await Promise.all(['zod', '@deepseek-ai/dsh-util-workspace-path'].map(async name => `${name}\n\n${await readFile(join(root, 'node_modules', name, 'LICENSE'), 'utf8')}`));
+await writeFile(join(root, 'THIRD-PARTY-NOTICES.txt'), notices.join('\n\n---\n\n'));
+await mkdir(join(root, 'dist'), { recursive: true });
+await build({ entryPoints: [join(root, 'src/host.ts')], outfile: join(root, 'dist/host.js'), bundle: true, packages: 'external', platform: 'node', format: 'esm', target: 'node24' });
+const client = await build({ entryPoints: [join(root, 'src/client.tsx')], write: false, bundle: true, external: ['react', 'react/jsx-runtime', '@deepseek-ai/cordis'], platform: 'browser', format: 'cjs', target: 'es2022', jsx: 'automatic' });
+await writeFile(join(root, 'dist/client.js'), 'window.__ModuleLoader__.load({ id: "tabilet-skills", factory: (require) => { var module = {exports:{}}; var exports = module.exports;\n' + client.outputFiles[0].text + '\nreturn module.exports; }});\n');
+await writeFile(join(root, 'dist/host.d.ts'), 'import type { Context } from "@deepseek-ai/cordis";\nexport declare const name = "tabilet-skills";\nexport declare const inject: string[];\nexport declare function apply(ctx: Context): void;\n');

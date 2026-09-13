@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { initProfile, PROFILE_TEMPLATES } from '@deepseek-ai/dsh-app-boot';
+import test from 'node:test';
+test('actual CLI installation, update, disable, and removal preserve unrelated profile settings and skills', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'tabilet-lifecycle-')); t.after(() => rm(root, { recursive: true, force: true }));
+  const env = { PATH: process.env.PATH, DSH_HOME: join(root, 'dsh'), DSH_AGENTS_HOME: join(root, 'agents'), DSH_TELEMETRY_DISABLED: '1', NO_COLOR: '1' };
+  const dir = join(env.DSH_HOME, 'profiles/headless'), template = PROFILE_TEMPLATES.headless;
+  initProfile(dir, template.bundles, template.patchReload);
+  const sentinel = '# Unrelated local settings\n[]\n'; await writeFile(join(dir, 'cordis.patch.yml'), sentinel);
+  await mkdir(join(env.DSH_HOME, 'skills/unrelated'), { recursive: true }); await writeFile(join(env.DSH_HOME, 'skills/unrelated/notes.md'), 'Preserve me');
+  const cli = resolve('node_modules/@deepseek-ai/dsh/lib/bin.js');
+  const run = (...args: string[]) => execFileSync(process.execPath, [cli, ...args], { env, cwd: root, encoding: 'utf8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'] });
+  const artifact = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', root], { encoding: 'utf8' }))[0];
+  run('plugin', '--profile', 'headless', 'add', join(root, artifact.filename), '--ignore-scripts');
+  assert.ok(JSON.parse(await readFile(join(dir, 'package.json'), 'utf8')).dsh.profile.bundles.includes('tabilet-skills'));
+  assert.ok(run('--profile', 'headless', '--dump-config').includes('tabilet-skills'));
+  // An isolated synthetic newer package exercises update without publishing it.
+  execFileSync('tar', ['-xzf', join(root, artifact.filename), '-C', root]);
+  const manifestPath = join(root, 'package/package.json'), manifest = JSON.parse(await readFile(manifestPath, 'utf8')); manifest.version = '1.4.1'; await writeFile(manifestPath, JSON.stringify(manifest));
+  const upgrade = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', root], { cwd: join(root, 'package'), encoding: 'utf8' }))[0];
+  run('plugin', '--profile', 'headless', 'add', join(root, upgrade.filename), '--ignore-scripts');
+  assert.equal(JSON.parse(await readFile(join(dir, 'node_modules/tabilet-skills/package.json'), 'utf8')).version, '1.4.1');
+  await writeFile(join(dir, 'cordis.patch.yml'), '# Unrelated local settings\n- id: tabilet-skills\n  disabled: true\n');
+  const disabled = run('--profile', 'headless', '--dump-config');
+  assert.match(disabled, /id: tabilet-skills[\s\S]{0,100}disabled: true|disabled: true[\s\S]{0,100}id: tabilet-skills/);
+  await writeFile(join(dir, 'cordis.patch.yml'), sentinel);
+  run('plugin', '--profile', 'headless', 'remove', 'tabilet-skills');
+  assert.ok(!JSON.parse(await readFile(join(dir, 'package.json'), 'utf8')).dsh.profile.bundles.includes('tabilet-skills'));
+  assert.equal(await readFile(join(dir, 'cordis.patch.yml'), 'utf8'), sentinel);
+  assert.equal(await readFile(join(env.DSH_HOME, 'skills/unrelated/notes.md'), 'utf8'), 'Preserve me');
+});

@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/tabilet/skills.git",
+  "version": "1.4.0",
+  "commit": "603d963529d2b8e67e2a2a8ae79d59d4489f7907",
+  "files": {
+    "LICENSE": "555cf5b885b2fad33220894deb8e39eded2680d38157b8798113abfa8f8d8c34",
+    "skills/memory-bank-archive/SKILL.md": "6be9f1a1ea31234eb237b0cf5f904a66f418cbe98a360cb13570a792d01e75d0",
+    "skills/memory-bank-archive/references/write-contract.md": "99f87654eb36917b9c627ea8b46567547d9e9b0af0276ebf9c252ced24c4b608",
+    "skills/memory-bank-goal/SKILL.md": "95503f50a4d9d9763bf31e02d65bc3f5e025b8951a1081b95080bcf78905458c",
+    "skills/memory-bank-goal/references/runtime-help.md": "7c36faf22c0121ac66ee07a26aefd9e40537dd93ee24bd84c8bd68fd10217841",
+    "skills/memory-bank-init/GOAL.md": "8e89b16bc6b26554ccc26b0288200074f8956dd672c900eded320f4800d53cd4",
+    "skills/memory-bank-init/SKILL.md": "d199d13ec95c2ba93630a2fdc590a570f5ddaaa366d99e4365ad43db59809cf7",
+    "skills/memory-bank-init/references/write-contract.md": "af3148245f2a43a8a8e42f55e2d64a79fada84c864d06c5fa78bf4982ba6bfea",
+    "skills/memory-bank-next/SKILL.md": "5a508e257f9a650ccbf0d6c4db5e6fe6991ed01f2304f96f27057911c7ac2824",
+    "skills/memory-bank-reconcile/SKILL.md": "10616a1860448a011870c3b730db828118cf637f27361cf45204f94e7f035d24",
+    "skills/memory-bank-reconcile/references/write-contract.md": "0b0c37c8a396df6d43da49bef113ecab7239bf02939444c8f8f88e6774814ae5",
+    "skills/memory-bank-upgrade/SKILL.md": "994e0bc81f6e74a5d7f1598d83e9f8fc54869e8b0471b2b4afba86b08c6c2d99",
+    "skills/memory-bank-upgrade/assets/template/AGENTS.md": "35160b4b90e0ecc74d188f800dc082892cdf8357651b13df3309f7d0b231688c",
+    "skills/memory-bank-upgrade/assets/template/GOAL.md": "8e89b16bc6b26554ccc26b0288200074f8956dd672c900eded320f4800d53cd4",
+    "skills/memory-bank-upgrade/assets/template/evolution/prompt-v1.md": "eaa16296cb8a88235dd31bb774f7c661fddac0415b09b38250e484aa7836b1ed",
+    "skills/memory-bank-upgrade/assets/template/evolution/result-v1.md": "ffc6e7125d02988fac6fc600f2a4e3c065d24aa2398c2d75b3d0286c3ab9d03f",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/architecture.md": "de90ccff5e5494726313198cf5426031bc873ef2d708d362cbdfcdfe8607260c",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/lessons.md": "32ce0b139706b861604b6f2dfb810dd134c2146448ae5d59d056d0c87c1c55c0",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/milestone.md": "0b56c74c2bb24556699da6865a11efdfda8f479afc59d4c8deb4e45926485dd4",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/product.md": "9c0fd9820cc0f86ed6a14aa23e6b2754ef388975c2203cee6eab29125da1ebac",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/status-M01.md": "05b1d625b7f7ad7674ae17cec77cf5ab64a068d901ad85a104d38e5f1b19a9cc",
+    "skills/memory-bank-upgrade/assets/template/memory-bank/tech-stack.md": "d0aff482dce87e9615a5a7cda4b112af20c3a00108c5a3d6bdfc2121891cc135",
+    "tests/fixtures/parser-conformance.json": "1a6eac3b2840b970fc3d8636b9b164f5ef1bfb644f2edd7e6bc121e6f29ca4ad"
+  }
+}

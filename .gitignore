@@ -1,0 +1,6 @@
+node_modules/
+payload/
+*.tgz
+playwright-report/
+test-results/
+.acceptance/
