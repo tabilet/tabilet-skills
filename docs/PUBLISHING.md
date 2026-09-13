@@ -1,26 +1,29 @@
 # Finish v1.4.0 publication
 
+The [canonical GitHub release](https://github.com/tabilet/skills/releases/tag/v1.4.0)
+and [companion GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0)
+are published. The companion has the required `dsh-plugin` topic. The public
+GitHub archive matches the tested artifact and installs into clean disposable
+Web and headless profiles. Remaining gates are npm publication, public npm
+artifact verification, and catalog submission/listing.
+
 Use the tested `tabilet-skills-1.4.0.tgz` and its recorded SHA-256 in
 [ACCEPTANCE.md](ACCEPTANCE.md). Do not publish a rebuilt or edited archive without
-verifying it. Both Git repositories must contain their tested v1.4.0 tags. The
+verifying it. Both repositories already contain immutable v1.4.0 tags; the
 canonical release commit is pinned in `upstream.lock.json`.
 
-Authenticate npm and GitHub in a terminal; never copy credentials into issues,
-release notes, or chat. A GitHub token must permit release creation and repository
-topic updates. Git push access alone does not establish these API permissions.
+Authenticate npm in a terminal with `npm login`; never copy credentials into
+issues, release notes, or chat. The current agent environment also supplies a
+restricted `GITHUB_TOKEN` that overrides the user's saved GitHub login. For future
+GitHub writes, prefix `gh` with `env -u GH_TOKEN -u GITHUB_TOKEN` to use the saved
+login. Never print token values or alter the environment's token globally.
 
-After access is available, publish the canonical GitHub release first using only
-the v1.4.0 section of its `docs/RELEASE_NOTES.md`. Then attach the companion's exact
-archive and checksum to its GitHub release. Pass multiline release notes through
-`gh release create --notes-file`, not shell interpolation.
+After npm authentication is available:
 
 ```bash
 npm whoami
-gh release create v1.4.0 --repo tabilet/tabilet-skills --verify-tag \
-  --title 'tabilet-skills v1.4.0' --notes-file docs/RELEASE_NOTES.md \
-  tabilet-skills-1.4.0.tgz SHA256SUMS
+sha256sum --check SHA256SUMS
 npm publish ./tabilet-skills-1.4.0.tgz --access public --ignore-scripts
-gh repo edit tabilet/tabilet-skills --add-topic dsh-plugin
 ```
 
 Download `tabilet-skills@1.4.0` from the public npm registry into a new temporary
@@ -32,8 +35,9 @@ integrity and clean-install evidence in `ACCEPTANCE.md`.
 
 The catalog repository-age gate opens **2026-09-14 16:27:47 UTC**. Re-read its
 [current rules](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md)
-before submitting. Verify the entry’s pinned GitHub release tarball is public;
-this supplies a complete prebuilt installation when using the catalog. Copy only [catalog-entry.yml](catalog-entry.yml) to
-`data/plugins/tabilet__tabilet-skills.yml` in a fork and submit one pull request;
-do not edit the catalog README. Record the pull request as submission pending.
-Only mark listed after acceptance and market visibility are verified.
+before submitting. The entry's pinned GitHub release tarball is public and
+provides a complete prebuilt installation. Copy only
+[catalog-entry.yml](catalog-entry.yml) to `data/plugins/tabilet__tabilet-skills.yml`
+in a fork and submit one pull request; do not edit the catalog README. Record
+the pull request as submission pending. Only mark listed after acceptance and
+market visibility are verified.

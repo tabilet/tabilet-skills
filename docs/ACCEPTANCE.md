@@ -8,12 +8,13 @@ No paid model acceptance was run; skill semantics are unchanged from v1.3.0.
 | Gate | Status |
 | --- | --- |
 | Canonical harness v1.4.0 commit/tag | Published: `603d963529d2b8e67e2a2a8ae79d59d4489f7907` |
-| Canonical GitHub release page | Pending: GitHub token rejected release creation with HTTP 403 |
+| Canonical GitHub release page | [Published](https://github.com/tabilet/skills/releases/tag/v1.4.0): 2026-09-13 21:24:41 UTC |
 | Companion GitHub commit/tag | Published: `v1.4.0` |
-| Companion GitHub release page/archive | Pending: release creation rejected with HTTP 403 |
-| npm v1.4.0 | Pending: machine authentication is not available yet |
+| Companion GitHub release page/archive | [Published](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0): 2026-09-13 21:24:56 UTC |
+| Public GitHub archive download and clean install | Passed: exact hash and all payload hashes; disposable Web and headless profiles |
+| npm v1.4.0 | Pending: `npm whoami` still reports `ENEEDAUTH` as of 2026-09-13 21:24 UTC |
 | Public npm artifact download and clean install | Pending npm publication |
-| Repository `dsh-plugin` topic | Pending: GitHub token rejected topic update with HTTP 403 |
+| Repository `dsh-plugin` topic | Added and verified |
 | Catalog submission | Pending repository age and verified publication |
 | Listed in catalog and market | Not listed |
 
@@ -142,3 +143,14 @@ archive unchanged. The published v1.4.0 Git tag remains at
   explicitly includes the selected JSON reports under the hidden evidence folder.
 - [Publication continuation](PUBLISHING.md) records the exact remaining operations.
   The public npm download/install gate cannot pass before npm publication.
+
+## Public GitHub artifact verification
+
+The public release archive was downloaded without authentication on
+2026-09-13 at 21:25 UTC. Its SHA-256 matches the tested and CI-built archive; all
+**23 pinned payload files** match `upstream.lock.json`. The downloaded archive
+installed through the DSH CLI into fresh disposable **Web and headless profiles**,
+each containing all six complete skills. No personal DSH profile was changed.
+[Download and installation evidence](public-github-v1.4.0.json) records the URL,
+identity, and completed checks. This does not substitute for the separate public
+npm download/install gate, which remains pending npm authentication and publication.

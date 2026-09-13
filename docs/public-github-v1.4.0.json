@@ -1,0 +1,15 @@
+{
+  "url": "https://github.com/tabilet/tabilet-skills/releases/download/v1.4.0/tabilet-skills-1.4.0.tgz",
+  "verifiedAt": "2026-09-13T21:25:44.401Z",
+  "sha256": "e78445a1cb1cf4f8503b397bab194cd5336e4d40281671048b0de771ee837a42",
+  "bytes": 187678,
+  "payloadFiles": 23,
+  "upstream": {
+    "version": "1.4.0",
+    "commit": "603d963529d2b8e67e2a2a8ae79d59d4489f7907"
+  },
+  "cleanProfiles": [
+    "web",
+    "headless"
+  ]
+}
