@@ -20,6 +20,7 @@ for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['l
     await writeFile(join(canonical, 'status-M01.md'), '| 1 | `[ ]` | Linked canonical task |\n');
     files.set('memory-bank/milestone.md', '| M01 | [Canonical](../../canonical/status-M01.md) |\n');
   }
+  if (name === 'active') files.set('memory-bank/milestone.md', files.get('memory-bank/milestone.md')! + `\n[Absolute alias](${join(project, 'memory-bank/status-A01.md')})\n`);
   if (name === 'active') files.set('memory-bank/product.md', '# Product\n<script>globalThis.TABILET_UNSAFE = true</script>\n![Remote image](https://example.invalid/tracker.png)\n');
   for (const [path, text] of files) { await mkdir(dirname(join(project, path)), { recursive: true }); await writeFile(join(project, path), text); }
   if (name === 'linked') await symlink(join(state.root, 'canonical/status-M01.md'), join(project, 'memory-bank/status-S01.md'));

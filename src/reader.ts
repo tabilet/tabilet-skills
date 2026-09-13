@@ -69,20 +69,32 @@ export class Reader {
       milestones.push({ id, path, title: title || id });
     }
     // Bounded parallelism keeps large ledgers responsive without flooding Remote.
+    const activeDocuments = new Map<string, Document>();
     for (let offset = 0; offset < milestones.length; offset += 12) {
-      await Promise.all(milestones.slice(offset, offset + 12).map(async ({ id, path }) => {
-        const doc = await attempt(path); if (!doc) return;
-        const rows = statusRows(doc.text);
-        issues.push(...statusMarkerProblems(doc.text).map(p => `${path}: ${p}`));
-        if (!rows.length) issues.push(`${path}: no recognized task rows`);
-        const items = new Set<string>();
-        for (const row of rows) {
-          if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
-          items.add(row.item); tasks.push({ ...row, id, path });
-          if (row.state === 'historical' && !/\bsuccessor\b\s*:?\s+\S/i.test(row.cells.slice(2).join(' '))) issues.push(`${path}:${row.line}: historical row has no named successor`);
-        }
+      await Promise.all(milestones.slice(offset, offset + 12).map(async ({ path }) => {
+        const doc = await attempt(path); if (doc) activeDocuments.set(path, doc);
       }));
     }
+    // An indexed absolute path and directory discovery may name the same file.
+    // Only the host's file identity can establish this; matching contents cannot.
+    const identities = new Set<string>(), aliases = new Set<string>();
+    for (const { id, path } of milestones) {
+      const doc = activeDocuments.get(path); if (!doc) continue;
+      const identity = JSON.stringify([id, doc.absolutePath]);
+      if (identities.has(identity)) { aliases.add(path); continue; }
+      identities.add(identity);
+      const rows = statusRows(doc.text);
+      issues.push(...statusMarkerProblems(doc.text).map(p => `${path}: ${p}`));
+      if (!rows.length) issues.push(`${path}: no recognized task rows`);
+      const items = new Set<string>();
+      for (const row of rows) {
+        if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
+        items.add(row.item); tasks.push({ ...row, id, path });
+        if (row.state === 'historical' && !/\bsuccessor\b\s*:?\s+\S/i.test(row.cells.slice(2).join(' '))) issues.push(`${path}:${row.line}: historical row has no named successor`);
+      }
+    }
+    for (let i = milestones.length - 1; i >= 0; i--) if (aliases.has(milestones[i].path)) milestones.splice(i, 1);
+    for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = new Set<string>();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
       if (!/^[A-Z]\d{2}$/.test(row.cells[0])) continue;

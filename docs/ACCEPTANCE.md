@@ -46,7 +46,7 @@ Canonical repository: all **30** checks in `python3 check.py` passed at the tagg
 commit. [GitHub CI](https://github.com/tabilet/skills/actions/runs/34772505453) also passed. The retained credential-free all-rc.1 DSH suite passed all **13** tests.
 The Python parser verifies **21** shared conformance cases.
 
-Companion: strict TypeScript checking, build, and **37** parser, reader, request,
+Companion: strict TypeScript checking, build, and **38** parser, reader, request,
 packaging, profile lifecycle, and runtime tests passed. The packed artifact is
 extracted and every pinned payload hash checked. Actual DSH registry tests load
 all six skills, preserve override precedence and supporting resources, and
@@ -99,8 +99,13 @@ Review 2 inspected the complete host/provider, remote contract, parser, readers,
 client lifecycle, workflow guards, build, packed payload, and isolation scripts.
 Clipboard absence now falls back to selecting preview text; missing composer and
 Goal capabilities are visible. All identified P1/P2-or-higher findings are
-resolved. Final verification of this reviewed source is required below before
-companion publication.
+resolved. Review 3 additionally found duplicate counting when an indexed absolute
+path and directory discovery named one file. The reader now deduplicates by the
+host's file identity; distinct files reusing an ID still warn. Both a focused
+regression and the native 120-file fixture cover this case. Initial GitHub CI
+exposed a race in attachment fixture setup after clearing DSH's contenteditable;
+that independent case now starts with a fresh connection and asserts an empty
+draft before uploading. Final verification is recorded below before publication.
 
 ## Retained limits
 

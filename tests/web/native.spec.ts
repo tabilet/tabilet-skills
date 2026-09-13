@@ -133,9 +133,15 @@ test('insertion preserves existing drafts, attachments, and a changed draft revi
   await dialog.getByRole('button', { name: 'Insert into empty draft' }).click();
   await expect(dialog).toContainText('Session or draft changed'); await expect(editor).toHaveText('Draft changed while preview was open');
   await dialog.getByRole('button', { name: 'Close request preview' }).click(); await editor.fill('');
+  // Use a fresh connection for the attachment fixture. Clearing a contenteditable
+  // and immediately uploading can race DSH's asynchronous edit normalization.
+  await page.reload(); const attachmentPanel = await open(page);
+  const attachmentEditor = page.locator('[contenteditable=true][role=textbox]');
+  await expect(attachmentEditor).toHaveText('');
   await page.locator('input[type=file]').setInputFiles({ name: 'keep.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6CYkAAAAASUVORK5CYII=', 'base64') });
-  await panel.getByRole('button', { name: 'Resume', exact: true }).click(); dialog = page.getByRole('dialog'); await dialog.getByRole('button', { name: 'Insert into empty draft' }).click(); await expect(dialog).toContainText('preserved');
-  expect((await page.locator('[contenteditable=true][role=textbox]').innerText()).trim()).toBe('');
+  await attachmentPanel.getByText('Prepare a workflow request', { exact: true }).click();
+  await attachmentPanel.getByRole('button', { name: 'Resume', exact: true }).click(); dialog = page.getByRole('dialog'); await dialog.getByRole('button', { name: 'Insert into empty draft' }).click(); await expect(dialog).toContainText('preserved');
+  expect((await attachmentEditor.innerText()).trim()).toBe('');
 });
 test('narrow layouts remain within the viewport and source links open in the same session', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); const panel = await open(page);

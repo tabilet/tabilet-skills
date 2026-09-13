@@ -51,3 +51,20 @@ test('indexed canonical paths work when directory discovery is denied', async ()
   const f = memoryPort(files), s = await new Reader(f.port).snapshot(signal());
   assert.equal(s.tasks[0].path, '../canonical/status-M01.md');
 });
+
+test('indexed aliases count one host file once, while distinct files retain duplicate-ID warnings', async () => {
+  const files = activeFixture(1);
+  files.set('memory-bank/milestone.md', files.get('memory-bank/milestone.md')! + '\n[Absolute alias](/project/memory-bank/status-A01.md)');
+  const f = memoryPort(files);
+  const read = f.port.read, stat = f.port.stat;
+  f.port.read = (path, sig) => read(path.replace(/^\/project\//, ''), sig);
+  f.port.stat = (path, sig) => stat(path.replace(/^\/project\//, ''), sig);
+  let snapshot = await new Reader(f.port).snapshot(signal());
+  assert.deepEqual(snapshot.issues, []); assert.equal(snapshot.tasks.length, 5); assert.equal(snapshot.milestones.length, 1);
+  assert.equal(snapshot.documents.filter(d => /status-A01.md$/.test(d.path)).length, 1);
+  files.set('../canonical/status-A01.md', files.get('memory-bank/status-A01.md')!);
+  files.set('memory-bank/milestone.md', files.get('memory-bank/milestone.md')! + '\n[Different file](../../canonical/status-A01.md)');
+  snapshot = await new Reader(f.port).snapshot(signal());
+  assert.ok(snapshot.issues.some(s => s.includes('Duplicate active ID: A01')));
+  assert.equal(snapshot.milestones.length, 2);
+});

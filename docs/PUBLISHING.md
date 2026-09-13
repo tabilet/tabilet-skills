@@ -32,7 +32,8 @@ integrity and clean-install evidence in `ACCEPTANCE.md`.
 
 The catalog repository-age gate opens **2026-09-14 16:27:47 UTC**. Re-read its
 [current rules](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md)
-before submitting. Copy only [catalog-entry.yml](catalog-entry.yml) to
+before submitting. Verify the entry’s pinned GitHub release tarball is public;
+this supplies a complete prebuilt installation when using the catalog. Copy only [catalog-entry.yml](catalog-entry.yml) to
 `data/plugins/tabilet__tabilet-skills.yml` in a fork and submit one pull request;
 do not edit the catalog README. Record the pull request as submission pending.
 Only mark listed after acceptance and market visibility are verified.

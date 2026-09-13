@@ -285,22 +285,36 @@ var Reader = class {
       const title = milestone && unfencedLines(milestone.text).find(([, s]) => new RegExp("^## " + id + "(?:\\s|$)").test(s))?.[1].slice(3);
       milestones.push({ id, path, title: title || id });
     }
+    const activeDocuments = /* @__PURE__ */ new Map();
     for (let offset = 0; offset < milestones.length; offset += 12) {
-      await Promise.all(milestones.slice(offset, offset + 12).map(async ({ id, path }) => {
+      await Promise.all(milestones.slice(offset, offset + 12).map(async ({ path }) => {
         const doc = await attempt(path);
-        if (!doc) return;
-        const rows = statusRows(doc.text);
-        issues.push(...statusMarkerProblems(doc.text).map((p) => `${path}: ${p}`));
-        if (!rows.length) issues.push(`${path}: no recognized task rows`);
-        const items = /* @__PURE__ */ new Set();
-        for (const row of rows) {
-          if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
-          items.add(row.item);
-          tasks.push({ ...row, id, path });
-          if (row.state === "historical" && !/\bsuccessor\b\s*:?\s+\S/i.test(row.cells.slice(2).join(" "))) issues.push(`${path}:${row.line}: historical row has no named successor`);
-        }
+        if (doc) activeDocuments.set(path, doc);
       }));
     }
+    const identities = /* @__PURE__ */ new Set(), aliases = /* @__PURE__ */ new Set();
+    for (const { id, path } of milestones) {
+      const doc = activeDocuments.get(path);
+      if (!doc) continue;
+      const identity = JSON.stringify([id, doc.absolutePath]);
+      if (identities.has(identity)) {
+        aliases.add(path);
+        continue;
+      }
+      identities.add(identity);
+      const rows = statusRows(doc.text);
+      issues.push(...statusMarkerProblems(doc.text).map((p) => `${path}: ${p}`));
+      if (!rows.length) issues.push(`${path}: no recognized task rows`);
+      const items = /* @__PURE__ */ new Set();
+      for (const row of rows) {
+        if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
+        items.add(row.item);
+        tasks.push({ ...row, id, path });
+        if (row.state === "historical" && !/\bsuccessor\b\s*:?\s+\S/i.test(row.cells.slice(2).join(" "))) issues.push(`${path}:${row.line}: historical row has no named successor`);
+      }
+    }
+    for (let i = milestones.length - 1; i >= 0; i--) if (aliases.has(milestones[i].path)) milestones.splice(i, 1);
+    for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = /* @__PURE__ */ new Set();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
       if (!/^[A-Z]\d{2}$/.test(row.cells[0])) continue;
