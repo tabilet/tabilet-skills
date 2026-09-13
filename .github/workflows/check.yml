@@ -20,6 +20,7 @@ jobs:
         if: always()
         with:
           name: acceptance-evidence
+          include-hidden-files: true
           path: |
             .acceptance/web-results*.json
             test-results/

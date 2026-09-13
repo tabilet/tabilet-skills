@@ -1,0 +1,48 @@
+{
+  "version": "1.4.0",
+  "sourceCommit": "9f1ebafd7680ee8b3aaa39586c8098a9e1786aad",
+  "upstream": {
+    "version": "1.4.0",
+    "commit": "603d963529d2b8e67e2a2a8ae79d59d4489f7907",
+    "files": 23
+  },
+  "artifact": {
+    "filename": "tabilet-skills-1.4.0.tgz",
+    "size": 187678,
+    "unpackedSize": 1025174,
+    "entryCount": 33,
+    "sha256": "e78445a1cb1cf4f8503b397bab194cd5336e4d40281671048b0de771ee837a42",
+    "shasum": "5b2165a6df9a080b1f99f532373499634279d4f5",
+    "integrity": "sha512-N3idn9yTHBEvP3iCNhIROEYSgLoQWJxdUBaDJSPY7RYjYFjP//hJTlmD9oFsyE6hSuMv4r0Q/P+g+2++IOhiPg=="
+  },
+  "node": "24.14.1",
+  "canonicalChecks": 30,
+  "canonicalDshRc1Tests": 13,
+  "companionTests": 38,
+  "web": {
+    "rc2": {
+      "startTime": "2026-09-13T17:51:31.179Z",
+      "duration": 77595.577,
+      "expected": 9,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "mixed": {
+      "startTime": "2026-09-13T17:53:02.780Z",
+      "duration": 85662.227,
+      "expected": 9,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "ci": {
+    "url": "https://github.com/tabilet/tabilet-skills/actions/runs/34772901760",
+    "conclusion": "success",
+    "companionTests": 38,
+    "rc2Tests": 9,
+    "mixedTests": 9,
+    "artifactSha256": "e78445a1cb1cf4f8503b397bab194cd5336e4d40281671048b0de771ee837a42"
+  }
+}
