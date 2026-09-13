@@ -107,7 +107,10 @@ regression and the native 120-file fixture cover this case. Initial GitHub CI
 exposed a race in attachment fixture setup after clearing DSH's contenteditable;
 that independent case now starts with a fresh connection and asserts an empty
 draft before uploading. All **38 automated tests** and **18 native runtime tests**
-passed after the reader correction. No P1/P2-or-higher findings remain open.
+passed after the reader correction. No P1/P2-or-higher implementation findings remain open. A subsequent CI run
+exposed DSH’s delayed Internal Testing Notice blocking test navigation; the test
+harness now dismisses that specific notice through Playwright’s locator handler.
+This test-only follow-up leaves the immutable release archive unchanged.
 
 ## Retained limits
 

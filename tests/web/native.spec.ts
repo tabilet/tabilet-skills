@@ -23,10 +23,15 @@ async function hashTree(root: string): Promise<Record<string, string>> {
   await walk(''); return result;
 }
 async function calls() { try { return (await readFile(providerLog, 'utf8')).trim().split('\n').filter(Boolean).map(s => JSON.parse(s)); } catch { return []; } }
+const noticeHandled = new WeakSet<Page>();
 async function open(page: Page, project = 'active') {
+  if (!noticeHandled.has(page)) {
+    await page.addLocatorHandler(page.getByRole('dialog', { name: 'Internal Testing Notice', exact: true }), async notice => {
+      await notice.getByRole('button', { name: 'Continue', exact: true }).click();
+    });
+    noticeHandled.add(page);
+  }
   await page.goto(await readFile('.acceptance/web-url.txt', 'utf8'));
-  const notice = page.getByRole('button', { name: 'Continue', exact: true });
-  if (await notice.isVisible()) await notice.click();
   await page.getByRole('button', { name: 'New session', exact: true }).first().waitFor();
   const openSidebar = page.getByRole('button', { name: 'Open sidebar', exact: true });
   if (await openSidebar.isVisible()) await openSidebar.click();
