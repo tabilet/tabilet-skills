@@ -38,11 +38,30 @@
     }
   },
   "ci": {
-    "url": "https://github.com/tabilet/tabilet-skills/actions/runs/34772901760",
+    "url": "https://github.com/tabilet/tabilet-skills/actions/runs/34773489964",
+    "commit": "7fc77ffddbb63c9540496b98edbd51aec8e9fa68",
     "conclusion": "success",
     "companionTests": 38,
     "rc2Tests": 9,
     "mixedTests": 9,
-    "artifactSha256": "e78445a1cb1cf4f8503b397bab194cd5336e4d40281671048b0de771ee837a42"
+    "artifactSha256": "e78445a1cb1cf4f8503b397bab194cd5336e4d40281671048b0de771ee837a42",
+    "web": {
+      "rc2": {
+        "startTime": "2026-09-13T18:05:26.592Z",
+        "duration": 60932.146,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "mixed": {
+        "startTime": "2026-09-13T18:06:40.091Z",
+        "duration": 60456.020000000004,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
   }
 }

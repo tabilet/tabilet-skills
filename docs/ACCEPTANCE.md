@@ -10,7 +10,7 @@ No paid model acceptance was run; skill semantics are unchanged from v1.3.0.
 | Canonical harness v1.4.0 commit/tag | Published: `603d963529d2b8e67e2a2a8ae79d59d4489f7907` |
 | Canonical GitHub release page | Pending: GitHub token rejected release creation with HTTP 403 |
 | Companion GitHub commit/tag | Published: `v1.4.0` |
-| Companion GitHub release page/archive | Pending: publishing token lacks release access |
+| Companion GitHub release page/archive | Pending: release creation rejected with HTTP 403 |
 | npm v1.4.0 | Pending: machine authentication is not available yet |
 | Public npm artifact download and clean install | Pending npm publication |
 | Repository `dsh-plugin` topic | Pending: GitHub token rejected topic update with HTTP 403 |
@@ -110,7 +110,10 @@ before uploading. Reloading alone was insufficient because DSH persists drafts. 
 passed after the reader correction. No P1/P2-or-higher implementation findings remain open. A subsequent CI run
 exposed DSH’s delayed Internal Testing Notice blocking test navigation; the test
 harness now dismisses that specific notice through Playwright’s locator handler.
-This test-only follow-up leaves the immutable release archive unchanged.
+These test-only follow-ups passed the complete CI suite at
+`7fc77ffddbb63c9540496b98edbd51aec8e9fa68` and leave the immutable release
+archive unchanged. The published v1.4.0 Git tag remains at
+`26360edd3275365129cd705b09323ef8c9a54bce`; its full CI run also passed.
 
 ## Retained limits
 
@@ -133,7 +136,7 @@ This test-only follow-up leaves the immutable release archive unchanged.
 - Archive: **187,678 bytes**, **33 entries**, **1,025,174 unpacked bytes**.
 - Reviewed implementation commit: `9f1ebafd7680ee8b3aaa39586c8098a9e1786aad`.
   Subsequent acceptance-record and CI artifact-upload changes do not alter the npm payload.
-- [GitHub CI](https://github.com/tabilet/tabilet-skills/actions/runs/34772901760)
+- [GitHub CI](https://github.com/tabilet/tabilet-skills/actions/runs/34773489964)
   passed all 38 automated tests and both sets of 9 native tests. Its downloaded
   archive has the **same SHA-256 as the local tested artifact**. The workflow
   explicitly includes the selected JSON reports under the hidden evidence folder.
