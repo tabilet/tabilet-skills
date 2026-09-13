@@ -105,8 +105,8 @@ path and directory discovery named one file. The reader now deduplicates by the
 host's file identity; distinct files reusing an ID still warn. Both a focused
 regression and the native 120-file fixture cover this case. Initial GitHub CI
 exposed a race in attachment fixture setup after clearing DSH's contenteditable;
-that independent case now starts with a fresh connection and asserts an empty
-draft before uploading. All **38 automated tests** and **18 native runtime tests**
+that independent case now uses a separate session and asserts an empty draft
+before uploading. Reloading alone was insufficient because DSH persists drafts. All **38 automated tests** and **18 native runtime tests**
 passed after the reader correction. No P1/P2-or-higher implementation findings remain open. A subsequent CI run
 exposed DSH’s delayed Internal Testing Notice blocking test navigation; the test
 harness now dismisses that specific notice through Playwright’s locator handler.

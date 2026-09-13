@@ -138,9 +138,9 @@ test('insertion preserves existing drafts, attachments, and a changed draft revi
   await dialog.getByRole('button', { name: 'Insert into empty draft' }).click();
   await expect(dialog).toContainText('Session or draft changed'); await expect(editor).toHaveText('Draft changed while preview was open');
   await dialog.getByRole('button', { name: 'Close request preview' }).click(); await editor.fill('');
-  // Use a fresh connection for the attachment fixture. Clearing a contenteditable
-  // and immediately uploading can race DSH's asynchronous edit normalization.
-  await page.reload(); const attachmentPanel = await open(page);
+  // Use an independent session for the attachment fixture. DSH persists drafts
+  // across reloads and clearing contenteditable can race edit normalization.
+  const attachmentPanel = await open(page, 'legacy');
   const attachmentEditor = page.locator('[contenteditable=true][role=textbox]');
   await expect(attachmentEditor).toHaveText('');
   await page.locator('input[type=file]').setInputFiles({ name: 'keep.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6CYkAAAAASUVORK5CYII=', 'base64') });
