@@ -38,7 +38,7 @@ both repositories advanced `main` to their tested v2 branches by fast-forward.
 | Companion tag and release | [v2.0.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.0.0) points to `9279c90129a8c4a238e1db7b1dd8c2d97f63d3a1`; `main` and `v2` reached the same commit before this publication record. The [tag](https://github.com/tabilet/tabilet-skills/actions/runs/35397901889) and [main](https://github.com/tabilet/tabilet-skills/actions/runs/35398260998) packed CI runs passed, including native Web/headless acceptance on both runtime graphs. |
 | Public companion download | The release archive downloaded without credentials and matched the locally tested tarball byte-for-byte: SHA-256 `c08e393d8bda8ba68393aa847183d35d814f15c4dc5daad2c45078c9a7d0c320`. The attached, release-specific `SHA256SUMS` contains that exact line and also downloaded without credentials. |
 | Live website and README | The [home](https://tabilet.github.io/skills/), [Propose](https://tabilet.github.io/skills/propose/), [installation](https://tabilet.github.io/skills/installation/), and [migration](https://tabilet.github.io/skills/upgrade/) pages returned HTTP 200 with v2 content after deployment. The public `main` README includes the Propose section and v2 project paths. |
-| Separate gates | npm publication and catalog listing were not performed or verified for v2. No paid model acceptance was run. |
+| DSH catalog update | The existing [catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/) still installs the v1.4.0 archive. [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411) updates its one YAML source file to the v2.0.0 archive; merge and public market visibility are pending. npm publication is optional for this GitHub-archive route and was not performed. No paid model acceptance was run. |
 
 # v1.5.0 acceptance and release record
 
@@ -116,9 +116,9 @@ No paid model acceptance was run; skill semantics are unchanged from v1.3.0.
 | npm v1.4.0 | Pending: `npm whoami` still reports `ENEEDAUTH` as of 2026-09-13 21:24 UTC |
 | Public npm artifact download and clean install | Pending npm publication |
 | Repository `dsh-plugin` topic | Added and verified |
-| Catalog submission | [PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379) submitted 2026-09-18; awaiting review |
+| Catalog submission | [PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379) submitted and merged 2026-09-18 |
 | Catalog automated checks | Passed: PR check and Submission gate, 2026-09-18 |
-| Listed in catalog and market | Not listed as of 2026-09-18 10:50 UTC; PR remains open |
+| Listed in catalog and market | Absent at 10:50 UTC; later listed with the v1.4.0 archive after PR #5379 merged at 13:58 UTC. |
 
 Companion repository creation: 2026-09-13 16:27:47 UTC. Under the current
 [one-day catalog rule](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md),
@@ -138,7 +138,8 @@ tests, and the site build. The
 passed at 10:27:32 UTC. At 10:50 UTC, GitHub still reported the PR as open with no
 merge commit, the entry was absent from the catalog's default branch, and the
 [public catalog](https://awesome-dsh-plugin.com/plugins.json) had no matching entry.
-Maintainer acceptance and subsequent market publication remain pending.
+That observation records the earlier pending state; PR #5379 merged later at
+13:58 UTC and the public catalog now offers its v1.4.0 archive.
 
 ## Components and artifact identity
 

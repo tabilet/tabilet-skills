@@ -147,6 +147,7 @@ require an installable bundle, working code, the `dsh-plugin` repository topic,
 and a repository at least one day old. The submission is one YAML entry;
 listing is confirmed only after acceptance and market visibility.
 
-[Catalog submission #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379)
-is awaiting review as of September 18, 2026. Until it is listed, install from the
-GitHub release archive using the command above.
+The [DSH catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/)
+currently installs the v1.4.0 GitHub archive. [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411)
+updates that entry to v2.0.0. Until the catalog displays the v2 archive, use the
+direct GitHub release command above. npm publication is optional for this route.
