@@ -1,13 +1,13 @@
 # v1.5.0 local preparation
 
 v1.5.0 is unreleased. The companion pins canonical commit
-`6f04eceec7a846428ad98a4c05429c5ee766fc96`, its seven complete skill
+`4954582734606fd382452a7b0d17046df51bfc6a`, its seven complete skill
 bundles, and every payload hash in `upstream.lock.json`. No push, tag,
 publication, deployment, or paid model acceptance was run.
 
 ## Local verification
 
-- Canonical: `python3 check.py` passed 31 checks; the credential-free DSH
+- Canonical: `python3 check.py` passed 32 checks; the credential-free DSH
   compatibility suite passed 13 tests; `mkdocs build --strict` passed.
   Rendered website checks found the Propose navigation entry and loaded banner
   at 1440 and 390 pixel viewports with no horizontal overflow.
