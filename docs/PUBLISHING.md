@@ -1,4 +1,15 @@
-# Finish v1.4.0 publication
+# Publication status
+
+## v1.5.0 GitHub release
+
+The seven-skill v1.5.0 companion is published as a prebuilt archive on
+[GitHub](https://github.com/tabilet/tabilet-skills/releases/tag/v1.5.0).
+Install and acceptance evidence live in [ACCEPTANCE.md](ACCEPTANCE.md). The
+canonical skill tag and companion archive are separate publications; npm and
+catalog listing have their own gates. The current environment has no npm login,
+so no npm publication is claimed for v1.5.0.
+
+## Finish v1.4.0 publication
 
 The [canonical GitHub release](https://github.com/tabilet/skills/releases/tag/v1.4.0)
 and [companion GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0)

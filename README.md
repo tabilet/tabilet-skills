@@ -5,8 +5,8 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **1.5.0 is prepared locally and unpublished**. Published v1.4.0
-still includes six skills. See [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
+Version **1.5.0 includes all seven skills**, including Propose. See
+[acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
 ## Install
@@ -20,15 +20,15 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v1.4.0/tabilet-skills-1.4.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v1.4.0/tabilet-skills-1.4.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v1.5.0/tabilet-skills-1.5.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v1.5.0/tabilet-skills-1.5.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The published v1.4.0 headless package loads six skills. The local v1.5.0
-artifact loads seven, including Propose, without the Web UI.
+and choose **Memory Bank**. The v1.5.0 headless package loads all seven skills,
+including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.5.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical

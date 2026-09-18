@@ -1,12 +1,12 @@
-# v1.5.0 (unreleased)
+# v1.5.0
 
-The companion stages seven complete canonical skills from an immutable local
+The companion stages seven complete canonical skills from an immutable
 v1.5.0 commit. The Propose shortcut accepts one required multiline requested
 change and prepares an approval-gated planning request with no external mutation
 authority. It preserves the existing draft, attachment, session, and revision
 guards. The dashboard remains read-only. Structural and model-free checks cover
 packaging and request integration, not autonomous planning quality. No paid API
-acceptance was run. The public v1.4.0 archive still contains six skills.
+acceptance was run. The prebuilt v1.5.0 GitHub archive contains all seven skills.
 
 # v1.4.0
 

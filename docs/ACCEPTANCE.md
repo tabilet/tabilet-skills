@@ -1,9 +1,16 @@
-# v1.5.0 local preparation
+# v1.5.0 acceptance and release record
 
-v1.5.0 is unreleased. The companion pins canonical commit
-`4954582734606fd382452a7b0d17046df51bfc6a`, its seven complete skill
-bundles, and every payload hash in `upstream.lock.json`. No push, tag,
-publication, deployment, or paid model acceptance was run.
+The companion pins canonical commit
+`bfd617a51fca028790f182142fe106f7f0ee7052`, its seven complete skill
+bundles, and every payload hash in `upstream.lock.json`. The prebuilt GitHub
+archive is released at [v1.5.0](https://github.com/tabilet/tabilet-skills/releases/tag/v1.5.0).
+No paid model acceptance was run. npm publication and catalog listing are
+separate gates; neither is established by the GitHub release.
+
+The tested archive is `tabilet-skills-1.5.0.tgz`, SHA-256
+`f2e81e97ee02b38db0e4596d2737aba1c0af3a5bebf074469680e211216f7f55`.
+Its release assets include `SHA256SUMS`. The archive contains prebuilt code,
+all seven complete canonical bundles, and the immutable upstream lock.
 
 ## Local verification
 
