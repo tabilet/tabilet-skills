@@ -388,7 +388,7 @@ var Reader = class {
 };
 
 // src/requests.ts
-var commands = ["next", "goal", "reconcile", "upgrade", "init", "archive"];
+var commands = ["next", "goal", "propose", "reconcile", "upgrade", "init", "archive"];
 function prepare(command, options = {}) {
   const prefix = `/memory-bank-${command}`;
   switch (command) {
@@ -404,6 +404,12 @@ COMMIT_POLICY: ${options.policy || "task"}
 EXTERNAL_MUTATIONS: none
 Reconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
     }
+    case "propose":
+      if (!options.requestedChange?.trim()) throw new Error("Enter the requested change.");
+      return `${prefix} Requested change (user-supplied text):
+${options.requestedChange}
+
+Inspect the current project and relevant implementation first, then present one complete planning proposal with acceptance, dependencies, downstream impacts, and exact file actions for approval before writes. Do not implement or commit. EXTERNAL_MUTATIONS: none.`;
     case "reconcile":
       if (!options.review?.trim()) throw new Error("Enter a local review path or a user-supplied URL.");
       return `${prefix} Review source (user-supplied text): ${JSON.stringify(options.review.trim())}. Revalidate findings against the current project and propose the complete disposition and file actions for approval before writes. For a remote source, show the exact URL and obtain separate explicit confirmation before fetching. Preparing this request has not fetched the source. Do not implement or commit findings.`;
@@ -715,7 +721,7 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }) {
 }
 function RequestPreview({ command, composer, resume, issues, close }) {
   const [order, setOrder] = (0, import_react.useState)(""), [completion, setCompletion] = (0, import_react.useState)(""), [policy, setPolicy] = (0, import_react.useState)("task");
-  const [review, setReview] = (0, import_react.useState)(""), [scope, setScope] = (0, import_react.useState)(""), [message, setMessage] = (0, import_react.useState)("");
+  const [requestedChange, setRequestedChange] = (0, import_react.useState)(""), [review, setReview] = (0, import_react.useState)(""), [scope, setScope] = (0, import_react.useState)(""), [message, setMessage] = (0, import_react.useState)("");
   const revision = (0, import_react.useRef)(composer?.snapshot().draftRev ?? -1);
   const ref = (0, import_react.useRef)(null);
   (0, import_react.useEffect)(() => {
@@ -723,7 +729,7 @@ function RequestPreview({ command, composer, resume, issues, close }) {
   }, []);
   let text = "", problem = "";
   try {
-    text = prepare(command, { order, completion, policy, review, scope, resume });
+    text = prepare(command, { order, completion, policy, requestedChange, review, scope, resume });
   } catch (e) {
     problem = e.message;
   }
@@ -773,6 +779,10 @@ function RequestPreview({ command, composer, resume, issues, close }) {
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "EXTERNAL_MUTATIONS: none" })
+    ] }),
+    command === "propose" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+      "Requested change",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { required: true, value: requestedChange, onChange: (e) => setRequestedChange(e.target.value) })
     ] }),
     command === "reconcile" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
       "Local review path or URL",

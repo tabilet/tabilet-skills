@@ -1,11 +1,12 @@
 # tabilet-skills
 
-Six shared engineering skills and a Memory Bank sidebar for DeepSeek Harness.
+Seven shared engineering skills and a Memory Bank sidebar for DeepSeek Harness.
 The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **1.4.0**. See [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
+Version **1.5.0 is prepared locally and unpublished**. Published v1.4.0
+still includes six skills. See [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
 ## Install
@@ -19,12 +20,13 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add tabilet-skills@1.4.0 --ignore-scripts
-dsh plugin --profile headless add tabilet-skills@1.4.0 --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v1.4.0/tabilet-skills-1.4.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v1.4.0/tabilet-skills-1.4.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. Headless loads the six skills without the Web UI.
+and choose **Memory Bank**. The published v1.4.0 headless package loads six skills. The local v1.5.0
+artifact loads seven, including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
 archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0).
 Git source checkouts require the build step below to generate the complete payload.
@@ -65,14 +67,19 @@ no model requests and no project writes.
 
 ## Prepare a workflow request
 
-Expand **Prepare a workflow request** and choose Next/Resume, Goal, Reconcile,
+Expand **Prepare a workflow request** and choose Next/Resume, Goal, Propose, Reconcile,
 Upgrade, Init, or Archive. Every shortcut opens a preview. Goal requires an
 explicit milestone order and completion conditions, defaults to `COMMIT_POLICY:
 task`, offers `none`, and includes `EXTERNAL_MUTATIONS: none`.
 
+Propose requires one multiline requested-change field. It prepares a request
+for inspection and one complete planning proposal before any writes, with
+`EXTERNAL_MUTATIONS: none`. The preview preserves line breaks and never sends
+itself.
+
 Reconcile accepts a local review path or a user-supplied URL as text. Preparation
 does not fetch it; the skill still requires separate confirmation before any
-remote review fetch. Init, Archive, Reconcile, and Upgrade retain their proposal
+remote review fetch. Init, Archive, Propose, Reconcile, and Upgrade retain their proposal
 and write approval gates.
 
 **Insert into empty draft** succeeds only in the same session and unchanged,
@@ -113,10 +120,10 @@ npm pack --ignore-scripts
 `upstream.lock.json` pins the canonical version, full commit, and every payload
 hash. `npm run build` generates `payload/` from that commit, using a sibling
 checkout when available or an isolated fetch of the exact commit. Never edit
-generated skills. To deliberately advance the upstream after its release:
+generated skills. To deliberately advance to a reviewed canonical local commit:
 
 ```bash
-node scripts/upstream.mjs pin ../skills v1.4.0
+node scripts/upstream.mjs pin ../skills HEAD
 npm run verify
 ```
 

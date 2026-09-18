@@ -20,10 +20,10 @@ test('actual CLI installation, update, disable, and removal preserve unrelated p
   assert.ok(run('--profile', 'headless', '--dump-config').includes('tabilet-skills'));
   // An isolated synthetic newer package exercises update without publishing it.
   execFileSync('tar', ['-xzf', join(root, artifact.filename), '-C', root]);
-  const manifestPath = join(root, 'package/package.json'), manifest = JSON.parse(await readFile(manifestPath, 'utf8')); manifest.version = '1.4.1'; await writeFile(manifestPath, JSON.stringify(manifest));
+  const manifestPath = join(root, 'package/package.json'), manifest = JSON.parse(await readFile(manifestPath, 'utf8')); manifest.version = '1.5.1'; await writeFile(manifestPath, JSON.stringify(manifest));
   const upgrade = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', root], { cwd: join(root, 'package'), encoding: 'utf8' }))[0];
   run('plugin', '--profile', 'headless', 'add', join(root, upgrade.filename), '--ignore-scripts');
-  assert.equal(JSON.parse(await readFile(join(dir, 'node_modules/tabilet-skills/package.json'), 'utf8')).version, '1.4.1');
+  assert.equal(JSON.parse(await readFile(join(dir, 'node_modules/tabilet-skills/package.json'), 'utf8')).version, '1.5.1');
   await writeFile(join(dir, 'cordis.patch.yml'), '# Unrelated local settings\n- id: tabilet-skills\n  disabled: true\n');
   const disabled = run('--profile', 'headless', '--dump-config');
   assert.match(disabled, /id: tabilet-skills[\s\S]{0,100}disabled: true|disabled: true[\s\S]{0,100}id: tabilet-skills/);

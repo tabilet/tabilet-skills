@@ -106,12 +106,12 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: R
 }
 function RequestPreview({ command, composer, resume, issues, close }: { command: Command; composer?: Composer; resume: boolean; issues: string[]; close(): void }) {
   const [order, setOrder] = useState(''), [completion, setCompletion] = useState(''), [policy, setPolicy] = useState<'task' | 'none'>('task');
-  const [review, setReview] = useState(''), [scope, setScope] = useState(''), [message, setMessage] = useState('');
+  const [requestedChange, setRequestedChange] = useState(''), [review, setReview] = useState(''), [scope, setScope] = useState(''), [message, setMessage] = useState('');
   const revision = useRef(composer?.snapshot().draftRev ?? -1);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { ref.current?.focus(); }, []);
   let text = '', problem = '';
-  try { text = prepare(command, { order, completion, policy, review, scope, resume }); } catch (e) { problem = (e as Error).message; }
+  try { text = prepare(command, { order, completion, policy, requestedChange, review, scope, resume }); } catch (e) { problem = (e as Error).message; }
   return <div className="mb-overlay"><div ref={ref} className="mb-preview" role="dialog" aria-modal="true" aria-label={`Prepare ${command} request`} tabIndex={-1} onKeyDown={e => {
     if (e.key === 'Escape') { e.stopPropagation(); close(); }
     if (e.key !== 'Tab') return;
@@ -123,6 +123,7 @@ function RequestPreview({ command, composer, resume, issues, close }: { command:
     <p>Review this request before inserting it. Send it normally from the conversation to start the skill.</p>
     {!!issues.length && <p className="mb-warning">Known ledger conflicts: {issues.join('; ')}</p>}
     {command === 'goal' && <><label>Milestone order<input autoComplete="off" value={order} onChange={e => setOrder(e.target.value)} placeholder="M01 -> M02" /></label><label>Completion conditions<textarea value={completion} onChange={e => setCompletion(e.target.value)} /></label><label>Commit policy<select value={policy} onChange={e => setPolicy(e.target.value as 'task' | 'none')}><option value="task">task — commit each task</option><option value="none">none — no commits</option></select></label><p>EXTERNAL_MUTATIONS: none</p></>}
+    {command === 'propose' && <label>Requested change<textarea required value={requestedChange} onChange={e => setRequestedChange(e.target.value)} /></label>}
     {command === 'reconcile' && <label>Local review path or URL<input value={review} onChange={e => setReview(e.target.value)} /><small>The preview does not fetch this source. The skill retains its separate remote-fetch confirmation.</small></label>}
     {(command === 'init' || command === 'archive') && <label>Requested scope (optional)<textarea value={scope} onChange={e => setScope(e.target.value)} /></label>}
     {problem ? <p>{problem}</p> : <label>Request preview<textarea aria-label="Request preview" readOnly rows={9} value={text} /></label>}

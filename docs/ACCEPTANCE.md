@@ -1,3 +1,44 @@
+# v1.5.0 local preparation
+
+v1.5.0 is unreleased. The companion pins canonical commit
+`6f04eceec7a846428ad98a4c05429c5ee766fc96`, its seven complete skill
+bundles, and every payload hash in `upstream.lock.json`. No push, tag,
+publication, deployment, or paid model acceptance was run.
+
+## Local verification
+
+- Canonical: `python3 check.py` passed 31 checks; the credential-free DSH
+  compatibility suite passed 13 tests; `mkdocs build --strict` passed.
+  Rendered website checks found the Propose navigation entry and loaded banner
+  at 1440 and 390 pixel viewports with no horizontal overflow.
+- Companion: TypeScript check and build passed. All 38 unit, parser, reader,
+  request, profile, and packed loader tests passed. The packed artifact includes
+  all seven canonical bundles and exact pinned hashes.
+- Native DSH: all 10 tests passed on locked rc.2 components and all 10 passed
+  with the isolated rc.1 launcher and rc.2 components. Disposable Web and
+  headless profiles used a local fixed-response provider. Propose coverage
+  includes empty-input validation, multiline preview, no preparation request,
+  guarded draft insertion, seven-skill catalog loading, and user-controlled
+  model-free submission. Project before/after hashes stayed equal.
+
+## Isolated planning contract review
+
+The skill and shared references were reviewed against these project states:
+
+| Scenario | Required planning result |
+|---|---|
+| Ordinary feature | Schedule by approved priority and dependencies without defect severity. |
+| Small addition to a pending owner | Concise proposal for that row and acceptance; no new milestone ceremony. |
+| Candidate promotion | Recheck trigger, obtain a fresh scheduling decision, and remove duplicate candidate work after approval. |
+| All-retired ledger | Treat it as initialized; reserve historical IDs and create new active work. |
+| Duplicate request | Point to the adequate pending owner; create no second row. |
+| Stale or interrupted approval | Re-read affected files and worktree changes, compare the existing diff with approval, and ask again on material drift or collision. |
+
+This is a structural and instruction review, not a model behavior benchmark.
+Autonomous planning quality and task acceptance remain unproven without a
+separately authorized evaluation. The companion prepares requests only and
+never approves or writes a plan.
+
 # v1.4.0 acceptance and release record
 
 Implementation is complete. Publication and catalog gates are tracked separately.

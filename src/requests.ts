@@ -1,6 +1,6 @@
-export const commands = ['next', 'goal', 'reconcile', 'upgrade', 'init', 'archive'] as const;
+export const commands = ['next', 'goal', 'propose', 'reconcile', 'upgrade', 'init', 'archive'] as const;
 export type Command = typeof commands[number];
-export interface RequestOptions { order?: string; completion?: string; policy?: 'task' | 'none'; review?: string; scope?: string; resume?: boolean }
+export interface RequestOptions { order?: string; completion?: string; policy?: 'task' | 'none'; requestedChange?: string; review?: string; scope?: string; resume?: boolean }
 export function prepare(command: Command, options: RequestOptions = {}): string {
   const prefix = `/memory-bank-${command}`;
   switch (command) {
@@ -11,6 +11,9 @@ export function prepare(command: Command, options: RequestOptions = {}): string 
       if (!options.completion?.trim()) throw new Error('Enter the completion conditions.');
       return `${prefix} Follow the project GOAL.md for ${ids.join(' -> ')}.\nCompletion conditions: ${options.completion.trim()}\nCOMMIT_POLICY: ${options.policy || 'task'}\nEXTERNAL_MUTATIONS: none\nReconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
     }
+    case 'propose':
+      if (!options.requestedChange?.trim()) throw new Error('Enter the requested change.');
+      return `${prefix} Requested change (user-supplied text):\n${options.requestedChange}\n\nInspect the current project and relevant implementation first, then present one complete planning proposal with acceptance, dependencies, downstream impacts, and exact file actions for approval before writes. Do not implement or commit. EXTERNAL_MUTATIONS: none.`;
     case 'reconcile':
       if (!options.review?.trim()) throw new Error('Enter a local review path or a user-supplied URL.');
       return `${prefix} Review source (user-supplied text): ${JSON.stringify(options.review.trim())}. Revalidate findings against the current project and propose the complete disposition and file actions for approval before writes. For a remote source, show the exact URL and obtain separate explicit confirmation before fetching. Preparing this request has not fetched the source. Do not implement or commit findings.`;

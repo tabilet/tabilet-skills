@@ -37,7 +37,7 @@ export async function stage() {
       files.set(path, data);
     }
     const names = [...files.keys()].filter(p => /^skills\/[^/]+\/SKILL.md$/.test(p));
-    if (names.length !== 6) throw new Error('Expected six complete canonical skills');
+    if (names.length !== 7) throw new Error('Expected seven complete canonical skills');
     await rm(join(root, 'payload'), { recursive: true, force: true });
     for (const [path, data] of files) {
       const destination = join(root, 'payload', path);

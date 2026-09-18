@@ -35,9 +35,17 @@ async function open(page: Page, project = 'active') {
   await page.getByRole('button', { name: 'New session', exact: true }).first().waitFor();
   const openSidebar = page.getByRole('button', { name: 'Open sidebar', exact: true });
   if (await openSidebar.isVisible()) await openSidebar.click();
-  await page.getByRole('treeitem', { name: project, exact: true }).waitFor();
-  if (!await page.getByLabel('Sessions', { exact: true }).getByText(`Acceptance ${project}`, { exact: true }).count()) await page.getByRole('treeitem', { name: project, exact: true }).click();
-  await page.getByLabel('Sessions', { exact: true }).getByText(`Acceptance ${project}`, { exact: true }).click();
+  const workspace = page.getByRole('treeitem', { name: project, exact: true });
+  await workspace.waitFor();
+  const session = page.getByLabel('Sessions', { exact: true }).getByText(`Acceptance ${project}`, { exact: true });
+  // The workspace can auto-expand while the initial session list loads. Check
+  // its state and click in one browser turn so a late expansion is not closed.
+  await workspace.evaluate(element => {
+    if (element.getAttribute('aria-expanded') !== 'true') (element as HTMLElement).click();
+  });
+  await expect(workspace).toHaveAttribute('aria-expanded', 'true');
+  await session.waitFor({ state: 'visible', timeout: 30000 });
+  await session.click();
   await page.getByRole('button', { name: 'Open right sidebar', exact: true }).click();
   await page.locator('[data-sidebar-right-guide-entry=memory-bank]').click();
   const panel = page.getByRole('region', { name: 'Memory Bank', exact: true });
@@ -85,7 +93,7 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await expect(panel.locator('.mb-document pre')).toContainText('<script>');
   expect(await page.evaluate(() => (globalThis as Record<string, unknown>).TABILET_UNSAFE)).toBeUndefined(); expect(remote).toEqual([]);
   await panel.getByRole('button', { name: 'Compatibility', exact: true }).click();
-  await expect(panel.getByText('bundled · tabilet-skills', { exact: true })).toHaveCount(6);
+  await expect(panel.getByText('bundled · tabilet-skills', { exact: true })).toHaveCount(7);
   await expect(panel).not.toContainText('Skill catalog unavailable');
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original); expect(errors).toEqual([]);
 });
@@ -114,19 +122,43 @@ test('legacy and all-retired projects are readable, and history bodies load only
   await expect(panel).not.toContainText('Invalid retired record');
   expect(reads.some(r => r.includes('history/status-M01.md'))).toBe(true);
 });
-test('all six previews are reviewable, keyboard accessible, and cause no submission', async ({ page }) => {
+test('all seven previews are reviewable, keyboard accessible, and cause no submission', async ({ page }) => {
   const panel = await open(page), count = (await calls()).length;
   await panel.getByText('Prepare a workflow request', { exact: true }).click();
-  for (const label of ['Resume', 'Goal', 'Reconcile', 'Upgrade', 'Init', 'Archive']) {
+  for (const label of ['Resume', 'Goal', 'Propose', 'Reconcile', 'Upgrade', 'Init', 'Archive']) {
     await panel.locator('.mb-actions').getByRole('button', { name: label, exact: true }).click();
     const dialog = page.getByRole('dialog'); await expect(dialog).toBeVisible();
     if (label === 'Goal') { await dialog.getByLabel('Milestone order').fill('A01 -> B01'); await dialog.getByLabel('Completion conditions').fill('Both milestones accepted'); await expect(dialog.getByLabel('Commit policy')).toHaveValue('task'); }
+    if (label === 'Propose') {
+      await expect(dialog).toContainText('Enter the requested change.');
+      await expect(dialog.getByRole('button', { name: 'Insert into empty draft' })).toBeDisabled();
+      await dialog.getByLabel('Requested change').fill('Add offline export\nKeep existing records.');
+      await expect(dialog.getByLabel('Request preview', { exact: true })).toContainText('Add offline export\nKeep existing records.');
+    }
     if (label === 'Reconcile') await dialog.getByLabel('Local review path or URL').fill('https://example.invalid/private-review');
     await expect(dialog.getByLabel('Request preview', { exact: true })).toHaveValue(/^\/memory-bank-/);
     await page.keyboard.press('Tab'); expect(await dialog.evaluate(el => el.contains(document.activeElement))).toBe(true);
     await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
   }
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original);
+});
+test('the user sends a Propose request only after inserting it', async ({ page }) => {
+  const panel = await open(page), count = (await calls()).length;
+  await panel.getByText('Prepare a workflow request', { exact: true }).click();
+  await panel.getByRole('button', { name: 'Propose', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Requested change').fill('Add offline export\nKeep existing records.');
+  await dialog.getByRole('button', { name: 'Insert into empty draft' }).click();
+  await expect(dialog).toContainText('Inserted into the draft');
+  expect((await calls()).length).toBe(count);
+  await dialog.getByRole('button', { name: 'Close request preview' }).click();
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  await expect.poll(async () => (await calls()).length).toBeGreaterThan(count);
+  const received = JSON.stringify((await calls()).slice(count));
+  expect(received).toContain('/memory-bank-propose');
+  expect(received).toContain('Keep existing records.');
+  expect(received).toContain('<skill_instructions>');
+  expect(await hashTree(projects.active)).toEqual(original);
 });
 test('insertion preserves existing drafts, attachments, and a changed draft revision', async ({ page }) => {
   const panel = await open(page); const editor = page.locator('[contenteditable=true][role=textbox]');
