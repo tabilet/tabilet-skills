@@ -1,16 +1,21 @@
 # v2.0.0 acceptance and release preparation
 
 The `v2` companion branch pins canonical commit
-`e94c336deef5b945098f2c25a09d60793b261a68` in `upstream.lock.json`.
+`35eaf54ae9db738f16036728ef4d2b0ecc519533` in `upstream.lock.json`.
 The canonical plugin, companion package, and DSH manifest all declare `2.0.0`.
 Canonical and companion `main` remained on the v1.5.0 line during development.
+The companion `v2` branch includes the later v1.5.0 release-record commit, so
+both repositories can advance `main` to their prepared v2 branches without a
+merge conflict.
 
 - Canonical: `python3 check.py` passed 33 checks, including migration and API
   runner tests. The separate DSH suite passed 13 tests after `npm ci`, and
   `mkdocs build --strict` passed. Migration acceptance covered ordinary,
   all-retired, archive-only, optional-goal, and customized projects; frozen
   hashes, task notes, clean-baseline gates, mixed layouts, symlinks, interruption,
-  tamper rejection, resume, and repeat no-op behavior were checked. Customized
+  tamper rejection, resume, and repeat no-op behavior were checked. A copied
+  v1.5.0 template produces the exact v2 stock `GOAL.md`; customized goal text
+  remains byte-for-byte intact with an explicit manual-review notice. Customized
   relative links and goal input stay valid; unexplained partial v2 layouts stop.
 - Companion: `npm run verify` passed TypeScript, build, and all 41 unit, parser,
   reader, request, profile, and packed-artifact tests. The packed artifact passed
@@ -19,8 +24,8 @@ Canonical and companion `main` remained on the v1.5.0 line during development.
   metadata, v1.5.0 read-only display with hidden workflow controls, new-project
   Init, Goal preview, source navigation, guarded drafts, and no project writes
   during browsing. No paid model acceptance was run.
-- Release artifact: `tabilet-skills-2.0.0.tgz`, 196,374 bytes, SHA-256
-  `805cad37475c984369973bf82ba73b413cd45e72a3c0c124350d943e540cf8c9`.
+- Release artifact: `tabilet-skills-2.0.0.tgz`, 196,755 bytes, SHA-256
+  `c08e393d8bda8ba68393aa847183d35d814f15c4dc5daad2c45078c9a7d0c320`.
   The matching line is in `SHA256SUMS`. The archive contains prebuilt output,
   exact pinned canonical skill resources, and the explicit migration CLI; it
   bundles no DSH runtime or install script.
@@ -28,6 +33,13 @@ Canonical and companion `main` remained on the v1.5.0 line during development.
 The v2 tags and archive are prepared locally. GitHub release publication,
 default-branch changes, npm publication, and catalog submission remain separate
 release actions; none is established by this acceptance record.
+
+For the final release, publish the canonical v2 tag and confirm its CI run;
+advance the companion `main` branch, publish its v2 tag, and attach the tested
+archive and `SHA256SUMS` to its GitHub release. Then advance canonical `main`,
+confirm the strict website deploy, and smoke-test the live installation and
+migration guides plus the archive download. Hosted CI, public download, and
+live-site evidence must be recorded after those actions.
 
 # v1.5.0 acceptance and release record
 
