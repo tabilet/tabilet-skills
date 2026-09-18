@@ -15,7 +15,7 @@ export interface Snapshot {
   documents: Document[]; tasks: Task[]; history: Historical[]; issues: string[];
   milestones: { id: string; path: string; title: string }[];
   refreshedAt: number; complete: boolean;
-  goalAvailable: boolean;
+  goalAvailable: boolean; layout: 'v2' | 'legacy' | 'mixed' | 'new';
 }
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const activeName = /^status-([A-Z]\d{2})\.md$/;
@@ -49,17 +49,39 @@ export class Reader {
         return result.entries;
       } catch (error) { signal.throwIfAborted(); if (!optional || !String(error).includes('workspace-file/not-found')) issues.push(`${path}: ${String(error)}`); return []; }
     };
-    const [milestone, architecture, bankEntries, historyEntries, docsEntries] = await Promise.all([
-      attempt('memory-bank/milestone.md'), attempt('memory-bank/architecture.md'),
-      listing('memory-bank'), listing('docs/history', true), listing('docs', true),
+    const present = async (path: string) => {
+      try { await this.port.stat(path, signal); return true; }
+      catch (error) { signal.throwIfAborted(); if (!String(error).includes('workspace-file/not-found')) issues.push(`${path}: ${String(error)}`); return false; }
+    };
+    const [v2Milestone, v2Architecture, legacyMilestone, legacyArchitecture, legacyGoal, legacyHistory] = await Promise.all([
+      present('tabilet/memory-bank/milestone.md'), present('tabilet/memory-bank/architecture.md'),
+      present('memory-bank/milestone.md'), present('memory-bank/architecture.md'), present('GOAL.md'),
+      present('docs/history/index.md'),
     ]);
-    await Promise.all(['product', 'tech-stack', 'lessons'].map(n => attempt(`memory-bank/${n}.md`)));
+    const [legacyBankEntries, legacyEvolutionEntries, legacyHistoryEntries, legacyDocsEntries] = await Promise.all([
+      listing('memory-bank', true), listing('evolution', true),
+      listing('docs/history', true), listing('docs', true),
+    ]);
+    const hasV2 = v2Milestone || v2Architecture;
+    const hasLegacy = legacyMilestone || legacyArchitecture || legacyGoal || legacyHistory ||
+      legacyBankEntries.length > 0 || legacyEvolutionEntries.length > 0 ||
+      legacyHistoryEntries.length > 0 || legacyDocsEntries.some(e => /^archive-[A-Z]\d{2}\.md$/.test(e.name)) ||
+      issues.some(issue => /^(?:memory-bank|evolution|docs\/history|docs): directory listing truncated$/.test(issue));
+    const layout: Snapshot['layout'] = hasV2 && hasLegacy ? 'mixed' : hasV2 ? 'v2' : hasLegacy ? 'legacy' : 'new';
+    if (layout === 'mixed') issues.push('Mixed or uncertain v1.5/v2 project layout; repair or resume migration before running v2 skills.');
+    const base = layout === 'legacy' ? '' : 'tabilet/';
+    const bank = `${base}memory-bank`, historyDir = `${base}docs/history`, docsDir = `${base}docs`;
+    const [milestone, architecture, bankEntries, historyEntries, docsEntries] = await Promise.all([
+      attempt(`${bank}/milestone.md`), attempt(`${bank}/architecture.md`),
+      listing(bank), listing(historyDir, true), listing(docsDir, true),
+    ]);
+    await Promise.all(['product', 'tech-stack', 'lessons'].map(n => attempt(`${bank}/${n}.md`)));
     await attempt('AGENTS.md');
     let goalAvailable = false;
-    try { await this.port.stat('GOAL.md', signal); goalAvailable = true; } catch { signal.throwIfAborted(); }
+    try { await this.port.stat(`${base}GOAL.md`, signal); goalAvailable = true; } catch { signal.throwIfAborted(); }
     const historyLink = milestone && localLinks(milestone.text, milestone.path).find(l => /(?:^|\/)history\/index\.md$/.test(l.path));
-    const historyIndex = await attempt(historyLink?.path || 'docs/history/index.md', true);
-    const activePaths = new Set(bankEntries.filter(e => activeName.test(e.name)).map(e => `memory-bank/${e.name}`));
+    const historyIndex = await attempt(historyLink?.path || `${historyDir}/index.md`, true);
+    const activePaths = new Set(bankEntries.filter(e => activeName.test(e.name)).map(e => `${bank}/${e.name}`));
     for (const link of milestone ? localLinks(milestone.text, milestone.path) : []) if (activeName.test(basename(link.path))) activePaths.add(link.path);
     const milestones: Snapshot['milestones'] = [];
     for (const path of [...activePaths].sort()) {
@@ -111,9 +133,9 @@ export class Reader {
     for (const e of historyEntries) if (activeName.test(e.name)) {
       const id = e.name.match(activeName)![1];
       if (!validId.test(id)) issues.push(`${e.name}: invalid retired permanent ID`);
-      if (!indexedHistory.has(id)) { issues.push(`${id}: retired record is missing from history index`); history.push({ id, path: `docs/history/${e.name}`, label: `${id} — unindexed` }); }
+      if (!indexedHistory.has(id)) { issues.push(`${id}: retired record is missing from history index`); history.push({ id, path: `${historyDir}/${e.name}`, label: `${id} — unindexed` }); }
     }
-    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: docs/history/${e.name}`);
+    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
     for (const { id } of milestones) if (history.some(h => h.id === id)) issues.push(`Duplicate active/retired ID: ${id}; retirement may be interrupted`);
     if (milestone) {
       const declared = new Set<string>();
@@ -128,7 +150,7 @@ export class Reader {
         if (indexedHistory.has(id)) issues.push(`${id}: retired ID remains in active milestone index/specification`);
       }
     }
-    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: memory-bank/${e.name}`);
+    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
     const ids = new Set<string>();
     for (const m of milestones) { if (ids.has(m.id)) issues.push(`Duplicate active ID: ${m.id}`); ids.add(m.id); }
     if (tasks.filter(t => t.state === 'in_progress').length > 1) issues.push('Multiple rows are in progress; reconcile the ledger before selecting work');
@@ -137,8 +159,8 @@ export class Reader {
     for (const doc of [architecture, historyIndex]) if (doc) for (const l of localLinks(doc.text, doc.path)) {
       if (/archive-[A-Z]\d{2}\.md$|knowledge\.md$/.test(l.path)) extra.set(l.path, l);
     }
-    for (const e of docsEntries) if (/^archive-[A-Z]\d{2}\.md$/.test(e.name)) extra.set(`docs/${e.name}`, { path: `docs/${e.name}`, label: e.name });
-    if (historyEntries.some(e => e.name === 'knowledge.md')) extra.set('docs/history/knowledge.md', { path: 'docs/history/knowledge.md', label: 'Knowledge history' });
+    for (const e of docsEntries) if (/^archive-[A-Z]\d{2}\.md$/.test(e.name)) extra.set(`${docsDir}/${e.name}`, { path: `${docsDir}/${e.name}`, label: e.name });
+    if (historyEntries.some(e => e.name === 'knowledge.md')) extra.set(`${historyDir}/knowledge.md`, { path: `${historyDir}/knowledge.md`, label: 'Knowledge history' });
     history.push(...extra.values());
     for (const d of documents.filter(d => activeName.test(basename(d.path)))) if (reviewEvidence(d.text).counter === 'Conflicting or invalid') issues.push(`${d.path}: conflicting or invalid review counter`);
     // A second metadata sweep detects relocation or edits during the complete read.
@@ -147,6 +169,6 @@ export class Reader {
       catch (e) { signal.throwIfAborted(); issues.push(`${d.path}: disappeared or became unreadable during refresh`); }
     }));
     signal.throwIfAborted();
-    return { documents, tasks: tasks.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line), history, milestones, issues, refreshedAt: Date.now(), complete: !issues.length, goalAvailable };
+    return { documents, tasks: tasks.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line), history, milestones, issues, refreshedAt: Date.now(), complete: !issues.length, goalAvailable, layout };
   }
 }

@@ -88,8 +88,8 @@ export function retiredRecord(text: string, name: string): RetiredRecord {
   const required = ['Milestone', 'Outcome', 'Retired', 'Source status', 'Source specification', 'Evidence', 'Worktree', 'Review', 'Review iterations', 'Verification', 'Consolidated into'];
   requireThat(required.every(k => metadata[k]), 'missing retirement metadata');
   requireThat(metadata.Milestone === id, 'retired milestone ID does not match its filename');
-  requireThat(metadata['Source status'] === `memory-bank/${name}`, 'source status path does not match the retired ID');
-  requireThat(/^memory-bank\/milestone\.md#\S+$/.test(metadata['Source specification']), 'missing original milestone specification anchor');
+  requireThat([`memory-bank/${name}`, `tabilet/memory-bank/${name}`].includes(metadata['Source status']), 'source status path does not match the retired ID');
+  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata['Source specification']), 'missing original milestone specification anchor');
   requireThat(['completed', 'cancelled', 'superseded'].includes(metadata.Outcome), 'invalid retirement outcome');
   requireThat(/^\d{4}-\d{2}-\d{2}$/.test(metadata.Retired) && !metadata.Retired.startsWith('0000') && Number.isFinite(Date.parse(metadata.Retired)) && new Date(metadata.Retired).toISOString().slice(0, 10) === metadata.Retired, 'retirement date must use YYYY-MM-DD');
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), 'evidence must be a full commit or unversioned');

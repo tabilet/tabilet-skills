@@ -28,7 +28,7 @@ test('packed artifact includes exact upstream resources, no runtime or install s
   t.after(async () => { await plugin.dispose(); await defaults.dispose(); await registry.dispose(); });
   assert.deepEqual((await ctx.skills.list({ cwd: project })).map(s => s.name), names);
   for (const name of names) {
-    const loaded = await ctx.skills.get(name, { cwd: project }); assert.ok(loaded); assert.equal(loaded.provider, 'tabilet-skills'); assert.equal(loaded.source, 'bundled'); assert.match(renderSkillContent(loaded), /memory-bank/);
+    const loaded = await ctx.skills.get(name, { cwd: project }); assert.ok(loaded); assert.equal(loaded.provider, 'tabilet-skills'); assert.equal(loaded.source, 'bundled'); assert.match(renderSkillContent(loaded), /tabilet\/memory-bank/);
   }
   const override = join(project, '.agents/skills/memory-bank-next'); await mkdir(override, { recursive: true });
   await cp(join(pkg, 'payload/skills/memory-bank-next/SKILL.md'), join(override, 'SKILL.md'));

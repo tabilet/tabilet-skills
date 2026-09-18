@@ -9,7 +9,7 @@ export function prepare(command: Command, options: RequestOptions = {}): string 
       const ids = options.order?.split(/\s*(?:->|,|\n)\s*/).filter(Boolean) || [];
       if (!ids.length || ids.some(id => !/^[A-Z](?:0[1-9]|[1-9][0-9])$/.test(id)) || new Set(ids).size !== ids.length) throw new Error('Enter a unique explicit milestone order, such as M01 -> M02.');
       if (!options.completion?.trim()) throw new Error('Enter the completion conditions.');
-      return `${prefix} Follow the project GOAL.md for ${ids.join(' -> ')}.\nCompletion conditions: ${options.completion.trim()}\nCOMMIT_POLICY: ${options.policy || 'task'}\nEXTERNAL_MUTATIONS: none\nReconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
+      return `${prefix} Follow the project tabilet/GOAL.md for ${ids.join(' -> ')}.\nCompletion conditions: ${options.completion.trim()}\nCOMMIT_POLICY: ${options.policy || 'task'}\nEXTERNAL_MUTATIONS: none\nReconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
     }
     case 'propose':
       if (!options.requestedChange?.trim()) throw new Error('Enter the requested change.');

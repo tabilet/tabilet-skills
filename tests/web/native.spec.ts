@@ -69,7 +69,7 @@ test.beforeAll(async ({ browser }) => {
     await rpc(page, 'session/prompt', { request: { sessionId, requestId: crypto.randomUUID(), mode: 'queue', content: [{ type: 'text', text: `Fixture seed ${name}.` }] } });
     await rpc(page, 'session/rename', { request: { sessionId, title: `Acceptance ${name}` } });
   }
-  await expect.poll(async () => (await calls()).length).toBeGreaterThanOrEqual(4);
+  await expect.poll(async () => (await calls()).length).toBeGreaterThanOrEqual(6);
   await page.waitForTimeout(1500);
   original = await hashTree(projects.active);
   await writeFile(seedPath, JSON.stringify({ sessions, original }));
@@ -99,7 +99,7 @@ test('native packed plugin renders a large project with safe memory, full tasks,
 });
 test('external edits and linked canonical edits become visible within ten seconds', async ({ page }) => {
   const panel = await open(page); await panel.getByRole('button', { name: 'Tasks', exact: true }).click(); await panel.getByLabel('Search', { exact: true }).fill('external update');
-  const path = join(projects.active, 'memory-bank/status-A01.md'), before = await readFile(path, 'utf8');
+  const path = join(projects.active, 'tabilet/memory-bank/status-A01.md'), before = await readFile(path, 'utf8');
   try {
     await writeFile(path, before.replace('Build A01', 'Build external update')); const start = Date.now();
     await expect(panel).toContainText('1 matching rows', { timeout: 10000 }); expect(Date.now() - start).toBeLessThan(10000);
@@ -111,7 +111,10 @@ test('external edits and linked canonical edits become visible within ten second
   finally { await writeFile(canonical, old); }
 });
 test('legacy and all-retired projects are readable, and history bodies load only when opened', async ({ page }) => {
-  let panel = await open(page, 'legacy'); await panel.getByRole('button', { name: 'Compatibility', exact: true }).click(); await expect(panel).toContainText('Unsupported legacy status structure');
+  let panel = await open(page, 'legacy');
+  await expect(panel).toContainText('v1.5.0 project: read-only view');
+  await expect(panel.getByText('Prepare a workflow request')).toHaveCount(0);
+  await panel.getByRole('button', { name: 'Compatibility', exact: true }).click(); await expect(panel).toContainText('Unsupported legacy status structure');
   const reads: string[] = [];
   page.on('request', r => { if (r.url().endsWith('/workspaceFiles/read')) reads.push(r.postData() || ''); });
   panel = await open(page, 'retired'); expect(reads.some(r => r.includes('history/status-M01.md'))).toBe(false);
@@ -121,6 +124,12 @@ test('legacy and all-retired projects are readable, and history bodies load only
   await expect(panel.locator('.mb-document pre')).toContainText('**Outcome.** cancelled');
   await expect(panel).not.toContainText('Invalid retired record');
   expect(reads.some(r => r.includes('history/status-M01.md'))).toBe(true);
+});
+test('a new project can prepare Init while legacy workflow controls stay hidden', async ({ page }) => {
+  const panel = await open(page, 'new');
+  await panel.getByText('Prepare a workflow request', { exact: true }).click();
+  await panel.getByRole('button', { name: 'Init', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Prepare init request' })).toBeVisible();
 });
 test('all seven previews are reviewable, keyboard accessible, and cause no submission', async ({ page }) => {
   const panel = await open(page), count = (await calls()).length;
@@ -172,7 +181,7 @@ test('insertion preserves existing drafts, attachments, and a changed draft revi
   await dialog.getByRole('button', { name: 'Close request preview' }).click(); await editor.fill('');
   // Use an independent session for the attachment fixture. DSH persists drafts
   // across reloads and clearing contenteditable can race edit normalization.
-  const attachmentPanel = await open(page, 'legacy');
+  const attachmentPanel = await open(page, 'draft');
   const attachmentEditor = page.locator('[contenteditable=true][role=textbox]');
   await expect(attachmentEditor).toHaveText('');
   await page.locator('input[type=file]').setInputFiles({ name: 'keep.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6CYkAAAAASUVORK5CYII=', 'base64') });

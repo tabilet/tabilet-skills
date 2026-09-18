@@ -5,7 +5,8 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **1.5.0 includes all seven skills**, including Propose. See
+Version **2.0.0** reads the new `tabilet/` project layout and includes all
+seven canonical skills. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
@@ -20,15 +21,15 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v1.5.0/tabilet-skills-1.5.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v1.5.0/tabilet-skills-1.5.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.0.0/tabilet-skills-2.0.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.0.0/tabilet-skills-2.0.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v1.5.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.0.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.5.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.0.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
@@ -52,6 +53,12 @@ enumerated by DSH's public registry. Review local overrides before removing them
   and context archives. Historical bodies load only when opened.
 - **Compatibility:** missing or malformed files, unsupported legacy state,
   duplicate identities, multiple in-progress rows, and skill sources.
+
+The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
+offers source navigation. Workflow request controls are hidden until the
+project is explicitly migrated. The canonical Upgrade bundle includes
+`migrate-v1.5-to-v2.py`, a read-only preview by default and an explicit
+`--apply` mode. Installing this package never runs migration.
 
 The panel follows the selected session. DSH observations, a five-second visible
 refresh cycle, focus, and manual refresh detect changes. File versions control

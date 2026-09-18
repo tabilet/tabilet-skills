@@ -158,8 +158,8 @@ function retiredRecord(text, name) {
   const required2 = ["Milestone", "Outcome", "Retired", "Source status", "Source specification", "Evidence", "Worktree", "Review", "Review iterations", "Verification", "Consolidated into"];
   requireThat(required2.every((k) => metadata[k]), "missing retirement metadata");
   requireThat(metadata.Milestone === id, "retired milestone ID does not match its filename");
-  requireThat(metadata["Source status"] === `memory-bank/${name}`, "source status path does not match the retired ID");
-  requireThat(/^memory-bank\/milestone\.md#\S+$/.test(metadata["Source specification"]), "missing original milestone specification anchor");
+  requireThat([`memory-bank/${name}`, `tabilet/memory-bank/${name}`].includes(metadata["Source status"]), "source status path does not match the retired ID");
+  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata["Source specification"]), "missing original milestone specification anchor");
   requireThat(["completed", "cancelled", "superseded"].includes(metadata.Outcome), "invalid retirement outcome");
   requireThat(/^\d{4}-\d{2}-\d{2}$/.test(metadata.Retired) && !metadata.Retired.startsWith("0000") && Number.isFinite(Date.parse(metadata.Retired)) && new Date(metadata.Retired).toISOString().slice(0, 10) === metadata.Retired, "retirement date must use YYYY-MM-DD");
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), "evidence must be a full commit or unversioned");
@@ -258,25 +258,55 @@ var Reader = class {
         return [];
       }
     };
-    const [milestone, architecture, bankEntries, historyEntries, docsEntries] = await Promise.all([
-      attempt("memory-bank/milestone.md"),
-      attempt("memory-bank/architecture.md"),
-      listing("memory-bank"),
+    const present = async (path) => {
+      try {
+        await this.port.stat(path, signal);
+        return true;
+      } catch (error62) {
+        signal.throwIfAborted();
+        if (!String(error62).includes("workspace-file/not-found")) issues.push(`${path}: ${String(error62)}`);
+        return false;
+      }
+    };
+    const [v2Milestone, v2Architecture, legacyMilestone, legacyArchitecture, legacyGoal, legacyHistory] = await Promise.all([
+      present("tabilet/memory-bank/milestone.md"),
+      present("tabilet/memory-bank/architecture.md"),
+      present("memory-bank/milestone.md"),
+      present("memory-bank/architecture.md"),
+      present("GOAL.md"),
+      present("docs/history/index.md")
+    ]);
+    const [legacyBankEntries, legacyEvolutionEntries, legacyHistoryEntries, legacyDocsEntries] = await Promise.all([
+      listing("memory-bank", true),
+      listing("evolution", true),
       listing("docs/history", true),
       listing("docs", true)
     ]);
-    await Promise.all(["product", "tech-stack", "lessons"].map((n) => attempt(`memory-bank/${n}.md`)));
+    const hasV2 = v2Milestone || v2Architecture;
+    const hasLegacy = legacyMilestone || legacyArchitecture || legacyGoal || legacyHistory || legacyBankEntries.length > 0 || legacyEvolutionEntries.length > 0 || legacyHistoryEntries.length > 0 || legacyDocsEntries.some((e) => /^archive-[A-Z]\d{2}\.md$/.test(e.name)) || issues.some((issue2) => /^(?:memory-bank|evolution|docs\/history|docs): directory listing truncated$/.test(issue2));
+    const layout = hasV2 && hasLegacy ? "mixed" : hasV2 ? "v2" : hasLegacy ? "legacy" : "new";
+    if (layout === "mixed") issues.push("Mixed or uncertain v1.5/v2 project layout; repair or resume migration before running v2 skills.");
+    const base = layout === "legacy" ? "" : "tabilet/";
+    const bank = `${base}memory-bank`, historyDir = `${base}docs/history`, docsDir = `${base}docs`;
+    const [milestone, architecture, bankEntries, historyEntries, docsEntries] = await Promise.all([
+      attempt(`${bank}/milestone.md`),
+      attempt(`${bank}/architecture.md`),
+      listing(bank),
+      listing(historyDir, true),
+      listing(docsDir, true)
+    ]);
+    await Promise.all(["product", "tech-stack", "lessons"].map((n) => attempt(`${bank}/${n}.md`)));
     await attempt("AGENTS.md");
     let goalAvailable = false;
     try {
-      await this.port.stat("GOAL.md", signal);
+      await this.port.stat(`${base}GOAL.md`, signal);
       goalAvailable = true;
     } catch {
       signal.throwIfAborted();
     }
     const historyLink = milestone && localLinks(milestone.text, milestone.path).find((l) => /(?:^|\/)history\/index\.md$/.test(l.path));
-    const historyIndex = await attempt(historyLink?.path || "docs/history/index.md", true);
-    const activePaths = new Set(bankEntries.filter((e) => activeName.test(e.name)).map((e) => `memory-bank/${e.name}`));
+    const historyIndex = await attempt(historyLink?.path || `${historyDir}/index.md`, true);
+    const activePaths = new Set(bankEntries.filter((e) => activeName.test(e.name)).map((e) => `${bank}/${e.name}`));
     for (const link of milestone ? localLinks(milestone.text, milestone.path) : []) if (activeName.test(basename(link.path))) activePaths.add(link.path);
     const milestones = [];
     for (const path of [...activePaths].sort()) {
@@ -338,10 +368,10 @@ var Reader = class {
       if (!validId.test(id)) issues.push(`${e.name}: invalid retired permanent ID`);
       if (!indexedHistory.has(id)) {
         issues.push(`${id}: retired record is missing from history index`);
-        history.push({ id, path: `docs/history/${e.name}`, label: `${id} \u2014 unindexed` });
+        history.push({ id, path: `${historyDir}/${e.name}`, label: `${id} \u2014 unindexed` });
       }
     }
-    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: docs/history/${e.name}`);
+    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
     for (const { id } of milestones) if (history.some((h) => h.id === id)) issues.push(`Duplicate active/retired ID: ${id}; retirement may be interrupted`);
     if (milestone) {
       const declared = /* @__PURE__ */ new Set();
@@ -358,7 +388,7 @@ var Reader = class {
         if (indexedHistory.has(id)) issues.push(`${id}: retired ID remains in active milestone index/specification`);
       }
     }
-    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: memory-bank/${e.name}`);
+    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
     const ids = /* @__PURE__ */ new Set();
     for (const m of milestones) {
       if (ids.has(m.id)) issues.push(`Duplicate active ID: ${m.id}`);
@@ -370,8 +400,8 @@ var Reader = class {
     for (const doc of [architecture, historyIndex]) if (doc) for (const l of localLinks(doc.text, doc.path)) {
       if (/archive-[A-Z]\d{2}\.md$|knowledge\.md$/.test(l.path)) extra.set(l.path, l);
     }
-    for (const e of docsEntries) if (/^archive-[A-Z]\d{2}\.md$/.test(e.name)) extra.set(`docs/${e.name}`, { path: `docs/${e.name}`, label: e.name });
-    if (historyEntries.some((e) => e.name === "knowledge.md")) extra.set("docs/history/knowledge.md", { path: "docs/history/knowledge.md", label: "Knowledge history" });
+    for (const e of docsEntries) if (/^archive-[A-Z]\d{2}\.md$/.test(e.name)) extra.set(`${docsDir}/${e.name}`, { path: `${docsDir}/${e.name}`, label: e.name });
+    if (historyEntries.some((e) => e.name === "knowledge.md")) extra.set(`${historyDir}/knowledge.md`, { path: `${historyDir}/knowledge.md`, label: "Knowledge history" });
     history.push(...extra.values());
     for (const d of documents.filter((d2) => activeName.test(basename(d2.path)))) if (reviewEvidence(d.text).counter === "Conflicting or invalid") issues.push(`${d.path}: conflicting or invalid review counter`);
     await Promise.all(documents.map(async (d) => {
@@ -383,7 +413,7 @@ var Reader = class {
       }
     }));
     signal.throwIfAborted();
-    return { documents, tasks: tasks.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line), history, milestones, issues, refreshedAt: Date.now(), complete: !issues.length, goalAvailable };
+    return { documents, tasks: tasks.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line), history, milestones, issues, refreshedAt: Date.now(), complete: !issues.length, goalAvailable, layout };
   }
 };
 
@@ -398,7 +428,7 @@ function prepare(command, options = {}) {
       const ids = options.order?.split(/\s*(?:->|,|\n)\s*/).filter(Boolean) || [];
       if (!ids.length || ids.some((id) => !/^[A-Z](?:0[1-9]|[1-9][0-9])$/.test(id)) || new Set(ids).size !== ids.length) throw new Error("Enter a unique explicit milestone order, such as M01 -> M02.");
       if (!options.completion?.trim()) throw new Error("Enter the completion conditions.");
-      return `${prefix} Follow the project GOAL.md for ${ids.join(" -> ")}.
+      return `${prefix} Follow the project tabilet/GOAL.md for ${ids.join(" -> ")}.
 Completion conditions: ${options.completion.trim()}
 COMMIT_POLICY: ${options.policy || "task"}
 EXTERNAL_MUTATIONS: none
@@ -526,7 +556,9 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       setView(v);
       setOpened("");
     }, children: v }, v)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "mb-workflows", children: [
+    snapshot?.layout === "legacy" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mb-warning", role: "status", children: "v1.5.0 project: read-only view. Migrate explicitly with migrate-v1.5-to-v2.py before using v2 workflows." }),
+    snapshot?.layout === "mixed" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mb-warning", role: "status", children: "Mixed or uncertain project layout. Repair or resume migration before using v2 workflows." }),
+    (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { className: "mb-workflows", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", { children: "Prepare a workflow request" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Preview a request, then send it from the conversation. No workflow runs here." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mb-actions", children: commands.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: (e) => {
@@ -637,7 +669,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       })
     ] }),
     view === "Memory" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mb-actions", children: ["product", "architecture", "tech-stack", "lessons"].map((name) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setOpened(`memory-bank/${name}.md`), children: name }, name)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mb-actions", children: ["product", "architecture", "tech-stack", "lessons"].map((name) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setOpened(`${snapshot?.layout === "legacy" ? "" : "tabilet/"}memory-bank/${name}.md`), children: name }, name)) }),
       opened ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OpenDocument, { reader, path: opened, snapshot, navigate, visible }, opened) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Open a current memory document." })
     ] }),
     view === "History" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -680,7 +712,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow." }),
       !composer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Composer capability unavailable; requests can be copied." })
     ] }),
-    command && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
+    command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {

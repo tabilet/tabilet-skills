@@ -24,6 +24,12 @@ test('retired source documents preserve literal CRLF endings', () => {
   assert.equal(result.specification, c.record.specification.replaceAll('\n', '\r\n'));
   assert.equal(result.status, c.record.status.replaceAll('\n', '\r\n'));
 });
+test('retired records accept new source paths and frozen v1.5 provenance', () => {
+  const c = fixtures.find((f: { name: string }) => f.name === 'completed');
+  assert.equal(retiredRecord(c.text, c.file).metadata['Source status'], 'memory-bank/status-M01.md');
+  const v2 = c.text.replaceAll('memory-bank/', 'tabilet/memory-bank/');
+  assert.equal(retiredRecord(v2, c.file).metadata['Source status'], 'tabilet/memory-bank/status-M01.md');
+});
 test('links discover canonical local files and ignore executable/remote resources and fenced examples', () => {
-  assert.deepEqual(localLinks('[Local](../../canonical/status-M01.md)\n![image](https://invalid/x)\n[remote](https://invalid/x)\n```\n[hidden](x.md)\n```', 'memory-bank/milestone.md'), [{ label: 'Local', path: '../canonical/status-M01.md' }]);
+  assert.deepEqual(localLinks('[Local](../../../canonical/status-M01.md)\n![image](https://invalid/x)\n[remote](https://invalid/x)\n```\n[hidden](x.md)\n```', 'tabilet/memory-bank/milestone.md'), [{ label: 'Local', path: '../canonical/status-M01.md' }]);
 });
