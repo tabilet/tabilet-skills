@@ -24,4 +24,4 @@ jobs:
           path: |
             .acceptance/web-results*.json
             test-results/
-            tabilet-skills-1.4.0.tgz
+            tabilet-skills-*.tgz
