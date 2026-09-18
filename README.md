@@ -33,7 +33,7 @@ archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/rele
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/main/docs/DSH.md#install-the-six-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/v2.0.0/docs/DSH.md#install-the-seven-bundles).
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not

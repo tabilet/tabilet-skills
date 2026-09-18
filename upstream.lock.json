@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/tabilet/skills.git",
   "version": "2.0.0",
-  "commit": "53a925e9cd6ceec239923016ca0fc01e5972616f",
+  "commit": "e94c336deef5b945098f2c25a09d60793b261a68",
   "files": {
     "LICENSE": "555cf5b885b2fad33220894deb8e39eded2680d38157b8798113abfa8f8d8c34",
     "skills/memory-bank-archive/SKILL.md": "8447fd6381d3dc2ed22d873f8b8ec5516cee63694497c2b7f1140414388d2e29",
@@ -30,7 +30,7 @@
     "skills/memory-bank-upgrade/assets/template/tabilet/memory-bank/product.md": "9c0fd9820cc0f86ed6a14aa23e6b2754ef388975c2203cee6eab29125da1ebac",
     "skills/memory-bank-upgrade/assets/template/tabilet/memory-bank/status-M01.md": "05b1d625b7f7ad7674ae17cec77cf5ab64a068d901ad85a104d38e5f1b19a9cc",
     "skills/memory-bank-upgrade/assets/template/tabilet/memory-bank/tech-stack.md": "b466850c3cd486814c7bd49b833c9f8759d0b03733ee4f94d6368de978245c08",
-    "skills/memory-bank-upgrade/migrate-v1.5-to-v2.py": "28918dd220ef94382f39b837b9439acb12c581c865d9055dcfcc0a43eb505580",
+    "skills/memory-bank-upgrade/migrate-v1.5-to-v2.py": "25a22a5170a03abe9f57899bf9f074ba446dd7f6990da572c37a0e0dd39a1cdf",
     "tests/fixtures/parser-conformance.json": "1a6eac3b2840b970fc3d8636b9b164f5ef1bfb644f2edd7e6bc121e6f29ca4ad"
   }
 }
