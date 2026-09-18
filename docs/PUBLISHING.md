@@ -5,7 +5,8 @@ and [companion GitHub release](https://github.com/tabilet/tabilet-skills/release
 are published. The companion has the required `dsh-plugin` topic. The public
 GitHub archive matches the tested artifact and installs into clean disposable
 Web and headless profiles. [Catalog PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379)
-was submitted on 2026-09-18 and awaits review. Remaining gates are npm publication,
+was submitted on 2026-09-18. Its PR check and Submission gate both passed, but it
+remains open and awaits maintainer review. Remaining gates are npm publication,
 public npm artifact verification, and catalog acceptance/market visibility.
 
 Use the tested `tabilet-skills-1.4.0.tgz` and its recorded SHA-256 in

@@ -16,7 +16,8 @@ No paid model acceptance was run; skill semantics are unchanged from v1.3.0.
 | Public npm artifact download and clean install | Pending npm publication |
 | Repository `dsh-plugin` topic | Added and verified |
 | Catalog submission | [PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379) submitted 2026-09-18; awaiting review |
-| Listed in catalog and market | Not listed |
+| Catalog automated checks | Passed: PR check and Submission gate, 2026-09-18 |
+| Listed in catalog and market | Not listed as of 2026-09-18 10:50 UTC; PR remains open |
 
 Companion repository creation: 2026-09-13 16:27:47 UTC. Under the current
 [one-day catalog rule](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md),
@@ -28,6 +29,15 @@ matched the tested SHA-256 below and declared the expected installable bundle.
 The submission uses the prebuilt GitHub archive; npm is optional for listing.
 A submitted pull request does not establish listing: catalog acceptance and
 market visibility remain unverified.
+
+The hosted [PR check](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/35334092562)
+completed successfully at 10:27:10 UTC on 2026-09-18, including lint, regression
+tests, and the site build. The
+[Submission gate](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/runs/105567022269)
+passed at 10:27:32 UTC. At 10:50 UTC, GitHub still reported the PR as open with no
+merge commit, the entry was absent from the catalog's default branch, and the
+[public catalog](https://awesome-dsh-plugin.com/plugins.json) had no matching entry.
+Maintainer acceptance and subsequent market publication remain pending.
 
 ## Components and artifact identity
 
