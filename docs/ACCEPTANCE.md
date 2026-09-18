@@ -59,6 +59,17 @@ all seven complete canonical bundles, and the immutable upstream lock.
   guarded draft insertion, seven-skill catalog loading, and user-controlled
   model-free submission. Project before/after hashes stayed equal.
 
+## Publication verification
+
+| Gate | Result |
+|---|---|
+| Canonical tag and release | [v1.5.0](https://github.com/tabilet/skills/releases/tag/v1.5.0), commit `bfd617a51fca028790f182142fe106f7f0ee7052`; published 2026-09-18 19:45:55 UTC. The public source archive contains seven skills and a v1.5.0 manifest. |
+| Companion tag and release | [v1.5.0](https://github.com/tabilet/tabilet-skills/releases/tag/v1.5.0), commit `c25567077c2b15f47df0a3bc47cbcf3a7b3daa06`; published 2026-09-18 19:46:02 UTC with the tested archive and `SHA256SUMS`. |
+| Public archive download | Downloaded without credentials; SHA-256 matches `f2e81e97ee02b38db0e4596d2737aba1c0af3a5bebf074469680e211216f7f55` and the local tested tarball byte-for-byte. Seven bundled skills and the canonical commit pin match. Installed into fresh disposable Web and headless profiles. |
+| Hosted checks and site | Canonical check, DSH compatibility, and docs deployment passed. The website serves the v1.5.0 installation command. Both companion packed verification runs passed. |
+| npm | Not published; `npm whoami` reports `ENEEDAUTH` in this environment. |
+| Catalog | Listing and market visibility have not been verified for v1.5.0. |
+
 ## Isolated planning contract review
 
 The skill and shared references were reviewed against these project states:
