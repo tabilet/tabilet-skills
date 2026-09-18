@@ -15,15 +15,19 @@ No paid model acceptance was run; skill semantics are unchanged from v1.3.0.
 | npm v1.4.0 | Pending: `npm whoami` still reports `ENEEDAUTH` as of 2026-09-13 21:24 UTC |
 | Public npm artifact download and clean install | Pending npm publication |
 | Repository `dsh-plugin` topic | Added and verified |
-| Catalog submission | Pending repository age and verified publication |
+| Catalog submission | [PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379) submitted 2026-09-18; awaiting review |
 | Listed in catalog and market | Not listed |
 
 Companion repository creation: 2026-09-13 16:27:47 UTC. Under the current
 [one-day catalog rule](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md),
-earliest eligible submission is **2026-09-14 16:27:47 UTC**. The prepared single
-entry is [catalog-entry.yml](catalog-entry.yml), for
-`data/plugins/tabilet__tabilet-skills.yml`. Submission must wait for eligibility;
-a submitted pull request does not establish listing.
+eligibility began **2026-09-14 16:27:47 UTC**. The single
+entry in [catalog-entry.yml](catalog-entry.yml) was submitted as
+`data/plugins/tabilet__tabilet-skills.yml` on 2026-09-18. The catalog's entry
+validation and submission checker passed locally. A fresh public archive download
+matched the tested SHA-256 below and declared the expected installable bundle.
+The submission uses the prebuilt GitHub archive; npm is optional for listing.
+A submitted pull request does not establish listing: catalog acceptance and
+market visibility remain unverified.
 
 ## Components and artifact identity
 

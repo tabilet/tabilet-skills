@@ -132,3 +132,7 @@ Track GitHub/npm publication, catalog submission, and listing separately.
 require an installable bundle, working code, the `dsh-plugin` repository topic,
 and a repository at least one day old. The submission is one YAML entry;
 listing is confirmed only after acceptance and market visibility.
+
+[Catalog submission #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379)
+is awaiting review as of September 18, 2026. Until it is listed, install from the
+GitHub release archive using the command above.

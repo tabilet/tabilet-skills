@@ -4,8 +4,9 @@ The [canonical GitHub release](https://github.com/tabilet/skills/releases/tag/v1
 and [companion GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v1.4.0)
 are published. The companion has the required `dsh-plugin` topic. The public
 GitHub archive matches the tested artifact and installs into clean disposable
-Web and headless profiles. Remaining gates are npm publication, public npm
-artifact verification, and catalog submission/listing.
+Web and headless profiles. [Catalog PR #5379](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5379)
+was submitted on 2026-09-18 and awaits review. Remaining gates are npm publication,
+public npm artifact verification, and catalog acceptance/market visibility.
 
 Use the tested `tabilet-skills-1.4.0.tgz` and its recorded SHA-256 in
 [ACCEPTANCE.md](ACCEPTANCE.md). Do not publish a rebuilt or edited archive without
@@ -33,11 +34,11 @@ and install the downloaded archive into fresh disposable DSH Web and headless
 profiles. Keep the running personal profiles untouched. Record the registry
 integrity and clean-install evidence in `ACCEPTANCE.md`.
 
-The catalog repository-age gate opens **2026-09-14 16:27:47 UTC**. Re-read its
+The catalog repository-age gate opened **2026-09-14 16:27:47 UTC**. Its
 [current rules](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md)
-before submitting. The entry's pinned GitHub release tarball is public and
-provides a complete prebuilt installation. Copy only
-[catalog-entry.yml](catalog-entry.yml) to `data/plugins/tabilet__tabilet-skills.yml`
-in a fork and submit one pull request; do not edit the catalog README. Record
-the pull request as submission pending. Only mark listed after acceptance and
-market visibility are verified.
+were re-read before submitting [catalog-entry.yml](catalog-entry.yml) in PR #5379.
+That PR adds only `data/plugins/tabilet__tabilet-skills.yml`; it does not edit
+the generated catalog READMEs. The pinned GitHub release tarball provides a
+complete prebuilt installation, so npm publication is not a listing prerequisite.
+Address any requested changes in the existing PR rather than opening a duplicate.
+Only mark listed after acceptance and market visibility are verified.
