@@ -1,12 +1,11 @@
 # v2.0.0 acceptance and release preparation
 
-The `v2` companion branch pins canonical commit
+The v2 companion release pins canonical commit
 `35eaf54ae9db738f16036728ef4d2b0ecc519533` in `upstream.lock.json`.
 The canonical plugin, companion package, and DSH manifest all declare `2.0.0`.
 Canonical and companion `main` remained on the v1.5.0 line during development.
-The companion `v2` branch includes the later v1.5.0 release-record commit, so
-both repositories can advance `main` to their prepared v2 branches without a
-merge conflict.
+The companion `v2` branch includes the later v1.5.0 release-record commit;
+both repositories advanced `main` to their tested v2 branches by fast-forward.
 
 - Canonical: `python3 check.py` passed 33 checks, including migration and API
   runner tests. The separate DSH suite passed 13 tests after `npm ci`, and
@@ -30,16 +29,16 @@ merge conflict.
   exact pinned canonical skill resources, and the explicit migration CLI; it
   bundles no DSH runtime or install script.
 
-The v2 tags and archive are prepared locally. GitHub release publication,
-default-branch changes, npm publication, and catalog submission remain separate
-release actions; none is established by this acceptance record.
+## Publication verification (2026-09-18)
 
-For the final release, publish the canonical v2 tag and confirm its CI run;
-advance the companion `main` branch, publish its v2 tag, and attach the tested
-archive and `SHA256SUMS` to its GitHub release. Then advance canonical `main`,
-confirm the strict website deploy, and smoke-test the live installation and
-migration guides plus the archive download. Hosted CI, public download, and
-live-site evidence must be recorded after those actions.
+| Gate | Result |
+|---|---|
+| Canonical tag and release | [v2.0.0](https://github.com/tabilet/skills/releases/tag/v2.0.0) points to `35eaf54ae9db738f16036728ef4d2b0ecc519533`; `main` and `v2` reached the same commit. The public source archive contains the seven-skill v2 manifest, Propose, migration CLI, and matching `tabilet/GOAL.md`. |
+| Canonical hosted checks | Tag and `main` check and DSH compatibility runs passed. The `main` [check](https://github.com/tabilet/skills/actions/runs/35398348908), [DSH suite](https://github.com/tabilet/skills/actions/runs/35398348923), and [strict website deploy](https://github.com/tabilet/skills/actions/runs/35398348916) all passed. |
+| Companion tag and release | [v2.0.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.0.0) points to `9279c90129a8c4a238e1db7b1dd8c2d97f63d3a1`; `main` and `v2` reached the same commit before this publication record. The [tag](https://github.com/tabilet/tabilet-skills/actions/runs/35397901889) and [main](https://github.com/tabilet/tabilet-skills/actions/runs/35398260998) packed CI runs passed, including native Web/headless acceptance on both runtime graphs. |
+| Public companion download | The release archive downloaded without credentials and matched the locally tested tarball byte-for-byte: SHA-256 `c08e393d8bda8ba68393aa847183d35d814f15c4dc5daad2c45078c9a7d0c320`. The attached, release-specific `SHA256SUMS` contains that exact line and also downloaded without credentials. |
+| Live website and README | The [home](https://tabilet.github.io/skills/), [Propose](https://tabilet.github.io/skills/propose/), [installation](https://tabilet.github.io/skills/installation/), and [migration](https://tabilet.github.io/skills/upgrade/) pages returned HTTP 200 with v2 content after deployment. The public `main` README includes the Propose section and v2 project paths. |
+| Separate gates | npm publication and catalog listing were not performed or verified for v2. No paid model acceptance was run. |
 
 # v1.5.0 acceptance and release record
 
