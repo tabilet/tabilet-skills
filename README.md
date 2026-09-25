@@ -5,8 +5,8 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.0.0** reads the new `tabilet/` project layout and includes all
-seven canonical skills. See
+Version **2.1.0** pins the canonical v2.1.0 skills and adds an SQLite audit
+guide view to the read-only sidebar. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
@@ -21,19 +21,19 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.0.0/tabilet-skills-2.0.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.0.0/tabilet-skills-2.0.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.1.0/tabilet-skills-2.1.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.1.0/tabilet-skills-2.1.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.0.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.1.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.0.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.1.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/v2.0.0/docs/DSH.md#install-the-seven-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/v2.1.0/docs/DSH.md#install-the-seven-bundles).
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -53,6 +53,10 @@ enumerated by DSH's public registry. Review local overrides before removing them
   and context archives. Historical bodies load only when opened.
 - **Compatibility:** missing or malformed files, unsupported legacy state,
   duplicate identities, multiple in-progress rows, and skill sources.
+- **SQLite:** the optional external audit database, its location, and commands
+  to inspect audit runs or browse the Markdown index. The sidebar does not open
+  the database; use the separately installed CLI or local explorer. See the
+  [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the
@@ -147,7 +151,6 @@ require an installable bundle, working code, the `dsh-plugin` repository topic,
 and a repository at least one day old. The submission is one YAML entry;
 listing is confirmed only after acceptance and market visibility.
 
-The [DSH catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/)
-currently installs the v1.4.0 GitHub archive. [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411)
-updates that entry to v2.0.0. Until the catalog displays the v2 archive, use the
-direct GitHub release command above. npm publication is optional for this route.
+The DSH catalog entry is updated through a separate reviewed submission. If a
+new release is not yet listed, install its prebuilt archive from the GitHub
+release above. npm publication is optional for this route.

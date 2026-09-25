@@ -17,7 +17,7 @@ export async function apply(ctx: Context): Promise<void> {
   ctx.inject(['remote.tabiletMemory'], registerPanel);
 }
 function registerPanel(ctx: Context): void {
-  ctx.effect(() => ctx.sidebarRightTabs.register({ id: 'tabilet-skills', kind: 'memory-bank', title: () => 'Memory Bank', guide: [{ order: 60, title: () => 'Memory Bank', description: () => 'Tasks, memory, history, and workflow requests' }] }));
+  ctx.effect(() => ctx.sidebarRightTabs.register({ id: 'tabilet-skills', kind: 'memory-bank', title: () => 'Memory Bank', guide: [{ order: 60, title: () => 'Memory Bank', description: () => 'Tasks, acceptance, memory, history, SQLite, and workflow requests' }] }));
   function Body(props: PropsRuntime<'sidebar.right.pane.tab'>) {
     const { sessionId, useTabInfo } = props;
     const info = useTabInfo();

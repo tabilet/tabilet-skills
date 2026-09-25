@@ -1,3 +1,13 @@
+# v2.1.0 candidate
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.1.0. Adds a
+SQLite sidebar view with the optional audit database location, example audit
+and Markdown-index commands, and a link to the canonical guide. The dashboard
+remains read-only and does not open or modify the database. The candidate's
+model-free DSH verification and release artifact identity are recorded in
+[acceptance evidence](ACCEPTANCE.md); GitHub release and catalog submission are
+separate publication gates.
+
 # v1.5.0
 
 The companion stages seven complete canonical skills from an immutable

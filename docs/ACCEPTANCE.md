@@ -1,3 +1,27 @@
+# v2.1.0 candidate acceptance
+
+This candidate pins canonical `tabilet/skills` v2.1.0 at
+`f9820713b6e69928f71ec00dc634100010239e44`. It adds an optional SQLite view
+to the Memory Bank sidebar. The view documents the database path, audit and
+index commands, and canonical guide; it explicitly states that the dashboard
+does not open or modify the external database. The catalog preview uses the
+v2.1.0 archive URL and a description of this limited functionality.
+
+## Candidate verification
+
+| Gate | Result |
+|---|---|
+| Canonical payload hashes | Generated from the immutable v2.1.0 pin and verified by the build and packed-resource tests. |
+| TypeScript, unit and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 41 unit tests, 11 packed Web tests, and 11 mixed-runtime Web tests. The Web suite includes the packed headless profile. |
+| Prebuilt archive | `tabilet-skills-2.1.0.tgz`, 202,070 bytes, SHA-256 `0502341d2defba7618b70b586dc378ae798f128b3a2d40e89131191ae1246180`. It contains the prebuilt sidebar and exact pinned canonical skill resources, with no DSH runtime or install scripts. |
+| GitHub tag, release and push | Not published. |
+| DSH catalog PR and listing | Not submitted; live listing remains v2.0.0. |
+
+The DSH market update is a separate one-file catalog PR after the tested v2.1.0
+archive is published. Merging that PR and confirming public market visibility
+are later gates. npm publication is optional for the GitHub-archive route. No
+paid model acceptance is part of the candidate.
+
 # v2.0.0 acceptance and release preparation
 
 The v2 companion release pins canonical commit
@@ -38,7 +62,7 @@ both repositories advanced `main` to their tested v2 branches by fast-forward.
 | Companion tag and release | [v2.0.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.0.0) points to `9279c90129a8c4a238e1db7b1dd8c2d97f63d3a1`; `main` and `v2` reached the same commit before this publication record. The [tag](https://github.com/tabilet/tabilet-skills/actions/runs/35397901889) and [main](https://github.com/tabilet/tabilet-skills/actions/runs/35398260998) packed CI runs passed, including native Web/headless acceptance on both runtime graphs. |
 | Public companion download | The release archive downloaded without credentials and matched the locally tested tarball byte-for-byte: SHA-256 `c08e393d8bda8ba68393aa847183d35d814f15c4dc5daad2c45078c9a7d0c320`. The attached, release-specific `SHA256SUMS` contains that exact line and also downloaded without credentials. |
 | Live website and README | The [home](https://tabilet.github.io/skills/), [Propose](https://tabilet.github.io/skills/propose/), [installation](https://tabilet.github.io/skills/installation/), and [migration](https://tabilet.github.io/skills/upgrade/) pages returned HTTP 200 with v2 content after deployment. The public `main` README includes the Propose section and v2 project paths. |
-| DSH catalog update | The existing [catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/) still installs the v1.4.0 archive. [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411) updates its one YAML source file to the v2.0.0 archive; merge and public market visibility are pending. npm publication is optional for this GitHub-archive route and was not performed. No paid model acceptance was run. |
+| DSH catalog update | [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411) merged with the v2.0.0 archive URL. The current [catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/) offers v2.0.0. npm publication is optional for this GitHub-archive route and was not performed. No paid model acceptance was run. |
 
 # v1.5.0 acceptance and release record
 

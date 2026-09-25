@@ -95,6 +95,12 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await panel.getByRole('button', { name: 'Compatibility', exact: true }).click();
   await expect(panel.getByText('bundled · tabilet-skills', { exact: true })).toHaveCount(7);
   await expect(panel).not.toContainText('Skill catalog unavailable');
+  await panel.getByRole('button', { name: 'SQLite', exact: true }).click();
+  await expect(panel.getByRole('heading', { name: 'Optional SQLite audit and lookup', exact: true })).toBeVisible();
+  await expect(panel).toContainText('does not open or modify the database');
+  await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit audit runs --project /absolute/path/to/project' })).toBeVisible();
+  await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit explorer /absolute/path/to/project --port 8000' })).toBeVisible();
+  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md');
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original); expect(errors).toEqual([]);
 });
 test('external edits and linked canonical edits become visible within ten seconds', async ({ page }) => {

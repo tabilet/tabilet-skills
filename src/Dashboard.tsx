@@ -4,7 +4,7 @@ import { markers, retiredRecord, reviewEvidence, type State } from './parser.ts'
 import { commands, insertPrepared, prepare, type Command, type Composer } from './requests.ts';
 import type { SkillSource } from './dsh.ts';
 
-const views = ['Overview', 'Tasks', 'Acceptance', 'Memory', 'History', 'Compatibility'] as const;
+const views = ['Overview', 'Tasks', 'Acceptance', 'Memory', 'History', 'Compatibility', 'SQLite'] as const;
 const labels: Record<State, string> = { pending: 'Pending', completed: 'Completed', in_progress: 'In progress', blocked: 'Blocked', cancelled: 'Cancelled', historical: 'Closed historical' };
 export interface DashboardProps {
   sessionId: string; visible: boolean; port: FilePort; composer?: Composer;
@@ -82,6 +82,20 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
     {view === 'History' && <div><p>Index metadata is available immediately. Full retired records, knowledge history, and frozen context archives load when opened.</p>{snapshot?.documents.filter(d => /history\/index.md$/.test(d.path)).map(d => <button key={d.path} onClick={() => setOpened(d.path)}>Open history index</button>)}{snapshot?.history.map(h => <div className="mb-record" key={h.path}><button onClick={() => setOpened(h.path)}>{h.label}</button><small>Document verification: {opened === h.path ? 'see opened record' : 'not loaded'}</small></div>)}{opened && <OpenDocument key={opened} reader={reader} path={opened} snapshot={snapshot} navigate={navigate} visible={visible} />}</div>}
     {view === 'Compatibility' && <div><h3>Project records</h3>{snapshot?.issues.length ? <ul>{snapshot.issues.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p>No active-ledger conflicts detected. Historical bodies are verified only when opened.</p>}
       <h3>Winning skill sources</h3>{catalogError && <p role="alert">Skill catalog unavailable: {catalogError}</p>}{commands.map(c => { const skill = catalog.find(s => s.name === `memory-bank-${c}`); return <div className="mb-record" key={c}><strong>memory-bank-{c}</strong>{skill ? <><p>{skill.source}{skill.provider ? ` · ${skill.provider}` : ''}</p>{skill.location && <pre>{skill.location}</pre>}{skill.provider !== 'tabilet-skills' && <p>Duplicate: the bundled copy is shadowed by this winning override.</p>}</> : <p>Not reported by the current session catalog.</p>}</div>; })}<p>DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow.</p>{!composer && <p>Composer capability unavailable; requests can be copied.</p>}</div>}
+    {view === 'SQLite' && <div>
+      <h3>Optional SQLite audit and lookup</h3>
+      <p>SQLite is an optional external audit database and rebuildable index of project Markdown. Markdown remains authoritative. This sidebar reads project files; it does not open or modify the database.</p>
+      <h3>Database location</h3>
+      <p>The default is <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3'}</code>. Set <code>TABILET_AUDIT_DB</code> to use another external path. Keep the database outside the project.</p>
+      <h3>Inspect audit records</h3>
+      <pre><code>tabilet-audit audit runs --project /absolute/path/to/project</code></pre>
+      <pre><code>tabilet-audit audit events --run-id RUN_ID</code></pre>
+      <h3>Search or browse the Markdown index</h3>
+      <pre><code>tabilet-audit index search /absolute/path/to/project 'authentication'</code></pre>
+      <pre><code>tabilet-audit explorer /absolute/path/to/project --port 8000</code></pre>
+      <p>After starting the local explorer, open <code>http://localhost:8000/</code>. Install the optional toolkit separately; these commands are examples only and are not run by the sidebar.</p>
+      <p><a href="https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+    </div>}
     {command && (snapshot?.layout === 'v2' || snapshot?.layout === 'new') && <RequestPreview key={`${sessionId}:${command}`} command={command} composer={composer} resume={progress.length === 1} issues={[...(snapshot?.issues || []), ...(command === 'goal' && !snapshot?.goalAvailable ? ['Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing.'] : [])]} close={closePreview} />}
   </section>;
 }

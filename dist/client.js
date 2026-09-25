@@ -461,7 +461,7 @@ function insertPrepared(composer, text, revision) {
 
 // src/Dashboard.tsx
 var import_jsx_runtime = require("react/jsx-runtime");
-var views = ["Overview", "Tasks", "Acceptance", "Memory", "History", "Compatibility"];
+var views = ["Overview", "Tasks", "Acceptance", "Memory", "History", "Compatibility", "SQLite"];
 var labels = { pending: "Pending", completed: "Completed", in_progress: "In progress", blocked: "Blocked", cancelled: "Cancelled", historical: "Closed historical" };
 function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
   const reader = (0, import_react.useMemo)(() => new Reader(port), [port]);
@@ -711,6 +711,30 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow." }),
       !composer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Composer capability unavailable; requests can be copied." })
+    ] }),
+    view === "SQLite" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Optional SQLite audit and lookup" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "SQLite is an optional external audit database and rebuildable index of project Markdown. Markdown remains authoritative. This sidebar reads project files; it does not open or modify the database." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Database location" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        "The default is ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3" }),
+        ". Set ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
+        " to use another external path. Keep the database outside the project."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Inspect audit records" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit runs --project /absolute/path/to/project" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit events --run-id RUN_ID" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Search or browse the Markdown index" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit index search /absolute/path/to/project 'authentication'" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit explorer /absolute/path/to/project --port 8000" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        "After starting the local explorer, open ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "http://localhost:8000/" }),
+        ". Install the optional toolkit separately; these commands are examples only and are not run by the sidebar."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
     ] }),
     command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
   ] });
@@ -20607,7 +20631,7 @@ async function apply(ctx) {
   ctx.inject(["remote.tabiletMemory"], registerPanel);
 }
 function registerPanel(ctx) {
-  ctx.effect(() => ctx.sidebarRightTabs.register({ id: "tabilet-skills", kind: "memory-bank", title: () => "Memory Bank", guide: [{ order: 60, title: () => "Memory Bank", description: () => "Tasks, memory, history, and workflow requests" }] }));
+  ctx.effect(() => ctx.sidebarRightTabs.register({ id: "tabilet-skills", kind: "memory-bank", title: () => "Memory Bank", guide: [{ order: 60, title: () => "Memory Bank", description: () => "Tasks, acceptance, memory, history, SQLite, and workflow requests" }] }));
   function Body(props) {
     const { sessionId, useTabInfo } = props;
     const info = useTabInfo();
