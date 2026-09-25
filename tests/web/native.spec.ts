@@ -98,6 +98,8 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await panel.getByRole('button', { name: 'SQLite', exact: true }).click();
   await expect(panel.getByRole('heading', { name: 'Optional SQLite audit and lookup', exact: true })).toBeVisible();
   await expect(panel).toContainText('does not open or modify the database');
+  await expect(panel).toContainText('does not enable automatic API-runner auditing');
+  await expect(panel).toContainText('stays off unless you set TABILET_AUDIT_DB or pass --audit-db to the runner');
   await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit audit runs --project /absolute/path/to/project' })).toBeVisible();
   await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit explorer /absolute/path/to/project --port 8000' })).toBeVisible();
   await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md');

@@ -55,7 +55,9 @@ enumerated by DSH's public registry. Review local overrides before removing them
   duplicate identities, multiple in-progress rows, and skill sources.
 - **SQLite:** the optional external audit database, its location, and commands
   to inspect audit runs or browse the Markdown index. The sidebar does not open
-  the database; use the separately installed CLI or local explorer. See the
+  the database. The standalone CLI has a default path; this does not enable
+  automatic API-runner auditing, which requires `TABILET_AUDIT_DB` or
+  `--audit-db`. Use the separately installed CLI or local explorer. See the
   [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and

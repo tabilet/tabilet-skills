@@ -87,6 +87,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
       <p>SQLite is an optional external audit database and rebuildable index of project Markdown. Markdown remains authoritative. This sidebar reads project files; it does not open or modify the database.</p>
       <h3>Database location</h3>
       <p>The default is <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3'}</code>. Set <code>TABILET_AUDIT_DB</code> to use another external path. Keep the database outside the project.</p>
+      <p>This is the default path for standalone <code>tabilet-audit</code> commands. It does not enable automatic API-runner auditing; that stays off unless you set <code>TABILET_AUDIT_DB</code> or pass <code>--audit-db</code> to the runner.</p>
       <h3>Inspect audit records</h3>
       <pre><code>tabilet-audit audit runs --project /absolute/path/to/project</code></pre>
       <pre><code>tabilet-audit audit events --run-id RUN_ID</code></pre>

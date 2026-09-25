@@ -723,6 +723,15 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
         " to use another external path. Keep the database outside the project."
       ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        "This is the default path for standalone ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit" }),
+        " commands. It does not enable automatic API-runner auditing; that stays off unless you set ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
+        " or pass ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "--audit-db" }),
+        " to the runner."
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Inspect audit records" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit runs --project /absolute/path/to/project" }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit events --run-id RUN_ID" }) }),
