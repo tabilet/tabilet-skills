@@ -1,4 +1,4 @@
-# v2.1.0 candidate acceptance
+# v2.1.0 acceptance and publication record
 
 This candidate pins canonical `tabilet/skills` v2.1.0 at
 `f9820713b6e69928f71ec00dc634100010239e44`. It adds an optional SQLite view
@@ -16,13 +16,13 @@ this limited functionality.
 | Canonical payload hashes | Generated from the immutable v2.1.0 pin and verified by the build and packed-resource tests. |
 | TypeScript, unit and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 41 unit tests, 11 packed Web tests, and 11 mixed-runtime Web tests. The Web suite includes the packed headless profile. |
 | Prebuilt archive | `tabilet-skills-2.1.0.tgz`, 202,248 bytes, SHA-256 `9eadcee4ddf89ea4a42f1236025f7a9f1bb6ce35b2f155e4b85802bd63939163`. It contains the prebuilt sidebar and exact pinned canonical skill resources, with no DSH runtime or install scripts. |
-| GitHub tag, release and push | Not published. |
-| DSH catalog PR and listing | Not submitted; live listing remains v2.0.0. |
+| Companion main and tag | Published at commit `fda7065330b412892e39ce890c7d76ac935141f2`; both hosted verification runs passed: [main](https://github.com/tabilet/tabilet-skills/actions/runs/36157038723) and [v2.1.0 tag](https://github.com/tabilet/tabilet-skills/actions/runs/36157059837). |
+| Public release assets | [v2.1.0 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.1.0) serves the tested 202,248-byte archive and `SHA256SUMS`. The public archive was downloaded and matched byte-for-byte; SHA-256 is `9eadcee4ddf89ea4a42f1236025f7a9f1bb6ce35b2f155e4b85802bd63939163`. |
+| DSH catalog update | [PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907) updates only the plugin's YAML entry to the v2.1.0 archive and is awaiting catalog CI and maintainer review. The live listing still offers v2.0.0. |
 
-The DSH market update is a separate one-file catalog PR after the tested v2.1.0
-archive is published. Merging that PR and confirming public market visibility
-are later gates. npm publication is optional for the GitHub-archive route. No
-paid model acceptance is part of the candidate.
+Merging the catalog PR and confirming public market visibility are later gates.
+npm publication is optional for the GitHub-archive route. No paid model
+acceptance was run.
 
 # v2.0.0 acceptance and release preparation
 

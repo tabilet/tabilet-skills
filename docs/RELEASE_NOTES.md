@@ -1,13 +1,12 @@
-# v2.1.0 candidate
+# v2.1.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.1.0. Adds a
 SQLite sidebar view with the optional audit database location, example audit
 and Markdown-index commands, and a link to the canonical guide. It distinguishes
 the standalone CLI's default path from opt-in API-runner auditing. The dashboard
-remains read-only and does not open or modify the database. The candidate's
-model-free DSH verification and release artifact identity are recorded in
-[acceptance evidence](ACCEPTANCE.md); GitHub release and catalog submission are
-separate publication gates.
+remains read-only and does not open or modify the database. The tested archive,
+verification, and publication record are in [acceptance evidence](ACCEPTANCE.md).
+The catalog update is submitted and awaiting review.
 
 # v1.5.0
 

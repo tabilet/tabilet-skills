@@ -1,28 +1,37 @@
 # Publication status
 
-## v2.1.0 candidate
+## v2.1.0 GitHub release and DSH catalog
 
-The companion package candidate targets the canonical
+The companion pins the canonical
 [v2.1.0 tag](https://github.com/tabilet/skills/releases/tag/v2.1.0) and adds a
-read-only SQLite guidance view to the DSH sidebar. The panel explains where the
-optional database lives, provides audit and index command examples, and links
-to the canonical SQLite guide. It does not open or modify the database.
+read-only SQLite guidance view to the DSH sidebar. The panel explains the
+optional database location, gives audit and index command examples, links to the
+canonical SQLite guide, and clarifies that automatic API-runner auditing is
+opt-in. It does not open or modify the database.
 
-The package version, plugin manifest, and catalog-entry preview are set to
-2.1.0. The candidate has not been published. The v2.1.0 companion GitHub
-release, repository push, tag, and catalog PR are separate publication steps.
-The catalog submission should update only
-`data/plugins/tabilet__tabilet-skills.yml` with the v2.1.0 archive URL and the
-descriptions in [catalog-entry.yml](catalog-entry.yml). The official
+The companion [v2.1.0 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.1.0)
+is public. Its tested archive and release-specific `SHA256SUMS` are publicly
+downloadable; [acceptance evidence](ACCEPTANCE.md) records the hash and hosted
+verification runs.
+
+The DSH catalog update is submitted as
+[PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907).
+It changes only `data/plugins/tabilet__tabilet-skills.yml` to use the v2.1.0
+archive and the descriptions in [catalog-entry.yml](catalog-entry.yml). The
+official
 [catalog contribution guide](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md)
 requires a valid `dsh.bundle`, working code, the `dsh-plugin` repository topic,
 and a repository at least one day old. It says generated catalog READMEs must
 not be edited manually.
 
 The [current catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/)
-points to v2.0.0. The earlier
+still points to v2.0.0 while PR #5907 awaits checks and maintainer review. After
+it merges, verify the public entry and `plugins.json`, download the linked
+archive, compare its SHA-256 with the release checksum, and install it into
+disposable DSH Web and headless profiles. Record those results in
+[ACCEPTANCE.md](ACCEPTANCE.md). The earlier
 [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411)
-merged with that archive URL; it is not the pending v2.1.0 submission.
+merged with the v2.0.0 archive URL.
 
 ## v2.0.0 publication record
 
