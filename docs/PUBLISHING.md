@@ -25,10 +25,10 @@ and a repository at least one day old. It says generated catalog READMEs must
 not be edited manually.
 
 The [current catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/)
-still points to v2.0.0 while PR #5907 awaits checks and maintainer review. After
-it merges, verify the public entry and `plugins.json`, download the linked
-archive, compare its SHA-256 with the release checksum, and install it into
-disposable DSH Web and headless profiles. Record those results in
+still points to v2.0.0 while PR #5907 awaits maintainer review; its catalog CI
+passed. After it merges, verify the public entry and `plugins.json`, download
+the linked archive, compare its SHA-256 with the release checksum, and install
+it into disposable DSH Web and headless profiles. Record those results in
 [ACCEPTANCE.md](ACCEPTANCE.md). The earlier
 [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411)
 merged with the v2.0.0 archive URL.
