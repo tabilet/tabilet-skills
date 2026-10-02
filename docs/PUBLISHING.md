@@ -2,11 +2,11 @@
 
 ## v2.3.0 preparation
 
-The companion candidate pins the combined canonical v2.3.0 commit recorded in
+The companion candidate pins the published canonical
+[v2.3.0 release](https://github.com/tabilet/skills/releases/tag/v2.3.0) recorded in
 `upstream.lock.json`. The proposed catalog entry names the future
-`tabilet-skills-2.3.0.tgz` GitHub release asset. The canonical commit must first
-be published and tagged as v2.3.0; the companion archive and checksum must then
-be released before the catalog URL can be submitted and verified. A local
+`tabilet-skills-2.3.0.tgz` GitHub release asset. The companion archive and
+checksum must be released before the catalog URL can be submitted and verified. A local
 candidate or catalog YAML file does not establish a published release or
 market listing. [Acceptance evidence](ACCEPTANCE.md) records the local checks
 and remaining gates. npm publication remains optional for the archive route.

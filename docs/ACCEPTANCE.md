@@ -1,7 +1,7 @@
 # v2.3.0 release candidate
 
 The companion pins canonical `tabilet/skills` commit
-`d4e87a77b4e7bea70802dee5f87ccbcb12aac5ca` and verifies the hash of every
+`80114ea2829263516b25056dd8b4570959206f24` and verifies the hash of every
 packaged skill resource. The plugin and package manifests both declare 2.3.0.
 Its sidebar reads optional stage direction without turning it into executable
 work, and Propose previews can target a stage ID or the stages overview.
@@ -10,15 +10,23 @@ conditions; invalid or incomplete records remain visible as errors.
 
 | Gate | Local result |
 |---|---|
-| Canonical source | Combined `api` and `stage` candidate: 38 repository checks, strict MkDocs, 13 DSH compatibility tests, 5 Docker acceptance tests, and 2 browser tests passed. The canonical v2.3.0 tag and remote publication remain pending. |
+| Canonical source | Combined `api` and `stage` release at [v2.3.0](https://github.com/tabilet/skills/releases/tag/v2.3.0), commit `80114ea2829263516b25056dd8b4570959206f24`: 38 repository checks and strict MkDocs passed locally. Earlier candidate acceptance also passed 13 DSH compatibility tests, 5 Docker acceptance tests, and 2 browser tests. The hosted [DSH compatibility](https://github.com/tabilet/skills/actions/runs/37025816182) and [Docker acceptance](https://github.com/tabilet/skills/actions/runs/37025816095) checks passed on the tag. |
 | Companion unit and packed loader | `npm run verify` passed TypeScript checking and build plus all 44 unit, parser, reader, request, profile, and packed-loader tests. The packed tests checked the full upstream hash inventory and the actual DSH skill loader. |
 | Native DSH Web and headless | `npm run verify` passed all 11 tests on the locked rc.2 graph and all 11 with the isolated rc.1 launcher and rc.2 components. The stage view, explicit stage-target request, unchanged project files during browsing, and user-controlled submission were exercised in disposable profiles. |
-| Prebuilt archive | `tabilet-skills-2.3.0.tgz`, 208,366 bytes, SHA-256 `78ed92a8659ba6e2d26520494135b75550dd9d7e76b3da2e2a11278fbb00acd0`. The matching line is in `SHA256SUMS`; no install script or DSH runtime is bundled. |
+| Prebuilt archive | `tabilet-skills-2.3.0.tgz`, 208,371 bytes, SHA-256 `8be8149bbd4962a1489ce15dd407f3b3f780584bd6998070c95a0a6a29714085`. The matching line is in `SHA256SUMS`; no install script or DSH runtime is bundled. |
 | Publication and catalog | Companion tag, push, GitHub release assets, public download verification, catalog submission, and market visibility are pending. npm publication is optional. |
 
 No paid model acceptance was run. The dashboard and request preparation never
 authorize a plan or perform a model request; the native suite uses a local
 fixed-response provider only when a test explicitly sends a request.
+
+The canonical tag's hosted [repository check](https://github.com/tabilet/skills/actions/runs/37025815587)
+failed because disposable test repositories relied on a global Git author
+identity unavailable on GitHub Actions. A test-only follow-up on `main`
+(`befb665bfd3450fccb9d9ab350f36a785760a997`) configured local fixture
+identities. All 38 checks then passed with global Git configuration disabled,
+and the hosted [main check](https://github.com/tabilet/skills/actions/runs/37026627117)
+passed. The pinned skill payload and v2.3.0 release tag were not changed.
 
 # v2.1.0 acceptance and publication record
 
