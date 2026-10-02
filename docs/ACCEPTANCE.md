@@ -1,3 +1,18 @@
+# v2.3.1 peer compatibility correction
+
+The v2.1.0 and v2.3.0 companions declared `zod: ^4.6.4`, while the supported
+DSH rc.2 dependency graph and the reported Web profile resolve Zod 4.6.2.
+The v2.3.1 package widens only this peer range to `^4.6.2`; its canonical
+skill pin remains `80114ea2829263516b25056dd8b4570959206f24` and its
+dashboard and request behavior are unchanged. The source remote schemas
+parsed valid and invalid samples against Zod 4.6.2 from the locked DSH graph.
+
+| Gate | Result |
+|---|---|
+| Candidate archive | `tabilet-skills-2.3.1.tgz`, 208,422 bytes, SHA-256 `bc73a853b4bcc96238f83cfcf1ea9d261e4d39df435530ef266086fe10f026c6`. The matching line is in `SHA256SUMS`. |
+| Verification | `npm ci` and `npm run verify` passed: TypeScript, build, all 44 unit and packed-loader tests, 11 native Web/headless tests on rc.2, and 11 isolated mixed rc.1/rc.2 tests. Both browser runs installed the packed archive into disposable profiles. |
+| Publication | The tag, public archive, and amendment to catalog PR #6423 are pending. The live listing remains v2.1.0. No personal DSH profile was changed. |
+
 # v2.3.0 acceptance and publication record
 
 The companion pins canonical `tabilet/skills` commit

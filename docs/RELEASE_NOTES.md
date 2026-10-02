@@ -1,3 +1,11 @@
+# v2.3.1
+
+The companion keeps the same canonical v2.3.0 skills and read-only dashboard.
+It widens the Zod peer requirement from `^4.6.4` to `^4.6.2`, which matches the
+supported DSH rc.2 profile. The source remote schemas passed against Zod 4.6.2;
+the earlier lower bound caused a Plugin Market compatibility warning despite no
+observed schema failure. No project Markdown or controller contract changes.
+
 # v2.3.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.3.0. The sidebar

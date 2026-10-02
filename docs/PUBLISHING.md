@@ -1,5 +1,15 @@
 # Publication status
 
+## v2.3.1 peer compatibility patch
+
+The patch release keeps the canonical v2.3.0 skill pin and lowers the companion
+Zod peer minimum to 4.6.2, matching the supported DSH rc.2 dependency graph.
+The v2.3.1 archive passed package, loader, native Web/headless, and mixed
+runtime verification. After its release, update the open
+[catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+to the patch archive before the listing merges. The existing v2.1.0 and v2.3.0
+archives remain immutable.
+
 ## v2.3.0 GitHub release and catalog submission
 
 The companion pins the published canonical

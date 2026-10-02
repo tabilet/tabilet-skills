@@ -1,6 +1,6 @@
 {
   "name": "tabilet-skills",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Seven shared memory-bank skills, project records, and workflow request preparation.",
   "engines": {
     "dsh": "^0.1.5-rc.1"

@@ -5,8 +5,9 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.3.0** pins the canonical v2.3.0 skills and adds a read-only Stages
-view and explicit stage targeting to Propose request previews. See
+Version **2.3.1** pins the canonical v2.3.0 skills and includes the read-only
+Stages view and stage targeting for Propose. It accepts the Zod 4.6.2 version
+resolved by the supported DSH rc.2 profile. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
@@ -21,15 +22,15 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.1/tabilet-skills-2.3.1.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.1/tabilet-skills-2.3.1.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.3.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.3.1 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.1).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
