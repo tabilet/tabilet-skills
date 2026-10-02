@@ -8,9 +8,10 @@ The companion pins the published canonical
 serves the tested archive and checksum. Both assets were downloaded without
 credentials and the public archive matched the local tested artifact.
 [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
-submits the updated source YAML; market listing awaits its check and maintainer
-merge. [Acceptance evidence](ACCEPTANCE.md) records the verified gates and
-remaining catalog state. npm publication remains optional for the archive route.
+submits the updated source YAML. Its check and submission gate passed; market
+listing awaits a maintainer merge. [Acceptance evidence](ACCEPTANCE.md)
+records the verified gates and remaining catalog state. npm publication
+remains optional for the archive route.
 
 ## v2.1.0 GitHub release and DSH catalog
 
