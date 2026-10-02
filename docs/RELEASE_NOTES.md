@@ -1,3 +1,19 @@
+# v2.3.0
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.3.0. The sidebar
+reads optional `tabilet/stages.md`, shows the current stage and preliminary later
+stages, and keeps stage descriptions separate from executable milestone and task
+rows. Propose previews can name `--stages` or one stable `STG-` ID; they still
+require the user to send the request and approve planning writes. Projects
+without `stages.md` retain one implicit stage.
+
+The read-only history view now accepts completed legacy retirement envelopes
+that the canonical v2.3.0 parser accepts. SQLite guidance remains available;
+the companion never opens the audit database or runs the API controller. The
+seven bundled skills, dashboard, and workflow previews remain usable without
+changing project Markdown. See [acceptance evidence](ACCEPTANCE.md) for tested
+gates and pending publication steps.
+
 # v2.1.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.1.0. Adds a
@@ -6,7 +22,7 @@ and Markdown-index commands, and a link to the canonical guide. It distinguishes
 the standalone CLI's default path from opt-in API-runner auditing. The dashboard
 remains read-only and does not open or modify the database. The tested archive,
 verification, and publication record are in [acceptance evidence](ACCEPTANCE.md).
-The catalog update is submitted and awaiting review.
+The catalog update subsequently merged and the public listing offers v2.1.0.
 
 # v1.5.0
 

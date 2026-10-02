@@ -128,6 +128,34 @@ function statusMarkerProblems(text) {
   }
   return problems;
 }
+function stageOverview(text) {
+  const entries = [], problems = [];
+  let current, entry;
+  for (const [line, content] of unfencedLines(text)) {
+    const selected = content.match(/^\*\*Current stage\.\*\*\s+(\S+)\s*$/);
+    if (selected) {
+      if (current) problems.push("more than one current stage declaration");
+      current = selected[1];
+    }
+    const heading = content.match(/^## (STG-\d+)(?:\s|$)/);
+    if (heading) {
+      entry = { id: heading[1], line };
+      entries.push(entry);
+    } else if (content.startsWith("## ")) entry = void 0;
+    const field = content.match(/^\*\*(Name|Intent)\.\*\*\s+(.+)$/);
+    if (entry && field) entry[field[1] === "Name" ? "name" : "intent"] = field[2];
+  }
+  const validStageId = /^STG-(?:0[1-9]|[1-9]\d+)$/;
+  if (!current || !validStageId.test(current)) problems.push("current stage ID is missing or invalid");
+  const seen = /* @__PURE__ */ new Set();
+  for (const stage of entries) {
+    if (!validStageId.test(stage.id)) problems.push(`invalid stage ID: ${stage.id}`);
+    if (seen.has(stage.id)) problems.push(`duplicate stage ID: ${stage.id}`);
+    seen.add(stage.id);
+  }
+  if (current && !seen.has(current)) problems.push(`current stage ${current} has no stage entry`);
+  return { current, entries, problems };
+}
 function requireThat(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -165,7 +193,10 @@ function retiredRecord(text, name) {
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), "evidence must be a full commit or unversioned");
   requireThat(["clean", "includes uncommitted changes", "unversioned"].includes(metadata.Worktree), "invalid worktree provenance");
   requireThat(metadata.Evidence === "unversioned" === (metadata.Worktree === "unversioned"), "inconsistent unversioned provenance");
-  requireThat(metadata.Review === "passed" && /^(?:[1-9]|10)$/.test(metadata["Review iterations"]), "retirement requires a passed review within 10 iterations");
+  if (metadata.Review === "legacy")
+    requireThat(metadata["Review iterations"] === "not recorded" && !!metadata["Legacy closure"] && metadata.Outcome === "completed", "legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note");
+  else
+    requireThat(metadata.Review === "passed" && /^(?:[1-9]|10)$/.test(metadata["Review iterations"]), "retirement requires a passed review within 10 iterations");
   requireThat(metadata.Outcome === "completed" || metadata.Disposition, "cancellation or supersession needs its authorized disposition");
   requireThat(metadata.Outcome !== "superseded" || metadata.Successor, "supersession needs its accepted successor");
   const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(""));
@@ -297,6 +328,8 @@ var Reader = class {
     ]);
     await Promise.all(["product", "tech-stack", "lessons"].map((n) => attempt(`${bank}/${n}.md`)));
     await attempt("AGENTS.md");
+    const stages = layout === "legacy" ? void 0 : await attempt("tabilet/stages.md", true);
+    if (stages) issues.push(...stageOverview(stages.text).problems.map((problem) => `${stages.path}: ${problem}`));
     let goalAvailable = false;
     try {
       await this.port.stat(`${base}GOAL.md`, signal);
@@ -434,12 +467,16 @@ COMMIT_POLICY: ${options.policy || "task"}
 EXTERNAL_MUTATIONS: none
 Reconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
     }
-    case "propose":
+    case "propose": {
       if (!options.requestedChange?.trim()) throw new Error("Enter the requested change.");
-      return `${prefix} Requested change (user-supplied text):
+      const stage = options.stage?.trim();
+      if (stage && stage !== "--stages" && !/^STG-(?:0[1-9]|[1-9]\d+)$/.test(stage)) throw new Error("Use --stages for the overview or an existing stage ID such as STG-02.");
+      const target = stage === "--stages" ? " --stages" : stage ? ` --stage ${stage}` : "";
+      return `${prefix}${target} Requested change (user-supplied text):
 ${options.requestedChange}
 
 Inspect the current project and relevant implementation first, then present one complete planning proposal with acceptance, dependencies, downstream impacts, and exact file actions for approval before writes. Do not implement or commit. EXTERNAL_MUTATIONS: none.`;
+    }
     case "reconcile":
       if (!options.review?.trim()) throw new Error("Enter a local review path or a user-supplied URL.");
       return `${prefix} Review source (user-supplied text): ${JSON.stringify(options.review.trim())}. Revalidate findings against the current project and propose the complete disposition and file actions for approval before writes. For a remote source, show the exact URL and obtain separate explicit confirmation before fetching. Preparing this request has not fetched the source. Do not implement or commit findings.`;
@@ -461,7 +498,7 @@ function insertPrepared(composer, text, revision) {
 
 // src/Dashboard.tsx
 var import_jsx_runtime = require("react/jsx-runtime");
-var views = ["Overview", "Tasks", "Acceptance", "Memory", "History", "Compatibility", "SQLite"];
+var views = ["Overview", "Tasks", "Acceptance", "Memory", "Stages", "History", "Compatibility", "SQLite"];
 var labels = { pending: "Pending", completed: "Completed", in_progress: "In progress", blocked: "Blocked", cancelled: "Cancelled", historical: "Closed historical" };
 function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
   const reader = (0, import_react.useMemo)(() => new Reader(port), [port]);
@@ -527,6 +564,8 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
     };
   }, [reader, sources, port, visible, refreshId]);
   const tasks = snapshot?.tasks || [];
+  const stageDocument = snapshot?.documents.find((d) => d.path === "tabilet/stages.md");
+  const stages = stageDocument ? stageOverview(stageDocument.text) : void 0;
   const progress = tasks.filter((t) => t.state === "in_progress");
   const filtered = tasks.filter((t) => (!state || t.state === state) && (!milestone || t.id === milestone) && (!lane || t.id[0] === lane) && (!search || `${t.id} ${t.cells.join(" ")}`.toLowerCase().includes(search.toLowerCase())));
   const sourceButton = (path, line) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "mb-source", onClick: () => navigate(path, line), children: [
@@ -584,6 +623,8 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
           labels[value]
         ] })
       ] }, value)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Current stage" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: stages?.current || (stageDocument ? "Unresolved in stages.md" : "One implicit stage; no stages.md") }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Active milestones" }),
       snapshot?.milestones.length ? snapshot.milestones.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-record", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: m.title }),
@@ -672,6 +713,27 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "mb-actions", children: ["product", "architecture", "tech-stack", "lessons"].map((name) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setOpened(`${snapshot?.layout === "legacy" ? "" : "tabilet/"}memory-bank/${name}.md`), children: name }, name)) }),
       opened ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OpenDocument, { reader, path: opened, snapshot, navigate, visible }, opened) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Open a current memory document." })
     ] }),
+    view === "Stages" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Delivery stages" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Stages describe planning direction. Only approved milestones and status rows are executable." }),
+      stageDocument && stages ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+          "Current stage: ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: stages.current || "unresolved" })
+        ] }),
+        stages.entries.map((stage) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "mb-record", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+            stage.id,
+            stage.id === stages.current ? " \xB7 current" : ""
+          ] }),
+          stage.name && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: stage.name }),
+          stage.intent && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: stage.intent }),
+          sourceButton(stageDocument.path, stage.line)
+        ] }, `${stage.id}:${stage.line}`)),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setOpened(stageDocument.path), children: "Read complete stages.md" }),
+        opened === stageDocument.path && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OpenDocument, { reader, path: opened, snapshot, navigate, visible }, opened)
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "No stages.md: this project has one implicit stage." })
+    ] }),
     view === "History" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Index metadata is available immediately. Full retired records, knowledge history, and frozen context archives load when opened." }),
       snapshot?.documents.filter((d) => /history\/index.md$/.test(d.path)).map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setOpened(d.path), children: "Open history index" }, d.path)),
@@ -743,7 +805,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "http://localhost:8000/" }),
         ". Install the optional toolkit separately; these commands are examples only and are not run by the sidebar."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
     ] }),
     command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
   ] });
@@ -786,7 +848,7 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }) {
 }
 function RequestPreview({ command, composer, resume, issues, close }) {
   const [order, setOrder] = (0, import_react.useState)(""), [completion, setCompletion] = (0, import_react.useState)(""), [policy, setPolicy] = (0, import_react.useState)("task");
-  const [requestedChange, setRequestedChange] = (0, import_react.useState)(""), [review, setReview] = (0, import_react.useState)(""), [scope, setScope] = (0, import_react.useState)(""), [message, setMessage] = (0, import_react.useState)("");
+  const [requestedChange, setRequestedChange] = (0, import_react.useState)(""), [stage, setStage] = (0, import_react.useState)(""), [review, setReview] = (0, import_react.useState)(""), [scope, setScope] = (0, import_react.useState)(""), [message, setMessage] = (0, import_react.useState)("");
   const revision = (0, import_react.useRef)(composer?.snapshot().draftRev ?? -1);
   const ref = (0, import_react.useRef)(null);
   (0, import_react.useEffect)(() => {
@@ -794,7 +856,7 @@ function RequestPreview({ command, composer, resume, issues, close }) {
   }, []);
   let text = "", problem = "";
   try {
-    text = prepare(command, { order, completion, policy, requestedChange, review, scope, resume });
+    text = prepare(command, { order, completion, policy, requestedChange, stage, review, scope, resume });
   } catch (e) {
     problem = e.message;
   }
@@ -845,9 +907,16 @@ function RequestPreview({ command, composer, resume, issues, close }) {
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "EXTERNAL_MUTATIONS: none" })
     ] }),
-    command === "propose" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
-      "Requested change",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { required: true, value: requestedChange, onChange: (e) => setRequestedChange(e.target.value) })
+    command === "propose" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        "Requested change",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", { required: true, value: requestedChange, onChange: (e) => setRequestedChange(e.target.value) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+        "Stage focus (optional)",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { value: stage, onChange: (e) => setStage(e.target.value), placeholder: "--stages or STG-02" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: "Use --stages for the overview or a stable stage ID for one stage. Stage planning still needs approval." })
+      ] })
     ] }),
     command === "reconcile" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
       "Local review path or URL",

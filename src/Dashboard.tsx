@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Reader, type Document, type FilePort, type Snapshot } from './reader.ts';
-import { markers, retiredRecord, reviewEvidence, type State } from './parser.ts';
+import { markers, retiredRecord, reviewEvidence, stageOverview, type State } from './parser.ts';
 import { commands, insertPrepared, prepare, type Command, type Composer } from './requests.ts';
 import type { SkillSource } from './dsh.ts';
 
-const views = ['Overview', 'Tasks', 'Acceptance', 'Memory', 'History', 'Compatibility', 'SQLite'] as const;
+const views = ['Overview', 'Tasks', 'Acceptance', 'Memory', 'Stages', 'History', 'Compatibility', 'SQLite'] as const;
 const labels: Record<State, string> = { pending: 'Pending', completed: 'Completed', in_progress: 'In progress', blocked: 'Blocked', cancelled: 'Cancelled', historical: 'Closed historical' };
 export interface DashboardProps {
   sessionId: string; visible: boolean; port: FilePort; composer?: Composer;
@@ -46,6 +46,8 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
     return () => { active = false; controller.abort(); clearInterval(timer); window.removeEventListener('focus', focus); document.removeEventListener('visibilitychange', focus); };
   }, [reader, sources, port, visible, refreshId]);
   const tasks = snapshot?.tasks || [];
+  const stageDocument = snapshot?.documents.find(d => d.path === 'tabilet/stages.md');
+  const stages = stageDocument ? stageOverview(stageDocument.text) : undefined;
   const progress = tasks.filter(t => t.state === 'in_progress');
   const filtered = tasks.filter(t => (!state || t.state === state) && (!milestone || t.id === milestone) && (!lane || t.id[0] === lane) && (!search || `${t.id} ${t.cells.join(' ')}`.toLowerCase().includes(search.toLowerCase())));
   const sourceButton = (path: string, line?: number) => <button className="mb-source" onClick={() => navigate(path, line)}>{path}{line ? `:${line}` : ''} ↗</button>;
@@ -62,6 +64,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
     {!!snapshot?.issues.length && view !== 'Compatibility' && <button className="mb-warning mb-conflicts" onClick={() => setView('Compatibility')}>{snapshot.issues.length} compatibility issue{snapshot.issues.length === 1 ? '' : 's'} — inspect records</button>}
     {view === 'Overview' && <div>
       <div className="mb-counts">{Object.entries(markers).map(([marker, value]) => <button key={value} onClick={() => { setState(value); setView('Tasks'); }}><b>{tasks.filter(t => t.state === value).length}</b><span>{marker.replaceAll('`', '')} {labels[value]}</span></button>)}</div>
+      <h3>Current stage</h3><p>{stages?.current || (stageDocument ? 'Unresolved in stages.md' : 'One implicit stage; no stages.md')}</p>
       <h3>Active milestones</h3>{snapshot?.milestones.length ? snapshot.milestones.map(m => <div key={m.path} className="mb-record"><strong>{m.title}</strong>{sourceButton(m.path)}</div>) : <p>{snapshot?.history.some(h => h.id) ? 'No active milestones. Retired identities are indexed below History.' : 'No active milestones found.'}</p>}
       <h3>In progress</h3>{progress.length ? progress.map(t => <div className="mb-record" key={`${t.path}:${t.line}`}>{t.id} · {t.item}{sourceButton(t.path, t.line)}</div>) : <p>No row is in progress.</p>}
       <h3>Blocked</h3>{tasks.filter(t => t.state === 'blocked').map(t => <div className="mb-record" key={`${t.path}:${t.line}`}><strong>{t.id} · {t.item}</strong><p>{t.cells.slice(2).join(' | ')}</p>{sourceButton(t.path, t.line)}</div>)}
@@ -79,6 +82,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
       return <article className="mb-record" key={d.path}><h3>{d.path.split('/').at(-1)}</h3><p>Current review counter: <strong>{evidence.counter}</strong></p>{evidence.evidence.length ? evidence.evidence.map(([line, s]) => <div key={line}><pre>{s}</pre>{sourceButton(d.path, line)}</div>) : <p>Verification and review evidence: Unknown</p>}</article>;
     })}</div>}
     {view === 'Memory' && <div><div className="mb-actions">{['product', 'architecture', 'tech-stack', 'lessons'].map(name => <button key={name} onClick={() => setOpened(`${snapshot?.layout === 'legacy' ? '' : 'tabilet/'}memory-bank/${name}.md`)}>{name}</button>)}</div>{opened ? <OpenDocument key={opened} reader={reader} path={opened} snapshot={snapshot} navigate={navigate} visible={visible} /> : <p>Open a current memory document.</p>}</div>}
+    {view === 'Stages' && <div><h3>Delivery stages</h3><p>Stages describe planning direction. Only approved milestones and status rows are executable.</p>{stageDocument && stages ? <><p>Current stage: <strong>{stages.current || 'unresolved'}</strong></p>{stages.entries.map(stage => <article className="mb-record" key={`${stage.id}:${stage.line}`}><strong>{stage.id}{stage.id === stages.current ? ' · current' : ''}</strong>{stage.name && <p>{stage.name}</p>}{stage.intent && <p>{stage.intent}</p>}{sourceButton(stageDocument.path, stage.line)}</article>)}<button onClick={() => setOpened(stageDocument.path)}>Read complete stages.md</button>{opened === stageDocument.path && <OpenDocument key={opened} reader={reader} path={opened} snapshot={snapshot} navigate={navigate} visible={visible} />}</> : <p>No stages.md: this project has one implicit stage.</p>}</div>}
     {view === 'History' && <div><p>Index metadata is available immediately. Full retired records, knowledge history, and frozen context archives load when opened.</p>{snapshot?.documents.filter(d => /history\/index.md$/.test(d.path)).map(d => <button key={d.path} onClick={() => setOpened(d.path)}>Open history index</button>)}{snapshot?.history.map(h => <div className="mb-record" key={h.path}><button onClick={() => setOpened(h.path)}>{h.label}</button><small>Document verification: {opened === h.path ? 'see opened record' : 'not loaded'}</small></div>)}{opened && <OpenDocument key={opened} reader={reader} path={opened} snapshot={snapshot} navigate={navigate} visible={visible} />}</div>}
     {view === 'Compatibility' && <div><h3>Project records</h3>{snapshot?.issues.length ? <ul>{snapshot.issues.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p>No active-ledger conflicts detected. Historical bodies are verified only when opened.</p>}
       <h3>Winning skill sources</h3>{catalogError && <p role="alert">Skill catalog unavailable: {catalogError}</p>}{commands.map(c => { const skill = catalog.find(s => s.name === `memory-bank-${c}`); return <div className="mb-record" key={c}><strong>memory-bank-{c}</strong>{skill ? <><p>{skill.source}{skill.provider ? ` · ${skill.provider}` : ''}</p>{skill.location && <pre>{skill.location}</pre>}{skill.provider !== 'tabilet-skills' && <p>Duplicate: the bundled copy is shadowed by this winning override.</p>}</> : <p>Not reported by the current session catalog.</p>}</div>; })}<p>DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow.</p>{!composer && <p>Composer capability unavailable; requests can be copied.</p>}</div>}
@@ -95,7 +99,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
       <pre><code>tabilet-audit index search /absolute/path/to/project 'authentication'</code></pre>
       <pre><code>tabilet-audit explorer /absolute/path/to/project --port 8000</code></pre>
       <p>After starting the local explorer, open <code>http://localhost:8000/</code>. Install the optional toolkit separately; these commands are examples only and are not run by the sidebar.</p>
-      <p><a href="https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+      <p><a href="https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
     </div>}
     {command && (snapshot?.layout === 'v2' || snapshot?.layout === 'new') && <RequestPreview key={`${sessionId}:${command}`} command={command} composer={composer} resume={progress.length === 1} issues={[...(snapshot?.issues || []), ...(command === 'goal' && !snapshot?.goalAvailable ? ['Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing.'] : [])]} close={closePreview} />}
   </section>;
@@ -123,12 +127,12 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: R
 }
 function RequestPreview({ command, composer, resume, issues, close }: { command: Command; composer?: Composer; resume: boolean; issues: string[]; close(): void }) {
   const [order, setOrder] = useState(''), [completion, setCompletion] = useState(''), [policy, setPolicy] = useState<'task' | 'none'>('task');
-  const [requestedChange, setRequestedChange] = useState(''), [review, setReview] = useState(''), [scope, setScope] = useState(''), [message, setMessage] = useState('');
+  const [requestedChange, setRequestedChange] = useState(''), [stage, setStage] = useState(''), [review, setReview] = useState(''), [scope, setScope] = useState(''), [message, setMessage] = useState('');
   const revision = useRef(composer?.snapshot().draftRev ?? -1);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { ref.current?.focus(); }, []);
   let text = '', problem = '';
-  try { text = prepare(command, { order, completion, policy, requestedChange, review, scope, resume }); } catch (e) { problem = (e as Error).message; }
+  try { text = prepare(command, { order, completion, policy, requestedChange, stage, review, scope, resume }); } catch (e) { problem = (e as Error).message; }
   return <div className="mb-overlay"><div ref={ref} className="mb-preview" role="dialog" aria-modal="true" aria-label={`Prepare ${command} request`} tabIndex={-1} onKeyDown={e => {
     if (e.key === 'Escape') { e.stopPropagation(); close(); }
     if (e.key !== 'Tab') return;
@@ -140,7 +144,7 @@ function RequestPreview({ command, composer, resume, issues, close }: { command:
     <p>Review this request before inserting it. Send it normally from the conversation to start the skill.</p>
     {!!issues.length && <p className="mb-warning">Known ledger conflicts: {issues.join('; ')}</p>}
     {command === 'goal' && <><label>Milestone order<input autoComplete="off" value={order} onChange={e => setOrder(e.target.value)} placeholder="M01 -> M02" /></label><label>Completion conditions<textarea value={completion} onChange={e => setCompletion(e.target.value)} /></label><label>Commit policy<select value={policy} onChange={e => setPolicy(e.target.value as 'task' | 'none')}><option value="task">task — commit each task</option><option value="none">none — no commits</option></select></label><p>EXTERNAL_MUTATIONS: none</p></>}
-    {command === 'propose' && <label>Requested change<textarea required value={requestedChange} onChange={e => setRequestedChange(e.target.value)} /></label>}
+    {command === 'propose' && <><label>Requested change<textarea required value={requestedChange} onChange={e => setRequestedChange(e.target.value)} /></label><label>Stage focus (optional)<input value={stage} onChange={e => setStage(e.target.value)} placeholder="--stages or STG-02" /><small>Use --stages for the overview or a stable stage ID for one stage. Stage planning still needs approval.</small></label></>}
     {command === 'reconcile' && <label>Local review path or URL<input value={review} onChange={e => setReview(e.target.value)} /><small>The preview does not fetch this source. The skill retains its separate remote-fetch confirmation.</small></label>}
     {(command === 'init' || command === 'archive') && <label>Requested scope (optional)<textarea value={scope} onChange={e => setScope(e.target.value)} /></label>}
     {problem ? <p>{problem}</p> : <label>Request preview<textarea aria-label="Request preview" readOnly rows={9} value={text} /></label>}

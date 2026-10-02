@@ -92,6 +92,10 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await panel.getByRole('button', { name: 'product', exact: true }).click();
   await expect(panel.locator('.mb-document pre')).toContainText('<script>');
   expect(await page.evaluate(() => (globalThis as Record<string, unknown>).TABILET_UNSAFE)).toBeUndefined(); expect(remote).toEqual([]);
+  await panel.getByRole('button', { name: 'Stages', exact: true }).click();
+  await expect(panel).toContainText('Current stage: STG-01');
+  await expect(panel).toContainText('STG-02');
+  await expect(panel).toContainText('Preliminary expansion');
   await panel.getByRole('button', { name: 'Compatibility', exact: true }).click();
   await expect(panel.getByText('bundled · tabilet-skills', { exact: true })).toHaveCount(7);
   await expect(panel).not.toContainText('Skill catalog unavailable');
@@ -102,7 +106,7 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await expect(panel).toContainText('stays off unless you set TABILET_AUDIT_DB or pass --audit-db to the runner');
   await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit audit runs --project /absolute/path/to/project' })).toBeVisible();
   await expect(panel.locator('pre').filter({ hasText: 'tabilet-audit explorer /absolute/path/to/project --port 8000' })).toBeVisible();
-  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md');
+  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md');
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original); expect(errors).toEqual([]);
 });
 test('external edits and linked canonical edits become visible within ten seconds', async ({ page }) => {
@@ -165,6 +169,7 @@ test('the user sends a Propose request only after inserting it', async ({ page }
   await panel.getByRole('button', { name: 'Propose', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Requested change').fill('Add offline export\nKeep existing records.');
+  await dialog.getByLabel('Stage focus (optional)').fill('STG-02');
   await dialog.getByRole('button', { name: 'Insert into empty draft' }).click();
   await expect(dialog).toContainText('Inserted into the draft');
   expect((await calls()).length).toBe(count);
@@ -173,6 +178,7 @@ test('the user sends a Propose request only after inserting it', async ({ page }
   await expect.poll(async () => (await calls()).length).toBeGreaterThan(count);
   const received = JSON.stringify((await calls()).slice(count));
   expect(received).toContain('/memory-bank-propose');
+  expect(received).toContain('--stage STG-02');
   expect(received).toContain('Keep existing records.');
   expect(received).toContain('<skill_instructions>');
   expect(await hashTree(projects.active)).toEqual(original);

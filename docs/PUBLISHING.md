@@ -1,5 +1,16 @@
 # Publication status
 
+## v2.3.0 preparation
+
+The companion candidate pins the combined canonical v2.3.0 commit recorded in
+`upstream.lock.json`. The proposed catalog entry names the future
+`tabilet-skills-2.3.0.tgz` GitHub release asset. The canonical commit must first
+be published and tagged as v2.3.0; the companion archive and checksum must then
+be released before the catalog URL can be submitted and verified. A local
+candidate or catalog YAML file does not establish a published release or
+market listing. [Acceptance evidence](ACCEPTANCE.md) records the local checks
+and remaining gates. npm publication remains optional for the archive route.
+
 ## v2.1.0 GitHub release and DSH catalog
 
 The companion pins the canonical
@@ -14,10 +25,13 @@ is public. Its tested archive and release-specific `SHA256SUMS` are publicly
 downloadable; [acceptance evidence](ACCEPTANCE.md) records the hash and hosted
 verification runs.
 
-The DSH catalog update is submitted as
-[PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907).
+The DSH catalog update merged as
+[PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907)
+on 2026-09-25.
 It changes only `data/plugins/tabilet__tabilet-skills.yml` to use the v2.1.0
-archive and the descriptions in [catalog-entry.yml](catalog-entry.yml). The
+archive and the
+[v2.1.0 catalog descriptions](https://github.com/tabilet/tabilet-skills/blob/v2.1.0/docs/catalog-entry.yml).
+The
 official
 [catalog contribution guide](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/contributing.md)
 requires a valid `dsh.bundle`, working code, the `dsh-plugin` repository topic,
@@ -25,11 +39,7 @@ and a repository at least one day old. It says generated catalog READMEs must
 not be edited manually.
 
 The [current catalog entry](https://awesome-dsh-plugin.com/p/tabilet/tabilet-skills/)
-still points to v2.0.0 while PR #5907 awaits maintainer review; its catalog CI
-passed. After it merges, verify the public entry and `plugins.json`, download
-the linked archive, compare its SHA-256 with the release checksum, and install
-it into disposable DSH Web and headless profiles. Record those results in
-[ACCEPTANCE.md](ACCEPTANCE.md). The earlier
+and `plugins.json` point to the v2.1.0 archive. The earlier
 [PR #5411](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5411)
 merged with the v2.0.0 archive URL.
 

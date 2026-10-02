@@ -1,6 +1,28 @@
+# v2.3.0 release candidate
+
+The companion pins canonical `tabilet/skills` commit
+`d4e87a77b4e7bea70802dee5f87ccbcb12aac5ca` and verifies the hash of every
+packaged skill resource. The plugin and package manifests both declare 2.3.0.
+Its sidebar reads optional stage direction without turning it into executable
+work, and Propose previews can target a stage ID or the stages overview.
+Completed legacy retirement envelopes are accepted under the canonical
+conditions; invalid or incomplete records remain visible as errors.
+
+| Gate | Local result |
+|---|---|
+| Canonical source | Combined `api` and `stage` candidate: 38 repository checks, strict MkDocs, 13 DSH compatibility tests, 5 Docker acceptance tests, and 2 browser tests passed. The canonical v2.3.0 tag and remote publication remain pending. |
+| Companion unit and packed loader | `npm run verify` passed TypeScript checking and build plus all 44 unit, parser, reader, request, profile, and packed-loader tests. The packed tests checked the full upstream hash inventory and the actual DSH skill loader. |
+| Native DSH Web and headless | `npm run verify` passed all 11 tests on the locked rc.2 graph and all 11 with the isolated rc.1 launcher and rc.2 components. The stage view, explicit stage-target request, unchanged project files during browsing, and user-controlled submission were exercised in disposable profiles. |
+| Prebuilt archive | `tabilet-skills-2.3.0.tgz`, 208,366 bytes, SHA-256 `78ed92a8659ba6e2d26520494135b75550dd9d7e76b3da2e2a11278fbb00acd0`. The matching line is in `SHA256SUMS`; no install script or DSH runtime is bundled. |
+| Publication and catalog | Companion tag, push, GitHub release assets, public download verification, catalog submission, and market visibility are pending. npm publication is optional. |
+
+No paid model acceptance was run. The dashboard and request preparation never
+authorize a plan or perform a model request; the native suite uses a local
+fixed-response provider only when a test explicitly sends a request.
+
 # v2.1.0 acceptance and publication record
 
-This candidate pins canonical `tabilet/skills` v2.1.0 at
+The published companion pins canonical `tabilet/skills` v2.1.0 at
 `f9820713b6e69928f71ec00dc634100010239e44`. It adds an optional SQLite view
 to the Memory Bank sidebar. The view documents the database path, audit and
 index commands, and canonical guide; it explicitly states that the dashboard
@@ -18,11 +40,10 @@ this limited functionality.
 | Prebuilt archive | `tabilet-skills-2.1.0.tgz`, 202,248 bytes, SHA-256 `9eadcee4ddf89ea4a42f1236025f7a9f1bb6ce35b2f155e4b85802bd63939163`. It contains the prebuilt sidebar and exact pinned canonical skill resources, with no DSH runtime or install scripts. |
 | Companion main and tag | Published at commit `fda7065330b412892e39ce890c7d76ac935141f2`; both hosted verification runs passed: [main](https://github.com/tabilet/tabilet-skills/actions/runs/36157038723) and [v2.1.0 tag](https://github.com/tabilet/tabilet-skills/actions/runs/36157059837). |
 | Public release assets | [v2.1.0 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.1.0) serves the tested 202,248-byte archive and `SHA256SUMS`. The public archive was downloaded and matched byte-for-byte; SHA-256 is `9eadcee4ddf89ea4a42f1236025f7a9f1bb6ce35b2f155e4b85802bd63939163`. |
-| DSH catalog update | [PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907) updates only the plugin's YAML entry to the v2.1.0 archive; its catalog CI passed and it is awaiting maintainer review. The live listing still offers v2.0.0. |
+| DSH catalog update | [PR #5907](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/5907) merged on 2026-09-25. The catalog's source entry and public `plugins.json` now name the v2.1.0 archive. |
 
-Merging the catalog PR and confirming public market visibility are later gates.
-npm publication is optional for the GitHub-archive route. No paid model
-acceptance was run.
+npm publication was optional for the GitHub-archive route and was not needed
+for the catalog listing. No paid model acceptance was run.
 
 # v2.0.0 acceptance and release preparation
 

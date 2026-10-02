@@ -5,8 +5,8 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.1.0** pins the canonical v2.1.0 skills and adds an SQLite audit
-guide view to the read-only sidebar. See
+Version **2.3.0** pins the canonical v2.3.0 skills and adds a read-only Stages
+view and explicit stage targeting to Propose request previews. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
@@ -21,19 +21,19 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.1.0/tabilet-skills-2.1.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.1.0/tabilet-skills-2.1.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.1.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.3.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.1.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/v2.1.0/docs/DSH.md#install-the-seven-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/v2.3.0/docs/DSH.md#install-the-seven-bundles).
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -49,6 +49,9 @@ enumerated by DSH's public registry. Review local overrides before removing them
   review counter when the record supplies one. Unknown and conflicting evidence
   stay visible. Terminal rows do not prove acceptance.
 - **Memory:** product, architecture, stack, and curated lessons.
+- **Stages:** the optional current stage and preliminary later ideas from
+  `tabilet/stages.md`. Without it, the project has one implicit stage. Stage
+  descriptions do not create executable task rows.
 - **History:** retired index, complete preserved records, knowledge history,
   and context archives. Historical bodies load only when opened.
 - **Compatibility:** missing or malformed files, unsupported legacy state,
@@ -58,7 +61,7 @@ enumerated by DSH's public registry. Review local overrides before removing them
   the database. The standalone CLI has a default path; this does not enable
   automatic API-runner auditing, which requires `TABILET_AUDIT_DB` or
   `--audit-db`. Use the separately installed CLI or local explorer. See the
-  [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.1.0/docs/sqlite.md).
+  [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the
@@ -88,7 +91,9 @@ task`, offers `none`, and includes `EXTERNAL_MUTATIONS: none`.
 Propose requires one multiline requested-change field. It prepares a request
 for inspection and one complete planning proposal before any writes, with
 `EXTERNAL_MUTATIONS: none`. The preview preserves line breaks and never sends
-itself.
+itself. Its optional Stage focus accepts `--stages` for the overview or a stable
+ID such as `STG-02` for one stage. A stage-only request does not schedule tasks
+unless the user also asks to plan milestones.
 
 Reconcile accepts a local review path or a user-supplied URL as text. Preparation
 does not fetch it; the skill still requires separate confirmation before any

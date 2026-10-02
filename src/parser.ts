@@ -57,6 +57,36 @@ export function statusMarkerProblems(text: string): string[] {
   }
   return problems;
 }
+export interface StageEntry { id: string; line: number; name?: string; intent?: string }
+export interface StageOverview { current?: string; entries: StageEntry[]; problems: string[] }
+export function stageOverview(text: string): StageOverview {
+  const entries: StageEntry[] = [], problems: string[] = [];
+  let current: string | undefined, entry: StageEntry | undefined;
+  for (const [line, content] of unfencedLines(text)) {
+    const selected = content.match(/^\*\*Current stage\.\*\*\s+(\S+)\s*$/);
+    if (selected) {
+      if (current) problems.push('more than one current stage declaration');
+      current = selected[1];
+    }
+    const heading = content.match(/^## (STG-\d+)(?:\s|$)/);
+    if (heading) {
+      entry = { id: heading[1], line };
+      entries.push(entry);
+    } else if (content.startsWith('## ')) entry = undefined;
+    const field = content.match(/^\*\*(Name|Intent)\.\*\*\s+(.+)$/);
+    if (entry && field) entry[field[1] === 'Name' ? 'name' : 'intent'] = field[2];
+  }
+  const validStageId = /^STG-(?:0[1-9]|[1-9]\d+)$/;
+  if (!current || !validStageId.test(current)) problems.push('current stage ID is missing or invalid');
+  const seen = new Set<string>();
+  for (const stage of entries) {
+    if (!validStageId.test(stage.id)) problems.push(`invalid stage ID: ${stage.id}`);
+    if (seen.has(stage.id)) problems.push(`duplicate stage ID: ${stage.id}`);
+    seen.add(stage.id);
+  }
+  if (current && !seen.has(current)) problems.push(`current stage ${current} has no stage entry`);
+  return { current, entries, problems };
+}
 function requireThat(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
@@ -95,7 +125,10 @@ export function retiredRecord(text: string, name: string): RetiredRecord {
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), 'evidence must be a full commit or unversioned');
   requireThat(['clean', 'includes uncommitted changes', 'unversioned'].includes(metadata.Worktree), 'invalid worktree provenance');
   requireThat((metadata.Evidence === 'unversioned') === (metadata.Worktree === 'unversioned'), 'inconsistent unversioned provenance');
-  requireThat(metadata.Review === 'passed' && /^(?:[1-9]|10)$/.test(metadata['Review iterations']), 'retirement requires a passed review within 10 iterations');
+  if (metadata.Review === 'legacy')
+    requireThat(metadata['Review iterations'] === 'not recorded' && !!metadata['Legacy closure'] && metadata.Outcome === 'completed', 'legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note');
+  else
+    requireThat(metadata.Review === 'passed' && /^(?:[1-9]|10)$/.test(metadata['Review iterations']), 'retirement requires a passed review within 10 iterations');
   requireThat(metadata.Outcome === 'completed' || metadata.Disposition, 'cancellation or supersession needs its authorized disposition');
   requireThat(metadata.Outcome !== 'superseded' || metadata.Successor, 'supersession needs its accepted successor');
   const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(''));

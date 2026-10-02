@@ -1,4 +1,4 @@
-import { localLinks, reviewEvidence, statusMarkerProblems, statusRows, tableRows, unfencedLines, validId, type TaskRow } from './parser.ts';
+import { localLinks, reviewEvidence, stageOverview, statusMarkerProblems, statusRows, tableRows, unfencedLines, validId, type TaskRow } from './parser.ts';
 
 export interface FileInfo { version: string; absolutePath: string; bytes?: number }
 export interface FileText extends FileInfo { text: string }
@@ -77,6 +77,8 @@ export class Reader {
     ]);
     await Promise.all(['product', 'tech-stack', 'lessons'].map(n => attempt(`${bank}/${n}.md`)));
     await attempt('AGENTS.md');
+    const stages = layout === 'legacy' ? undefined : await attempt('tabilet/stages.md', true);
+    if (stages) issues.push(...stageOverview(stages.text).problems.map(problem => `${stages.path}: ${problem}`));
     let goalAvailable = false;
     try { await this.port.stat(`${base}GOAL.md`, signal); goalAvailable = true; } catch { signal.throwIfAborted(); }
     const historyLink = milestone && localLinks(milestone.text, milestone.path).find(l => /(?:^|\/)history\/index\.md$/.test(l.path));

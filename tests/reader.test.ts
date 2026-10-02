@@ -41,6 +41,21 @@ test('an empty project is new and can enter the v2 initialization flow', async (
   assert.equal(snapshot.layout, 'new');
   assert.ok(snapshot.issues.some(issue => issue.includes('tabilet/memory-bank/milestone.md')));
 });
+test('optional stages are read-only context and never create executable rows', async () => {
+  const files = activeFixture(1), f = memoryPort(files), reader = new Reader(f.port);
+  const without = await reader.snapshot(signal());
+  assert.equal(without.complete, true);
+  assert.ok(!without.documents.some(document => document.path === 'tabilet/stages.md'));
+  files.set('tabilet/stages.md', '# Stages\n\n**Current stage.** STG-01\n\n## STG-01\n**Name.** Current\n**Intent.** Deliver the active horizon\n\n## STG-02\n**Name.** Later\n**Intent.** Preliminary idea\n');
+  const withStages = await reader.snapshot(signal());
+  assert.equal(withStages.complete, true);
+  assert.equal(withStages.documents.find(document => document.path === 'tabilet/stages.md')?.text, files.get('tabilet/stages.md'));
+  assert.equal(withStages.tasks.length, without.tasks.length);
+  assert.equal(withStages.milestones.length, without.milestones.length);
+  files.set('tabilet/stages.md', files.get('tabilet/stages.md')!.replace('STG-01', 'STG-03'));
+  const unresolved = await reader.snapshot(signal());
+  assert.ok(unresolved.issues.some(issue => issue.includes('current stage STG-03 has no stage entry')));
+});
 test('history bodies are demand loaded; active/retired duplication and missing relocation are explicit', async () => {
   const files = activeFixture(1); files.set('tabilet/docs/history/index.md', '| ID | Outcome | Retired | Record | Notes |\n| A01 | completed | 2026-09-13 | [Record](status-A01.md) | done |');
   files.set('tabilet/docs/history/status-A01.md', 'malformed record');

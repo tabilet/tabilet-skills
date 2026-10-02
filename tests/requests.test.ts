@@ -16,6 +16,9 @@ test('all seven requests preserve workflow boundaries and explicit goal policies
   assert.ok(prepared.includes(requested));
   assert.match(prepared, /complete planning proposal.*approval before writes/);
   assert.match(prepared, /EXTERNAL_MUTATIONS: none/);
+  assert.match(prepare('propose', { requestedChange: 'Sketch later work', stage: '--stages' }), /^\/memory-bank-propose --stages /);
+  assert.match(prepare('propose', { requestedChange: 'Refine this stage', stage: 'STG-02' }), /^\/memory-bank-propose --stage STG-02 /);
+  for (const stage of ['STG-1', 'M01', '--stage STG-02']) assert.throws(() => prepare('propose', { requestedChange: 'Refine', stage }));
 });
 test('composer guards revision, session, text, phase, attachments, and reference chips synchronously', () => {
   const empty: Draft = { draft: '', draftRev: 2, phase: 'plain', attachmentIds: [], occurrences: [] };

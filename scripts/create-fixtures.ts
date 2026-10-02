@@ -23,6 +23,7 @@ for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['l
   }
   if (name === 'active') files.set('tabilet/memory-bank/milestone.md', files.get('tabilet/memory-bank/milestone.md')! + `\n[Absolute alias](${join(project, 'tabilet/memory-bank/status-A01.md')})\n`);
   if (name === 'active') files.set('tabilet/memory-bank/product.md', '# Product\n<script>globalThis.TABILET_UNSAFE = true</script>\n![Remote image](https://example.invalid/tracker.png)\n');
+  if (name === 'active') files.set('tabilet/stages.md', '# Stages\n\n**Current stage.** STG-01\n\n## STG-01\n**Name.** First delivery\n**Intent.** Complete the current horizon\n\n## STG-02\n**Name.** Later idea\n**Intent.** Preliminary expansion\n');
   for (const [path, text] of files) { await mkdir(dirname(join(project, path)), { recursive: true }); await writeFile(join(project, path), text); }
   if (name === 'linked') await symlink(join(state.root, 'canonical/status-M01.md'), join(project, 'tabilet/memory-bank/status-S01.md'));
 }
