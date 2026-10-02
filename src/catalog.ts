@@ -6,6 +6,7 @@ import type {} from '@deepseek-ai/dsh-agent-presets';
 import type {} from '@deepseek-ai/dsh-typert-registry';
 import type { SessionId } from '@deepseek-ai/dsh-session/types';
 import { remote, type SourceCatalog } from './remote.ts';
+import { readSQLite, type SQLiteQuery, type SQLiteView } from './sqlite.ts';
 
 export class SourceCatalogService extends TypertRemoteService {
   static inject = ['skills', 'sessionQuery', 'agents', 'typert'];
@@ -24,5 +25,14 @@ export class SourceCatalogService extends TypertRemoteService {
     const scope = live ?? await presets?.standingKeyFor(observation.projections.values.agentPreset ?? undefined);
     const result = await registry.snapshot({ cwd, scope, signal });
     return { complete: result.complete, skills: result.skills.filter(s => s.name.startsWith('memory-bank-')).map(s => ({ name: s.name, source: s.source, provider: s.provider, ...(s.resourceBase?.kind === 'directory' ? { location: s.resourceBase.path } : {}) })) };
+  }
+  @Remote
+  async sqlite(sessionId: SessionId, query: SQLiteQuery, signal: AbortSignal): Promise<SQLiteView> {
+    signal.throwIfAborted();
+    using observation = await this.ctx.sessionQuery.observeSession(sessionId);
+    const cwd = observation.header.cwd;
+    if (!cwd) throw new RemoteError('gateway/internal', 'Session project is unavailable', {});
+    signal.throwIfAborted();
+    return readSQLite(cwd, query);
   }
 }

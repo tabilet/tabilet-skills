@@ -1,3 +1,13 @@
+# v2.4.0 candidate
+
+The SQLite sidebar now opens the optional external database read-only for the
+selected session's project. It browses audit runs and their events, indexed
+Markdown documents, and search results. It shows index freshness and
+diagnostics, and links to the separately installed local Explorer and its
+installation guide. The panel never creates or refreshes the database; project
+Markdown remains authoritative. The canonical skill payload stays pinned to
+v2.3.0. Publication and catalog update remain pending.
+
 # v2.3.1
 
 The companion keeps the same canonical v2.3.0 skills and read-only dashboard.

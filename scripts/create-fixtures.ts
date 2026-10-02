@@ -1,6 +1,7 @@
 import { activeFixture } from '../tests/fixtures.ts';
 import { mkdir, readFile, writeFile, symlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { createSQLiteFixture } from '../tests/sqlite-fixture.ts';
 const state = JSON.parse(await readFile('.acceptance/profile.json', 'utf8'));
 const cases = JSON.parse(await readFile('payload/tests/fixtures/parser-conformance.json', 'utf8'));
 const projects: Record<string, string> = {};
@@ -28,3 +29,4 @@ for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['l
   if (name === 'linked') await symlink(join(state.root, 'canonical/status-M01.md'), join(project, 'tabilet/memory-bank/status-S01.md'));
 }
 await writeFile('.acceptance/projects.json', JSON.stringify(projects, null, 2));
+createSQLiteFixture(join(state.root, 'audit.sqlite3'), projects.active, projects.retired);

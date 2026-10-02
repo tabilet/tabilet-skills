@@ -3,15 +3,17 @@ import { Reader, type Document, type FilePort, type Snapshot } from './reader.ts
 import { markers, retiredRecord, reviewEvidence, stageOverview, type State } from './parser.ts';
 import { commands, insertPrepared, prepare, type Command, type Composer } from './requests.ts';
 import type { SkillSource } from './dsh.ts';
+import type { SQLiteQuery, SQLiteView } from './sqlite.ts';
 
 const views = ['Overview', 'Tasks', 'Acceptance', 'Memory', 'Stages', 'History', 'Compatibility', 'SQLite'] as const;
 const labels: Record<State, string> = { pending: 'Pending', completed: 'Completed', in_progress: 'In progress', blocked: 'Blocked', cancelled: 'Cancelled', historical: 'Closed historical' };
 export interface DashboardProps {
   sessionId: string; visible: boolean; port: FilePort; composer?: Composer;
   sources(signal: AbortSignal): Promise<SkillSource[]>;
+  sqlite(query: SQLiteQuery, signal: AbortSignal): Promise<SQLiteView>;
   navigate(path: string, line?: number): void;
 }
-export function Dashboard({ sessionId, visible, port, composer, sources, navigate }: DashboardProps) {
+export function Dashboard({ sessionId, visible, port, composer, sources, sqlite, navigate }: DashboardProps) {
   const reader = useMemo(() => new Reader(port), [port]);
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [loading, setLoading] = useState(true), [error, setError] = useState('');
@@ -86,23 +88,51 @@ export function Dashboard({ sessionId, visible, port, composer, sources, navigat
     {view === 'History' && <div><p>Index metadata is available immediately. Full retired records, knowledge history, and frozen context archives load when opened.</p>{snapshot?.documents.filter(d => /history\/index.md$/.test(d.path)).map(d => <button key={d.path} onClick={() => setOpened(d.path)}>Open history index</button>)}{snapshot?.history.map(h => <div className="mb-record" key={h.path}><button onClick={() => setOpened(h.path)}>{h.label}</button><small>Document verification: {opened === h.path ? 'see opened record' : 'not loaded'}</small></div>)}{opened && <OpenDocument key={opened} reader={reader} path={opened} snapshot={snapshot} navigate={navigate} visible={visible} />}</div>}
     {view === 'Compatibility' && <div><h3>Project records</h3>{snapshot?.issues.length ? <ul>{snapshot.issues.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p>No active-ledger conflicts detected. Historical bodies are verified only when opened.</p>}
       <h3>Winning skill sources</h3>{catalogError && <p role="alert">Skill catalog unavailable: {catalogError}</p>}{commands.map(c => { const skill = catalog.find(s => s.name === `memory-bank-${c}`); return <div className="mb-record" key={c}><strong>memory-bank-{c}</strong>{skill ? <><p>{skill.source}{skill.provider ? ` · ${skill.provider}` : ''}</p>{skill.location && <pre>{skill.location}</pre>}{skill.provider !== 'tabilet-skills' && <p>Duplicate: the bundled copy is shadowed by this winning override.</p>}</> : <p>Not reported by the current session catalog.</p>}</div>; })}<p>DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow.</p>{!composer && <p>Composer capability unavailable; requests can be copied.</p>}</div>}
-    {view === 'SQLite' && <div>
-      <h3>Optional SQLite audit and lookup</h3>
-      <p>SQLite is an optional external audit database and rebuildable index of project Markdown. Markdown remains authoritative. This sidebar reads project files; it does not open or modify the database.</p>
-      <h3>Database location</h3>
-      <p>The default is <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3'}</code>. Set <code>TABILET_AUDIT_DB</code> to use another external path. Keep the database outside the project.</p>
-      <p>This is the default path for standalone <code>tabilet-audit</code> commands. It does not enable automatic API-runner auditing; that stays off unless you set <code>TABILET_AUDIT_DB</code> or pass <code>--audit-db</code> to the runner.</p>
-      <h3>Inspect audit records</h3>
-      <pre><code>tabilet-audit audit runs --project /absolute/path/to/project</code></pre>
-      <pre><code>tabilet-audit audit events --run-id RUN_ID</code></pre>
-      <h3>Search or browse the Markdown index</h3>
-      <pre><code>tabilet-audit index search /absolute/path/to/project 'authentication'</code></pre>
-      <pre><code>tabilet-audit explorer /absolute/path/to/project --port 8000</code></pre>
-      <p>After starting the local explorer, open <code>http://localhost:8000/</code>. Install the optional toolkit separately; these commands are examples only and are not run by the sidebar.</p>
-      <p><a href="https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
-    </div>}
+    <SQLitePanel active={visible && view === 'SQLite'} read={sqlite} navigate={navigate} />
     {command && (snapshot?.layout === 'v2' || snapshot?.layout === 'new') && <RequestPreview key={`${sessionId}:${command}`} command={command} composer={composer} resume={progress.length === 1} issues={[...(snapshot?.issues || []), ...(command === 'goal' && !snapshot?.goalAvailable ? ['Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing.'] : [])]} close={closePreview} />}
   </section>;
+}
+function SQLitePanel({ active, read, navigate }: { active: boolean; read: DashboardProps['sqlite']; navigate: DashboardProps['navigate'] }) {
+  const [section, setSection] = useState<SQLiteQuery['section']>('overview'), [offset, setOffset] = useState(0);
+  const [runId, setRunId] = useState(''), [draftSearch, setDraftSearch] = useState(''), [search, setSearch] = useState('');
+  const [refresh, setRefresh] = useState(0), [data, setData] = useState<SQLiteView>(), [loading, setLoading] = useState(false), [error, setError] = useState('');
+  useEffect(() => {
+    if (!active) return;
+    const controller = new AbortController();
+    setLoading(true); setError('');
+    void read({ section, offset, ...(section === 'events' ? { runId } : {}), ...(section === 'index' && search ? { search } : {}) }, controller.signal)
+      .then(result => { if (!controller.signal.aborted) setData(result); }, cause => { if (!controller.signal.aborted) setError(String(cause)); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [active, read, section, offset, runId, search, refresh]);
+  if (!active) return null;
+  const switchTo = (next: SQLiteQuery['section']) => { setSection(next); setOffset(0); };
+  const source = (path: string, line?: number) => !path.startsWith('/') && !path.split('/').includes('..') && !path.includes('\\') && path.length < 500 ? <button className="mb-source" onClick={() => navigate(path, line)}>Open {path}{line ? `:${line}` : ''} ↗</button> : null;
+  const quotedProject = data?.projectRoot ? `'${data.projectRoot.replaceAll("'", "'\\''")}'` : '/absolute/path/to/project';
+  return <div>
+    <h3>Optional SQLite audit and lookup</h3>
+    <p>Audit records and the Markdown index for this session’s project. The sidebar opens the external database read-only; project Markdown remains authoritative. It never creates or refreshes the index.</p>
+    <div className="mb-actions"><button onClick={() => setRefresh(n => n + 1)}>Refresh SQLite</button>{(['overview', 'runs', 'index'] as const).map(item => <button key={item} aria-pressed={section === item || (item === 'runs' && section === 'events')} onClick={() => switchTo(item)}>{item === 'index' ? 'Markdown index' : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
+    {loading && <p role="status">Reading SQLite…</p>}{error && <p role="alert">{error}</p>}
+    {data && <><p role={data.state === 'ready' ? 'status' : 'alert'}>{data.message}</p><p>Project: <code>{data.projectRoot}</code><br />Database: <code>{data.databasePath || 'Unavailable'}</code></p>
+      {data.state === 'ready' && <>
+        <div className="mb-counts"><div><b>{data.counts.runs}</b><span>Audit runs</span></div><div><b>{data.counts.events}</b><span>Events</span></div><div><b>{data.counts.documents}</b><span>Indexed documents</span></div></div>
+        <p>Index: {data.index?.refreshedAt ? `refreshed ${data.index.refreshedAt}` : 'not refreshed'} · {data.index?.complete === true ? 'complete' : data.index?.complete === false ? 'incomplete' : 'unknown'}. Indexed content is a snapshot and may be stale.</p>
+        {!!data.index?.diagnostics.length && <details><summary>{data.index.diagnostics.length} index diagnostic{data.index.diagnostics.length === 1 ? '' : 's'}</summary><ul>{data.index.diagnostics.map((item, i) => <li key={i}>{item}</li>)}</ul></details>}
+        {section === 'events' && <button onClick={() => switchTo('runs')}>← Back to runs</button>}
+        {section === 'events' && <h3>Events in {runId}</h3>}
+        {section === 'index' && <form onSubmit={event => { event.preventDefault(); setSearch(draftSearch.trim()); setOffset(0); }}><label>Search indexed Markdown<input value={draftSearch} maxLength={200} onChange={event => setDraftSearch(event.target.value)} /></label><button type="submit">Search</button>{search && <button type="button" onClick={() => { setSearch(''); setDraftSearch(''); setOffset(0); }}>Clear search</button>}</form>}
+        {section !== 'overview' && <>{data.entries.length ? data.entries.map(entry => <article className="mb-record" key={entry.id}><strong>{entry.title}</strong><small>{entry.meta}</small>{entry.detail && <pre>{entry.detail}</pre>}{section === 'runs' && <button onClick={() => { setRunId(entry.id); switchTo('events'); }}>View events</button>}{entry.path && source(entry.path, entry.line)}</article>) : <p>No {section === 'events' ? 'events' : section === 'runs' ? 'runs' : 'indexed records'} found.</p>}
+          <div className="mb-actions"><button disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - 20))}>Previous</button><span>Page {Math.floor(offset / 20) + 1}</span><button disabled={!data.more || offset >= 10000} onClick={() => setOffset(offset + 20)}>Next</button></div></>}
+      </>}
+    </>}
+    <h3>Open the full local Explorer</h3><p>The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:</p>
+    <pre><code>tabilet-audit explorer {quotedProject} --port 8000</code></pre>
+    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
+    <p>The default database is <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3'}</code>. Set <code>TABILET_AUDIT_DB</code> to choose another external path before starting DSH. To rebuild the index, run <code>tabilet-audit index sync {quotedProject}</code> in a terminal.</p>
+    <p>This default path applies to standalone <code>tabilet-audit</code> commands. Automatic API-runner auditing stays off unless you set <code>TABILET_AUDIT_DB</code> or pass <code>--audit-db</code> to the runner.</p>
+    <p><a href="https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+  </div>;
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: Reader; path: string; snapshot?: Snapshot; navigate: DashboardProps['navigate']; visible: boolean }) {
   const [doc, setDoc] = useState<Document>(), [error, setError] = useState(''), [loading, setLoading] = useState(true);

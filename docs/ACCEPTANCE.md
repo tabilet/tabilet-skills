@@ -1,3 +1,21 @@
+# v2.4.0 SQLite browser candidate
+
+The optional SQLite tab now reads the selected project's external database
+through the DSH host, using Node 24's read-only SQLite connection. It pages
+audit runs, run events, indexed Markdown documents, and search hits. The
+session's project root is resolved by the host, not accepted from the browser.
+It labels the index snapshot's freshness and diagnostics, and links to the
+separately installed local Explorer. The canonical seven-skill payload remains
+pinned to v2.3.0.
+
+| Gate | Result |
+|---|---|
+| Local typecheck, build, unit, and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 46 unit and packed-loader tests, 11 native Web tests, and 11 isolated mixed rc.1 launcher/rc.2 component Web tests. Both Web runs installed the packed archive into disposable profiles and exercised the SQLite browser without model calls or project writes. |
+| External database isolation | Disposable two-project fixture covers run, event, document, and search scoping; source database bytes and modification time remain unchanged. |
+| Existing database compatibility | Read-only host calls against the existing apitools v4 database returned project-scoped overview, runs, and indexed documents. No database refresh or personal DSH installation was performed. |
+| Candidate archive | `tabilet-skills-2.4.0.tgz`, 212,564 bytes, SHA-256 `5e5a29c0a445e35d51f402aa58e75dab26e0e820deb75484bf4ad4ca91941b35`; the packed-loader and Web checks used this candidate. |
+| Publication | No v2.4.0 tag, GitHub release, catalog PR update, or personal DSH installation yet. |
+
 # v2.3.1 peer compatibility correction
 
 The v2.1.0 and v2.3.0 companions declared `zod: ^4.6.4`, while the supported

@@ -500,7 +500,7 @@ function insertPrepared(composer, text, revision) {
 var import_jsx_runtime = require("react/jsx-runtime");
 var views = ["Overview", "Tasks", "Acceptance", "Memory", "Stages", "History", "Compatibility", "SQLite"];
 var labels = { pending: "Pending", completed: "Completed", in_progress: "In progress", blocked: "Blocked", cancelled: "Cancelled", historical: "Closed historical" };
-function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
+function Dashboard({ sessionId, visible, port, composer, sources, sqlite, navigate }) {
   const reader = (0, import_react.useMemo)(() => new Reader(port), [port]);
   const [snapshot, setSnapshot] = (0, import_react.useState)();
   const [loading, setLoading] = (0, import_react.useState)(true), [error62, setError] = (0, import_react.useState)("");
@@ -774,40 +774,169 @@ function Dashboard({ sessionId, visible, port, composer, sources, navigate }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow." }),
       !composer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Composer capability unavailable; requests can be copied." })
     ] }),
-    view === "SQLite" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Optional SQLite audit and lookup" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "SQLite is an optional external audit database and rebuildable index of project Markdown. Markdown remains authoritative. This sidebar reads project files; it does not open or modify the database." }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Database location" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-        "The default is ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3" }),
-        ". Set ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
-        " to use another external path. Keep the database outside the project."
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-        "This is the default path for standalone ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit" }),
-        " commands. It does not enable automatic API-runner auditing; that stays off unless you set ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
-        " or pass ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "--audit-db" }),
-        " to the runner."
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Inspect audit records" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit runs --project /absolute/path/to/project" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit audit events --run-id RUN_ID" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Search or browse the Markdown index" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit index search /absolute/path/to/project 'authentication'" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit explorer /absolute/path/to/project --port 8000" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-        "After starting the local explorer, open ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "http://localhost:8000/" }),
-        ". Install the optional toolkit separately; these commands are examples only and are not run by the sidebar."
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
-    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SQLitePanel, { active: visible && view === "SQLite", read: sqlite, navigate }),
     command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
+  ] });
+}
+function SQLitePanel({ active, read, navigate }) {
+  const [section, setSection] = (0, import_react.useState)("overview"), [offset, setOffset] = (0, import_react.useState)(0);
+  const [runId, setRunId] = (0, import_react.useState)(""), [draftSearch, setDraftSearch] = (0, import_react.useState)(""), [search, setSearch] = (0, import_react.useState)("");
+  const [refresh, setRefresh] = (0, import_react.useState)(0), [data, setData] = (0, import_react.useState)(), [loading, setLoading] = (0, import_react.useState)(false), [error62, setError] = (0, import_react.useState)("");
+  (0, import_react.useEffect)(() => {
+    if (!active) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+    void read({ section, offset, ...section === "events" ? { runId } : {}, ...section === "index" && search ? { search } : {} }, controller.signal).then((result) => {
+      if (!controller.signal.aborted) setData(result);
+    }, (cause) => {
+      if (!controller.signal.aborted) setError(String(cause));
+    }).finally(() => {
+      if (!controller.signal.aborted) setLoading(false);
+    });
+    return () => controller.abort();
+  }, [active, read, section, offset, runId, search, refresh]);
+  if (!active) return null;
+  const switchTo = (next) => {
+    setSection(next);
+    setOffset(0);
+  };
+  const source = (path, line) => !path.startsWith("/") && !path.split("/").includes("..") && !path.includes("\\") && path.length < 500 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", { className: "mb-source", onClick: () => navigate(path, line), children: [
+    "Open ",
+    path,
+    line ? `:${line}` : "",
+    " \u2197"
+  ] }) : null;
+  const quotedProject = data?.projectRoot ? `'${data.projectRoot.replaceAll("'", "'\\''")}'` : "/absolute/path/to/project";
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Optional SQLite audit and lookup" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Audit records and the Markdown index for this session\u2019s project. The sidebar opens the external database read-only; project Markdown remains authoritative. It never creates or refreshes the index." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-actions", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setRefresh((n) => n + 1), children: "Refresh SQLite" }),
+      ["overview", "runs", "index"].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { "aria-pressed": section === item || item === "runs" && section === "events", onClick: () => switchTo(item), children: item === "index" ? "Markdown index" : item[0].toUpperCase() + item.slice(1) }, item))
+    ] }),
+    loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "status", children: "Reading SQLite\u2026" }),
+    error62 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: "alert", children: error62 }),
+    data && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { role: data.state === "ready" ? "status" : "alert", children: data.message }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+        "Project: ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: data.projectRoot }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+        "Database: ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: data.databasePath || "Unavailable" })
+      ] }),
+      data.state === "ready" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-counts", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.counts.runs }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Audit runs" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.counts.events }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Events" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.counts.documents }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Indexed documents" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+          "Index: ",
+          data.index?.refreshedAt ? `refreshed ${data.index.refreshedAt}` : "not refreshed",
+          " \xB7 ",
+          data.index?.complete === true ? "complete" : data.index?.complete === false ? "incomplete" : "unknown",
+          ". Indexed content is a snapshot and may be stale."
+        ] }),
+        !!data.index?.diagnostics.length && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("summary", { children: [
+            data.index.diagnostics.length,
+            " index diagnostic",
+            data.index.diagnostics.length === 1 ? "" : "s"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: data.index.diagnostics.map((item, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: item }, i)) })
+        ] }),
+        section === "events" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => switchTo("runs"), children: "\u2190 Back to runs" }),
+        section === "events" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", { children: [
+          "Events in ",
+          runId
+        ] }),
+        section === "index" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", { onSubmit: (event) => {
+          event.preventDefault();
+          setSearch(draftSearch.trim());
+          setOffset(0);
+        }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { children: [
+            "Search indexed Markdown",
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { value: draftSearch, maxLength: 200, onChange: (event) => setDraftSearch(event.target.value) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "submit", children: "Search" }),
+          search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { type: "button", onClick: () => {
+            setSearch("");
+            setDraftSearch("");
+            setOffset(0);
+          }, children: "Clear search" })
+        ] }),
+        section !== "overview" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+          data.entries.length ? data.entries.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "mb-record", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: entry.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("small", { children: entry.meta }),
+            entry.detail && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: entry.detail }),
+            section === "runs" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => {
+              setRunId(entry.id);
+              switchTo("events");
+            }, children: "View events" }),
+            entry.path && source(entry.path, entry.line)
+          ] }, entry.id)) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+            "No ",
+            section === "events" ? "events" : section === "runs" ? "runs" : "indexed records",
+            " found."
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-actions", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { disabled: offset === 0, onClick: () => setOffset(Math.max(0, offset - 20)), children: "Previous" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+              "Page ",
+              Math.floor(offset / 20) + 1
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { disabled: !data.more || offset >= 1e4, onClick: () => setOffset(offset + 20), children: "Next" })
+          ] })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Open the full local Explorer" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", { children: [
+      "tabilet-audit explorer ",
+      quotedProject,
+      " --port 8000"
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "http://127.0.0.1:8000/", target: "_blank", rel: "noreferrer", children: "Open local SQLite Explorer \u2197" }),
+      " \xB7 ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+      "The default database is ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3" }),
+      ". Set ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
+      " to choose another external path before starting DSH. To rebuild the index, run ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", { children: [
+        "tabilet-audit index sync ",
+        quotedProject
+      ] }),
+      " in a terminal."
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+      "This default path applies to standalone ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit" }),
+      " commands. Automatic API-runner auditing stays off unless you set ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
+      " or pass ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "--audit-db" }),
+      " to the runner."
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {
@@ -1013,6 +1142,9 @@ async function skillSources(ctx, sessionId, signal) {
   const result = unwrap(await ctx.remote.tabiletMemory.sources(sessionId, signal));
   if (!result.complete) throw new Error("Skill discovery is incomplete; refresh before relying on sources");
   return result.skills;
+}
+async function sqliteView(ctx, sessionId, query, signal) {
+  return unwrap(await ctx.remote.tabiletMemory.sqlite(sessionId, query, signal));
 }
 
 // node_modules/zod/v4/classic/external.js
@@ -20686,6 +20818,17 @@ function date4(params) {
 // src/remote.ts
 var sourceSchema = external_exports.object({ name: external_exports.string(), source: external_exports.string(), provider: external_exports.string(), location: external_exports.string().optional() });
 var catalogSchema = external_exports.object({ complete: external_exports.boolean(), skills: external_exports.array(sourceSchema) });
+var sqliteQuerySchema = external_exports.object({ section: external_exports.enum(["overview", "runs", "events", "index"]), offset: external_exports.number().int().min(0).max(1e4), runId: external_exports.string().max(128).optional(), search: external_exports.string().max(200).optional() });
+var sqliteViewSchema = external_exports.object({
+  state: external_exports.enum(["ready", "missing", "unregistered", "unsupported", "error"]),
+  message: external_exports.string(),
+  projectRoot: external_exports.string(),
+  databasePath: external_exports.string(),
+  counts: external_exports.object({ runs: external_exports.number(), events: external_exports.number(), documents: external_exports.number() }),
+  index: external_exports.object({ refreshedAt: external_exports.string().nullable(), complete: external_exports.boolean().nullable(), diagnostics: external_exports.array(external_exports.string()) }).nullable(),
+  entries: external_exports.array(external_exports.object({ id: external_exports.string(), title: external_exports.string(), meta: external_exports.string(), detail: external_exports.string().optional(), path: external_exports.string().optional(), line: external_exports.number().optional() })),
+  more: external_exports.boolean()
+});
 var remote = {
   package: "tabilet-skills",
   descriptors: [{
@@ -20697,6 +20840,18 @@ var remote = {
     parameters: [{ name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: external_exports.string().min(1) } }],
     cancellation: { parameter: "signal" },
     result: { mode: "strict", typeSymbol: "tabilet-skills#SourceCatalog", schema: catalogSchema }
+  }, {
+    id: "tabilet-skills#tabiletMemory/sqlite",
+    service: "tabiletMemory",
+    namespace: "tabiletMemory",
+    method: "sqlite",
+    invocation: { kind: "direct" },
+    parameters: [
+      { name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: external_exports.string().min(1) } },
+      { name: "query", wire: "query", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteQuery", schema: sqliteQuerySchema } }
+    ],
+    cancellation: { parameter: "signal" },
+    result: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteView", schema: sqliteViewSchema }
   }]
 };
 
@@ -20716,7 +20871,8 @@ function registerPanel(ctx) {
     const port = (0, import_react2.useMemo)(() => filePort(ctx, sessionId), [sessionId]);
     const composer = (0, import_react2.useMemo)(() => composerPort(ctx, sessionId), [sessionId]);
     const sources = (0, import_react2.useMemo)(() => (signal) => skillSources(ctx, sessionId, signal), [sessionId]);
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Dashboard, { sessionId, visible: info.tab.visible, port, composer, sources, navigate: (path, line) => info.tab.actions.openResource(fileAddressFor(sessionId, void 0, path), line ? { params: { line } } : void 0) }, sessionId);
+    const sqlite = (0, import_react2.useMemo)(() => (query, signal) => sqliteView(ctx, sessionId, query, signal), [sessionId]);
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Dashboard, { sessionId, visible: info.tab.visible, port, composer, sources, sqlite, navigate: (path, line) => info.tab.actions.openResource(fileAddressFor(sessionId, void 0, path), line ? { params: { line } } : void 0) }, sessionId);
   }
   ctx.effect(() => ctx.slots.inject("sidebar.right.pane.tab", () => ctx.slots.register({ name: "sidebar.right.pane.tab", key: "tabilet-skills" }, Body)));
 }

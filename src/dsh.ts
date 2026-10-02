@@ -7,6 +7,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types';
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol';
 import type { FilePort, FileInfo } from './reader.ts';
 import type { Composer } from './requests.ts';
+import type { SQLiteQuery, SQLiteView } from './sqlite.ts';
 
 export function unwrap<T>(r: RemoteResult<T>): T {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`);
@@ -66,4 +67,7 @@ export async function skillSources(ctx: Context, sessionId: SessionId, signal: A
   const result = unwrap(await ctx.remote.tabiletMemory.sources(sessionId, signal));
   if (!result.complete) throw new Error('Skill discovery is incomplete; refresh before relying on sources');
   return result.skills;
+}
+export async function sqliteView(ctx: Context, sessionId: SessionId, query: SQLiteQuery, signal: AbortSignal): Promise<SQLiteView> {
+  return unwrap(await ctx.remote.tabiletMemory.sqlite(sessionId, query, signal));
 }

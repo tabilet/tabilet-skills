@@ -57,12 +57,15 @@ enumerated by DSH's public registry. Review local overrides before removing them
   and context archives. Historical bodies load only when opened.
 - **Compatibility:** missing or malformed files, unsupported legacy state,
   duplicate identities, multiple in-progress rows, and skill sources.
-- **SQLite:** the optional external audit database, its location, and commands
-  to inspect audit runs or browse the Markdown index. The sidebar does not open
-  the database. The standalone CLI has a default path; this does not enable
-  automatic API-runner auditing, which requires `TABILET_AUDIT_DB` or
-  `--audit-db`. Use the separately installed CLI or local explorer. See the
-  [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md).
+- **SQLite:** read-only browsing of the selected project's audit runs, events,
+  indexed Markdown documents, and search results. The tab shows index freshness
+  and diagnostics, and links to the full local Explorer. It uses the external
+  `TABILET_AUDIT_DB` path or the standalone toolkit's default
+  `${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3`. It never creates or
+  refreshes the database. The default path does not enable automatic API-runner
+  auditing; that requires `TABILET_AUDIT_DB` or `--audit-db` on the runner.
+  Install the optional toolkit to create or refresh the index and run the
+  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the

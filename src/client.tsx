@@ -7,7 +7,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client';
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-documentpreview/client';
 import { fileAddressFor } from '@deepseek-ai/dsh-util-workspace-path';
 import { Dashboard } from './Dashboard.tsx';
-import { composerPort, filePort, skillSources } from './dsh.ts';
+import { composerPort, filePort, skillSources, sqliteView } from './dsh.ts';
 import { remote } from './remote.ts';
 
 export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.workspaceFiles', 'remote.skills', 'sessions'];
@@ -24,7 +24,8 @@ function registerPanel(ctx: Context): void {
     const port = useMemo(() => filePort(ctx, sessionId), [sessionId]);
     const composer = useMemo(() => composerPort(ctx, sessionId), [sessionId]);
     const sources = useMemo(() => (signal: AbortSignal) => skillSources(ctx, sessionId, signal), [sessionId]);
-    return <Dashboard key={sessionId} sessionId={sessionId} visible={info.tab.visible} port={port} composer={composer} sources={sources} navigate={(path, line) => info.tab.actions.openResource(fileAddressFor(sessionId, undefined, path), line ? { params: { line } } : undefined)} />;
+    const sqlite = useMemo(() => (query: Parameters<typeof sqliteView>[2], signal: AbortSignal) => sqliteView(ctx, sessionId, query, signal), [sessionId]);
+    return <Dashboard key={sessionId} sessionId={sessionId} visible={info.tab.visible} port={port} composer={composer} sources={sources} sqlite={sqlite} navigate={(path, line) => info.tab.actions.openResource(fileAddressFor(sessionId, undefined, path), line ? { params: { line } } : undefined)} />;
   }
   ctx.effect(() => ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({ name: 'sidebar.right.pane.tab', key: 'tabilet-skills' }, Body)));
 }
