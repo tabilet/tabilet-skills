@@ -1,4 +1,4 @@
-# v2.3.0 release candidate
+# v2.3.0 acceptance and publication record
 
 The companion pins canonical `tabilet/skills` commit
 `80114ea2829263516b25056dd8b4570959206f24` and verifies the hash of every
@@ -8,13 +8,15 @@ work, and Propose previews can target a stage ID or the stages overview.
 Completed legacy retirement envelopes are accepted under the canonical
 conditions; invalid or incomplete records remain visible as errors.
 
-| Gate | Local result |
+| Gate | Result |
 |---|---|
 | Canonical source | Combined `api` and `stage` release at [v2.3.0](https://github.com/tabilet/skills/releases/tag/v2.3.0), commit `80114ea2829263516b25056dd8b4570959206f24`: 38 repository checks and strict MkDocs passed locally. Earlier candidate acceptance also passed 13 DSH compatibility tests, 5 Docker acceptance tests, and 2 browser tests. The hosted [DSH compatibility](https://github.com/tabilet/skills/actions/runs/37025816182) and [Docker acceptance](https://github.com/tabilet/skills/actions/runs/37025816095) checks passed on the tag. |
 | Companion unit and packed loader | `npm run verify` passed TypeScript checking and build plus all 44 unit, parser, reader, request, profile, and packed-loader tests. The packed tests checked the full upstream hash inventory and the actual DSH skill loader. |
 | Native DSH Web and headless | `npm run verify` passed all 11 tests on the locked rc.2 graph and all 11 with the isolated rc.1 launcher and rc.2 components. The stage view, explicit stage-target request, unchanged project files during browsing, and user-controlled submission were exercised in disposable profiles. |
 | Prebuilt archive | `tabilet-skills-2.3.0.tgz`, 208,371 bytes, SHA-256 `8be8149bbd4962a1489ce15dd407f3b3f780584bd6998070c95a0a6a29714085`. The matching line is in `SHA256SUMS`; no install script or DSH runtime is bundled. |
-| Publication and catalog | Companion tag, push, GitHub release assets, public download verification, catalog submission, and market visibility are pending. npm publication is optional. |
+| Companion tag and release | [v2.3.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.0) points to `8366be96905191eff2832fe9f71d241f78b7a210`. Both hosted packed-verification runs passed: [tag](https://github.com/tabilet/tabilet-skills/actions/runs/37026816323) and [main](https://github.com/tabilet/tabilet-skills/actions/runs/37026816166). |
+| Public archive | The 208,371-byte [archive](https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz) and release-specific [SHA256SUMS](https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/SHA256SUMS) downloaded without credentials. The public archive matched the locally tested archive byte-for-byte, SHA-256 `8be8149bbd4962a1489ce15dd407f3b3f780584bd6998070c95a0a6a29714085`. |
+| DSH catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) updates only the source plugin YAML to v2.3.0. Its check and maintainer merge are pending; the live market listing still offers v2.1.0. npm publication is optional. |
 
 No paid model acceptance was run. The dashboard and request preparation never
 authorize a plan or perform a model request; the native suite uses a local

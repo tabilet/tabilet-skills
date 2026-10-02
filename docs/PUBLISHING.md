@@ -1,15 +1,16 @@
 # Publication status
 
-## v2.3.0 preparation
+## v2.3.0 GitHub release and catalog submission
 
-The companion candidate pins the published canonical
+The companion pins the published canonical
 [v2.3.0 release](https://github.com/tabilet/skills/releases/tag/v2.3.0) recorded in
-`upstream.lock.json`. The proposed catalog entry names the future
-`tabilet-skills-2.3.0.tgz` GitHub release asset. The companion archive and
-checksum must be released before the catalog URL can be submitted and verified. A local
-candidate or catalog YAML file does not establish a published release or
-market listing. [Acceptance evidence](ACCEPTANCE.md) records the local checks
-and remaining gates. npm publication remains optional for the archive route.
+`upstream.lock.json`. Its [v2.3.0 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.0)
+serves the tested archive and checksum. Both assets were downloaded without
+credentials and the public archive matched the local tested artifact.
+[Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+submits the updated source YAML; market listing awaits its check and maintainer
+merge. [Acceptance evidence](ACCEPTANCE.md) records the verified gates and
+remaining catalog state. npm publication remains optional for the archive route.
 
 ## v2.1.0 GitHub release and DSH catalog
 
