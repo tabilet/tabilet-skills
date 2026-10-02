@@ -9,9 +9,9 @@ parsed valid and invalid samples against Zod 4.6.2 from the locked DSH graph.
 
 | Gate | Result |
 |---|---|
-| Candidate archive | `tabilet-skills-2.3.1.tgz`, 208,422 bytes, SHA-256 `bc73a853b4bcc96238f83cfcf1ea9d261e4d39df435530ef266086fe10f026c6`. The matching line is in `SHA256SUMS`. |
-| Verification | `npm ci` and `npm run verify` passed: TypeScript, build, all 44 unit and packed-loader tests, 11 native Web/headless tests on rc.2, and 11 isolated mixed rc.1/rc.2 tests. Both browser runs installed the packed archive into disposable profiles. |
-| Publication | The tag, public archive, and amendment to catalog PR #6423 are pending. The live listing remains v2.1.0. No personal DSH profile was changed. |
+| Published archive | [v2.3.1](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.1) tags commit `139e1ef3f51d76770d41f28d70b904cb004b27e6`. Its public `tabilet-skills-2.3.1.tgz` is 208,422 bytes, SHA-256 `bc73a853b4bcc96238f83cfcf1ea9d261e4d39df435530ef266086fe10f026c6`; the release-specific public `SHA256SUMS`, local archive, and hosted CI artifact agree. Both public assets downloaded without credentials. |
+| Verification | `npm ci` and `npm run verify` passed: TypeScript, build, all 44 unit and packed-loader tests, 11 native Web/headless tests on rc.2, and 11 isolated mixed rc.1/rc.2 tests. Both browser runs installed the packed archive into disposable profiles. The [main hosted run](https://github.com/tabilet/tabilet-skills/actions/runs/37047784939) and [v2.3.1 tag run](https://github.com/tabilet/tabilet-skills/actions/runs/37048200383) passed. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) now points to the v2.3.1 public archive and changes only Tabilet's source YAML. Its [catalog check](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37048272325) passed; maintainer merge is pending, so the live listing remains v2.1.0. No personal DSH profile was changed. |
 
 # v2.3.0 acceptance and publication record
 
