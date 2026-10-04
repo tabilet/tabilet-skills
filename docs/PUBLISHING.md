@@ -2,9 +2,15 @@
 
 ## v2.4.0 SQLite browser
 
-The SQLite browser is implemented and packed verification passed. This release
-pins the canonical v2.4.0 commit and its file hashes. [Acceptance evidence](ACCEPTANCE.md)
-records the tested archive and publication gates.
+The SQLite browser is implemented and packed verification passed. The companion
+pins the [canonical v2.4.0 release](https://github.com/tabilet/skills/releases/tag/v2.4.0)
+by commit and file hashes. Its [v2.4.0 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.4.0)
+serves the tested archive and checksum; both assets downloaded publicly and the
+archive matched the tested local and hosted files. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+now points to that archive. Its catalog check, submission gate, and the
+companion's hosted main and tag verification passed; the live market listing
+awaits maintainer merge. The [acceptance evidence](ACCEPTANCE.md) records the
+gate results. npm publication is optional for this GitHub archive route.
 
 ## v2.3.1 peer compatibility patch
 
@@ -12,11 +18,10 @@ The patch release keeps the canonical v2.3.0 skill pin and lowers the companion
 Zod peer minimum to 4.6.2, matching the supported DSH rc.2 dependency graph.
 The [v2.3.1 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.1)
 serves the verified archive and checksum. The public archive matches the local
-and hosted CI artifacts. Open
+and hosted CI artifacts. At this release,
 [catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
-now points to that archive; its catalog check passed and maintainer merge is
-pending. The live listing remains v2.1.0 until merge. The existing v2.1.0 and
-v2.3.0 archives remain immutable.
+pointed to that archive and its catalog check passed. The PR was later updated
+to v2.4.0. The existing v2.1.0 and v2.3.0 archives remain immutable.
 
 ## v2.3.0 GitHub release and catalog submission
 
@@ -26,10 +31,10 @@ The companion pins the published canonical
 serves the tested archive and checksum. Both assets were downloaded without
 credentials and the public archive matched the local tested artifact.
 [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
-submits the updated source YAML. Its check and submission gate passed; market
-listing awaits a maintainer merge. [Acceptance evidence](ACCEPTANCE.md)
-records the verified gates and remaining catalog state. npm publication
-remains optional for the archive route.
+initially submitted the updated source YAML. Its check and submission gate
+passed; later revisions superseded the proposed archive. [Acceptance
+evidence](ACCEPTANCE.md) records the verified gates. npm publication remains
+optional for the archive route.
 
 ## v2.1.0 GitHub release and DSH catalog
 

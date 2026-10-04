@@ -1,4 +1,4 @@
-# v2.4.0 SQLite browser candidate
+# v2.4.0 SQLite browser acceptance and publication
 
 The optional SQLite tab now reads the selected project's external database
 through the DSH host, using Node 24's read-only SQLite connection. It pages
@@ -14,8 +14,9 @@ with 38 verified file hashes in `upstream.lock.json`.
 | Local typecheck, build, unit, and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 46 unit and packed-loader tests, 11 native Web tests, and 11 isolated mixed rc.1 launcher/rc.2 component Web tests. Both Web runs installed the packed archive into disposable profiles and exercised the SQLite browser without model calls or project writes. |
 | External database isolation | Disposable two-project fixture covers run, event, document, and search scoping; source database bytes and modification time remain unchanged. |
 | Existing database compatibility | Read-only host calls against the existing apitools v4 database returned project-scoped overview, runs, and indexed documents. No database refresh or personal DSH installation was performed. |
-| Candidate archive | `tabilet-skills-2.4.0.tgz`, 212,581 bytes, SHA-256 `3773a3b7407b2a0dcc353e139b3d19b21ce6f181fd49a39f8a62674a8658d931`; the packed-loader and both Web runs used this candidate. |
-| Publication | No v2.4.0 tag, GitHub release, catalog PR update, or personal DSH installation yet. |
+| Published archive | [v2.4.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.4.0) tags commit `2e416971447f275bc040e42060b1aacb537029f5`. The public `tabilet-skills-2.4.0.tgz` is 212,581 bytes, SHA-256 `3773a3b7407b2a0dcc353e139b3d19b21ce6f181fd49a39f8a62674a8658d931`; its public `SHA256SUMS` verifies, and the download matches the locally tested and hosted CI archives byte for byte. |
+| Hosted verification | All five [canonical v2.4.0 checks](https://github.com/tabilet/skills/actions) passed. Companion [main](https://github.com/tabilet/tabilet-skills/actions/runs/37193340919) and [tag](https://github.com/tabilet/tabilet-skills/actions/runs/37193341038) checks passed against `2e416971447f275bc040e42060b1aacb537029f5`. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) points to the public v2.4.0 archive and changes only Tabilet's source YAML. Its [catalog check](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37193422305) and [submission gate](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/runs/111411073721) passed; the live listing remains v2.1.0 until maintainer merge. No personal DSH installation was changed. |
 
 # v2.3.1 peer compatibility correction
 
@@ -30,7 +31,7 @@ parsed valid and invalid samples against Zod 4.6.2 from the locked DSH graph.
 |---|---|
 | Published archive | [v2.3.1](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.1) tags commit `139e1ef3f51d76770d41f28d70b904cb004b27e6`. Its public `tabilet-skills-2.3.1.tgz` is 208,422 bytes, SHA-256 `bc73a853b4bcc96238f83cfcf1ea9d261e4d39df435530ef266086fe10f026c6`; the release-specific public `SHA256SUMS`, local archive, and hosted CI artifact agree. Both public assets downloaded without credentials. |
 | Verification | `npm ci` and `npm run verify` passed: TypeScript, build, all 44 unit and packed-loader tests, 11 native Web/headless tests on rc.2, and 11 isolated mixed rc.1/rc.2 tests. Both browser runs installed the packed archive into disposable profiles. The [main hosted run](https://github.com/tabilet/tabilet-skills/actions/runs/37047784939) and [v2.3.1 tag run](https://github.com/tabilet/tabilet-skills/actions/runs/37048200383) passed. |
-| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) now points to the v2.3.1 public archive and changes only Tabilet's source YAML. Its [catalog check](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37048272325) passed; maintainer merge is pending, so the live listing remains v2.1.0. No personal DSH profile was changed. |
+| Catalog | At this release, [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) pointed to the v2.3.1 public archive and changed only Tabilet's source YAML. Its [catalog check](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37048272325) passed; the PR was later updated to v2.4.0. No personal DSH profile was changed. |
 
 # v2.3.0 acceptance and publication record
 
@@ -50,7 +51,7 @@ conditions; invalid or incomplete records remain visible as errors.
 | Prebuilt archive | `tabilet-skills-2.3.0.tgz`, 208,371 bytes, SHA-256 `8be8149bbd4962a1489ce15dd407f3b3f780584bd6998070c95a0a6a29714085`. The matching line is in `SHA256SUMS`; no install script or DSH runtime is bundled. |
 | Companion tag and release | [v2.3.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.3.0) points to `8366be96905191eff2832fe9f71d241f78b7a210`. Both hosted packed-verification runs passed: [tag](https://github.com/tabilet/tabilet-skills/actions/runs/37026816323) and [main](https://github.com/tabilet/tabilet-skills/actions/runs/37026816166). |
 | Public archive | The 208,371-byte [archive](https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/tabilet-skills-2.3.0.tgz) and release-specific [SHA256SUMS](https://github.com/tabilet/tabilet-skills/releases/download/v2.3.0/SHA256SUMS) downloaded without credentials. The public archive matched the locally tested archive byte-for-byte, SHA-256 `8be8149bbd4962a1489ce15dd407f3b3f780584bd6998070c95a0a6a29714085`. |
-| DSH catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) updates only the source plugin YAML to v2.3.0. Its [check and submission gate](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37026941413) passed; maintainer merge is pending, and the live market listing still offers v2.1.0. npm publication is optional. |
+| DSH catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) initially updated only the source plugin YAML to v2.3.0. Its [check and submission gate](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/actions/runs/37026941413) passed; later revisions superseded the proposed archive. npm publication is optional. |
 
 No paid model acceptance was run. The dashboard and request preparation never
 authorize a plan or perform a model request; the native suite uses a local
