@@ -1,7 +1,7 @@
 {
   "repository": "https://github.com/tabilet/skills.git",
-  "version": "2.3.0",
-  "commit": "80114ea2829263516b25056dd8b4570959206f24",
+  "version": "2.4.0",
+  "commit": "6d75e9a038821e789dca9ed72eb5de54d860f3c6",
   "files": {
     "LICENSE": "555cf5b885b2fad33220894deb8e39eded2680d38157b8798113abfa8f8d8c34",
     "skills/memory-bank-archive/SKILL.md": "a199954e14c9e2f72ec3848e9d01b92ec37b51803bcbf486dc7e9f2f1b0b173c",

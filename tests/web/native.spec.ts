@@ -119,8 +119,8 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await expect(panel).toContainText('Automatic API-runner auditing stays off unless you set TABILET_AUDIT_DB or pass --audit-db to the runner');
   await expect(panel.locator('pre').filter({ hasText: `tabilet-audit explorer '${projects.active}' --port 8000` })).toBeVisible();
   await expect(panel.getByRole('link', { name: 'Open local SQLite Explorer ↗' })).toHaveAttribute('href', 'http://127.0.0.1:8000/');
-  await expect(panel.getByRole('link', { name: 'Install the optional toolkit ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md#install-and-use-the-optional-toolkit');
-  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.3.0/docs/sqlite.md');
+  await expect(panel.getByRole('link', { name: 'Install the optional toolkit ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.4.0/docs/sqlite.md#install-and-use-the-optional-toolkit');
+  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.4.0/docs/sqlite.md');
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original); expect(errors).toEqual([]);
 });
 test('external edits and linked canonical edits become visible within ten seconds', async ({ page }) => {

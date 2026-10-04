@@ -3,9 +3,11 @@
 ## v2.4.0 candidate
 
 The SQLite browser is implemented and packed verification passed on the
-`sqlite-view` branch. It needs review and a separate release decision before a v2.4.0
-tag, GitHub archive, or catalog update. The currently published v2.3.1 archive
-and open catalog PR remain unchanged.
+`sqlite-view` branch. The candidate pins the canonical v2.4.0 commit and its
+file hashes; [acceptance evidence](ACCEPTANCE.md) records the tested archive.
+It needs review and a separate release decision before a v2.4.0 tag, GitHub
+archive, or catalog update. The currently published v2.3.1 archive and open
+catalog PR remain unchanged.
 
 ## v2.3.1 peer compatibility patch
 
