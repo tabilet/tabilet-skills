@@ -1,10 +1,14 @@
 import { DatabaseSync } from 'node:sqlite';
-import { realpathSync } from 'node:fs';
+import { mkdirSync, realpathSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { projectStorageRoot } from '../src/projectStorage.ts';
 
 export function createSQLiteFixture(path: string, project: string, other: string): void {
+  mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   try {
     db.exec(`PRAGMA user_version=4;
+      CREATE TABLE schema_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);
       CREATE TABLE workspaces(workspace_id TEXT PRIMARY KEY,project_root TEXT UNIQUE NOT NULL);
       CREATE TABLE runs(run_id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,operation TEXT NOT NULL,started_at TEXT NOT NULL,completed_at TEXT,result TEXT,parent_run_id TEXT);
       CREATE TABLE events(event_id TEXT PRIMARY KEY,run_id TEXT NOT NULL,sequence INTEGER NOT NULL,recorded_at TEXT NOT NULL,event_type TEXT NOT NULL,milestone_id TEXT,task_label TEXT,status_path TEXT,commit_sha TEXT,details_json TEXT);
@@ -12,6 +16,11 @@ export function createSQLiteFixture(path: string, project: string, other: string
       CREATE TABLE index_documents(workspace_id TEXT NOT NULL,path TEXT NOT NULL,kind TEXT NOT NULL,size INTEGER,text TEXT NOT NULL);
       CREATE TABLE index_search(search_id INTEGER PRIMARY KEY,workspace_id TEXT NOT NULL,path TEXT NOT NULL,line INTEGER NOT NULL,kind TEXT NOT NULL,text TEXT NOT NULL);`);
     const active = realpathSync(project), separate = realpathSync(other);
+    const owner = projectStorageRoot(project);
+    db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('schema', 'tabilet.audit/v4');
+    db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_root', owner);
+    db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_workspace:active', owner);
+    db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_workspace:other', owner);
     db.prepare('INSERT INTO workspaces VALUES (?,?)').run('active', active);
     db.prepare('INSERT INTO workspaces VALUES (?,?)').run('other', separate);
     db.prepare('INSERT INTO runs VALUES (?,?,?,?,?,?,?)').run('run-active', 'active', 'memory-bank-next', '2026-10-01T12:00:00Z', '2026-10-01T12:01:00Z', 'completed', null);

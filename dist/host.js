@@ -10,7 +10,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 var __decoratorStart = (base) => [, , , __create(base?.[__knownSymbol("metadata")] ?? null)];
 var __decoratorStrings = ["class", "method", "getter", "setter", "accessor", "field", "value", "get", "set"];
 var __expectFn = (fn) => fn !== void 0 && typeof fn !== "function" ? __typeError("Function expected") : fn;
-var __decoratorContext = (kind, name2, done, metadata, fns) => ({ kind: __decoratorStrings[kind], name: name2, metadata, addInitializer: (fn) => done._ ? __typeError("Already initialized") : fns.push(__expectFn(fn || null)) });
+var __decoratorContext = (kind, name2, done, metadata2, fns) => ({ kind: __decoratorStrings[kind], name: name2, metadata: metadata2, addInitializer: (fn) => done._ ? __typeError("Already initialized") : fns.push(__expectFn(fn || null)) });
 var __decoratorMetadata = (array, target) => __defNormalProp(target, __knownSymbol("metadata"), array[3]);
 var __runInitializers = (array, flags, self, value) => {
   for (var i = 0, fns = array[flags >> 1], n = fns && fns.length; i < n; i++) flags & 1 ? fns[i].call(self) : value = fns[i].call(self, value);
@@ -137,22 +137,72 @@ var remote = {
 };
 
 // src/sqlite.ts
-import { existsSync, realpathSync } from "node:fs";
-import { homedir } from "node:os";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync as existsSync2, realpathSync as realpathSync2 } from "node:fs";
+import { relative, resolve as resolve2, sep } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+
+// src/projectStorage.ts
+import { createHash } from "node:crypto";
+import { closeSync, existsSync, openSync, readSync, realpathSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+function metadata(path) {
+  const descriptor = openSync(path, "r");
+  try {
+    const data = Buffer.alloc(65537), size = readSync(descriptor, data, 0, data.length, 0);
+    if (size > 65536) throw new Error("Git project metadata is too large");
+    const value = new TextDecoder("utf-8", { fatal: true }).decode(data.subarray(0, size)).replace(/[\r\n]+$/, "");
+    if (!value || /[\r\n]/.test(value)) throw new Error("Invalid Git project metadata");
+    return value;
+  } finally {
+    closeSync(descriptor);
+  }
+}
+function canonical(path) {
+  const resolved = resolve(path);
+  if (existsSync(resolved)) return realpathSync(resolved);
+  const parent = dirname(resolved);
+  return parent === resolved ? resolved : join(canonical(parent), basename(resolved));
+}
+function projectStorageRoot(project) {
+  const root = canonical(project);
+  for (let candidate = root; ; candidate = dirname(candidate)) {
+    const entry = join(candidate, ".git");
+    if (existsSync(entry)) {
+      if (statSync(entry).isDirectory()) return candidate;
+      if (statSync(entry).isFile()) {
+        const pointer = metadata(entry);
+        if (!pointer.startsWith("gitdir: ")) throw new Error("Invalid .git project pointer");
+        const gitdir = canonical(resolve(candidate, pointer.slice(8))), commonFile = join(gitdir, "commondir");
+        if (!existsSync(commonFile)) return candidate;
+        const common = canonical(resolve(gitdir, metadata(commonFile))), owner = dirname(common);
+        const registered = join(gitdir, "gitdir");
+        if (basename(common) !== ".git" || !existsSync(common) || !statSync(common).isDirectory() || dirname(gitdir) !== join(common, "worktrees") || !existsSync(registered) || canonical(metadata(registered)) !== canonical(entry) || canonical(join(owner, ".git")) !== common) throw new Error("Linked worktree has no valid project registration");
+        return owner;
+      }
+    }
+    if (dirname(candidate) === candidate) return root;
+  }
+}
+function projectStorageId(canonicalProject) {
+  return createHash("sha256").update(canonicalProject, "utf8").digest("hex");
+}
+function projectDatabasePath(project, env = process.env) {
+  const configured = env.TABILET_AUDIT_DB?.trim();
+  const expand = (value) => value === "~" ? homedir() : value.startsWith("~/") ? join(homedir(), value.slice(2)) : value;
+  if (configured && configured !== "project") {
+    const external = expand(configured);
+    if (!isAbsolute(external)) throw new Error("Audit database must be project or an absolute external path");
+    return resolve(external);
+  }
+  const state = expand(env.XDG_STATE_HOME?.trim() || "");
+  const base = state && isAbsolute(state) ? state : join(homedir(), ".local", "state");
+  return join(canonical(base), "tabilet", "projects", projectStorageId(projectStorageRoot(project)), "audit.sqlite3");
+}
+
+// src/sqlite.ts
 var PAGE = 20;
 var EMPTY = { runs: 0, events: 0, documents: 0 };
-function databasePath(env) {
-  const configured = env.TABILET_AUDIT_DB?.trim();
-  if (configured) {
-    const expanded = configured === "~" ? homedir() : configured.startsWith("~/") ? join(homedir(), configured.slice(2)) : configured;
-    if (!isAbsolute(expanded)) throw new Error("TABILET_AUDIT_DB must be an absolute path");
-    return resolve(expanded);
-  }
-  const state = env.XDG_STATE_HOME?.trim();
-  return join(state && isAbsolute(state) ? state : join(homedir(), ".local", "state"), "tabilet", "audit.sqlite3");
-}
 function insideProject(project, database) {
   const from = relative(project, database);
   return from === "" || from !== ".." && !from.startsWith(`..${sep}`);
@@ -171,31 +221,34 @@ function clipped(value, limit = 4e3) {
 function readSQLite(projectPath, query, env = process.env) {
   let projectRoot = projectPath;
   try {
-    projectRoot = realpathSync(projectPath);
+    projectRoot = realpathSync2(projectPath);
   } catch {
     return { state: "error", message: "Selected session project is unavailable.", projectRoot, databasePath: "", counts: { ...EMPTY }, index: null, entries: [], more: false };
   }
   let path = "";
   const output = { state: "error", message: "", projectRoot, databasePath: "", counts: { ...EMPTY }, index: null, entries: [], more: false };
+  let owner = "";
   try {
-    path = databasePath(env);
+    owner = projectStorageRoot(projectRoot);
+    path = projectDatabasePath(projectRoot, env);
     output.databasePath = path;
   } catch (error) {
     output.message = clipped(error);
     return output;
   }
-  if (insideProject(projectRoot, path)) {
+  if (insideProject(projectRoot, path) || insideProject(owner, path)) {
     output.message = "Audit database must be outside the selected project.";
     return output;
   }
-  if (!existsSync(path)) {
+  if (!existsSync2(path)) {
     output.state = "missing";
     output.message = "No audit database at this path. Install and run the optional toolkit to create an index.";
     return output;
   }
   let database;
   try {
-    if (insideProject(projectRoot, realpathSync(path))) throw new Error("Audit database must be outside the selected project");
+    if (realpathSync2(path) !== resolve2(path)) throw new Error("Symlink audit database paths are unsupported");
+    if (insideProject(projectRoot, realpathSync2(path)) || insideProject(owner, realpathSync2(path))) throw new Error("Audit database must be outside the selected project");
     database = new DatabaseSync(path, { readOnly: true, timeout: 1e3 });
     database.exec("PRAGMA query_only=ON");
     const version = Number(database.prepare("PRAGMA user_version").get().user_version);
@@ -204,6 +257,15 @@ function readSQLite(projectPath, query, env = process.env) {
       output.message = `Database schema v${version} needs the canonical Tabilet toolkit (v4) for this view.`;
       return output;
     }
+    const binding = database.prepare("SELECT value FROM schema_meta WHERE key='project_root'").get();
+    if (!binding) {
+      output.state = "unsupported";
+      output.message = "Older shared database selected. Use the project database; existing history can be extracted separately.";
+      return output;
+    }
+    if (binding.value !== owner) throw new Error("Audit database belongs to a different project");
+    const invalid = database.prepare("SELECT COUNT(*) AS n FROM workspaces w LEFT JOIN schema_meta m ON m.key='project_workspace:' || w.workspace_id WHERE m.value IS NULL OR m.value<>?").get(owner);
+    if (Number(invalid.n)) throw new Error("Workspace is not registered to this audit project");
     const workspace = database.prepare("SELECT workspace_id FROM workspaces WHERE project_root=?").get(projectRoot);
     if (!workspace) {
       output.state = "unregistered";

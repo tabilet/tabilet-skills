@@ -1,8 +1,8 @@
 /** Bounded, project-scoped reads of the optional external Tabilet database. */
 import { existsSync, realpathSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { relative, resolve, sep } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { projectDatabasePath, projectStorageRoot } from './projectStorage.js';
 
 export type SQLiteSection = 'overview' | 'runs' | 'events' | 'index';
 export interface SQLiteQuery { section: SQLiteSection; offset: number; runId?: string; search?: string }
@@ -17,16 +17,6 @@ export interface SQLiteView {
 
 const PAGE = 20;
 const EMPTY = { runs: 0, events: 0, documents: 0 };
-function databasePath(env: NodeJS.ProcessEnv): string {
-  const configured = env.TABILET_AUDIT_DB?.trim();
-  if (configured) {
-    const expanded = configured === '~' ? homedir() : configured.startsWith('~/') ? join(homedir(), configured.slice(2)) : configured;
-    if (!isAbsolute(expanded)) throw new Error('TABILET_AUDIT_DB must be an absolute path');
-    return resolve(expanded);
-  }
-  const state = env.XDG_STATE_HOME?.trim();
-  return join(state && isAbsolute(state) ? state : join(homedir(), '.local', 'state'), 'tabilet', 'audit.sqlite3');
-}
 function insideProject(project: string, database: string): boolean {
   const from = relative(project, database);
   return from === '' || (from !== '..' && !from.startsWith(`..${sep}`));
@@ -46,17 +36,24 @@ export function readSQLite(projectPath: string, query: SQLiteQuery, env: NodeJS.
   catch { return { state: 'error', message: 'Selected session project is unavailable.', projectRoot, databasePath: '', counts: { ...EMPTY }, index: null, entries: [], more: false }; }
   let path = '';
   const output: SQLiteView = { state: 'error', message: '', projectRoot, databasePath: '', counts: { ...EMPTY }, index: null, entries: [], more: false };
-  try { path = databasePath(env); output.databasePath = path; }
+  let owner = '';
+  try { owner = projectStorageRoot(projectRoot); path = projectDatabasePath(projectRoot, env); output.databasePath = path; }
   catch (error) { output.message = clipped(error); return output; }
-  if (insideProject(projectRoot, path)) { output.message = 'Audit database must be outside the selected project.'; return output; }
+  if (insideProject(projectRoot, path) || insideProject(owner, path)) { output.message = 'Audit database must be outside the selected project.'; return output; }
   if (!existsSync(path)) { output.state = 'missing'; output.message = 'No audit database at this path. Install and run the optional toolkit to create an index.'; return output; }
   let database: DatabaseSync | undefined;
   try {
-    if (insideProject(projectRoot, realpathSync(path))) throw new Error('Audit database must be outside the selected project');
+    if (realpathSync(path) !== resolve(path)) throw new Error('Symlink audit database paths are unsupported');
+    if (insideProject(projectRoot, realpathSync(path)) || insideProject(owner, realpathSync(path))) throw new Error('Audit database must be outside the selected project');
     database = new DatabaseSync(path, { readOnly: true, timeout: 1000 });
     database.exec('PRAGMA query_only=ON');
     const version = Number((database.prepare('PRAGMA user_version').get() as { user_version: number }).user_version);
     if (version !== 4) { output.state = 'unsupported'; output.message = `Database schema v${version} needs the canonical Tabilet toolkit (v4) for this view.`; return output; }
+    const binding = database.prepare("SELECT value FROM schema_meta WHERE key='project_root'").get() as { value: string } | undefined;
+    if (!binding) { output.state = 'unsupported'; output.message = 'Older shared database selected. Use the project database; existing history can be extracted separately.'; return output; }
+    if (binding.value !== owner) throw new Error('Audit database belongs to a different project');
+    const invalid = database.prepare("SELECT COUNT(*) AS n FROM workspaces w LEFT JOIN schema_meta m ON m.key='project_workspace:' || w.workspace_id WHERE m.value IS NULL OR m.value<>?").get(owner) as { n: number };
+    if (Number(invalid.n)) throw new Error('Workspace is not registered to this audit project');
     const workspace = database.prepare('SELECT workspace_id FROM workspaces WHERE project_root=?').get(projectRoot) as { workspace_id: string } | undefined;
     if (!workspace) { output.state = 'unregistered'; output.message = 'This project has no records in the selected database. Run tabilet-audit index sync for this project.'; return output; }
     const id = workspace.workspace_id;

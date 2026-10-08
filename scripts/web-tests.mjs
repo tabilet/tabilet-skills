@@ -5,11 +5,13 @@ import { resolve, join } from 'node:path';
 // The helper creates fresh DSH_HOME/DSH_AGENTS_HOME and installs the actual pack.
 execFileSync('npm', ['pack', '--ignore-scripts'], { stdio: 'ignore' });
 execFileSync(process.execPath, ['scripts/acceptance-profile.mjs'], { stdio: 'inherit' });
-execFileSync(process.execPath, ['--import', 'tsx', 'scripts/create-fixtures.ts'], { stdio: 'inherit' });
 const state = JSON.parse(readFileSync('.acceptance/profile.json'));
+state.env.XDG_STATE_HOME = join(state.root, 'state');
+state.env.TABILET_AUDIT_DB = 'project';
+writeFileSync('.acceptance/profile.json', JSON.stringify(state, null, 2));
+execFileSync(process.execPath, ['--import', 'tsx', 'scripts/create-fixtures.ts'], { stdio: 'inherit' });
 state.env.DEEPSEEK_API_KEY = 'model-free-fixture';
 state.env.DEEPSEEK_BASE_URL = 'http://127.0.0.1:3198';
-state.env.TABILET_AUDIT_DB = join(state.root, 'audit.sqlite3');
 if (process.env.TABILET_MIXED === '1') {
   const mixed = join(state.root, 'mixed/node_modules'); mkdirSync(mixed, { recursive: true });
   // Alias is locked in package-lock.json: only launcher rc.1, all shared components rc.2.

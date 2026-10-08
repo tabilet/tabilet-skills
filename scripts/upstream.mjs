@@ -11,7 +11,7 @@ const git = (repo, ...args) => execFileSync('git', ['-C', repo, ...args], { maxB
 export async function pin(repo, ref = 'HEAD') {
   const commit = git(repo, 'rev-parse', `${ref}^{commit}`).toString().trim();
   const version = JSON.parse(git(repo, 'show', `${commit}:.claude-plugin/plugin.json`)).version;
-  const paths = git(repo, 'ls-tree', '-r', '--name-only', commit, 'skills', 'tests/fixtures/parser-conformance.json', 'LICENSE').toString().trim().split('\n');
+  const paths = git(repo, 'ls-tree', '-r', '--name-only', commit, 'skills', 'tests/fixtures/parser-conformance.json', 'tests/fixtures/project-storage.json', 'LICENSE').toString().trim().split('\n');
   const files = Object.fromEntries(paths.map(path => [path, hash(git(repo, 'show', `${commit}:${path}`))]));
   await writeFile(join(root, 'upstream.lock.json'), JSON.stringify({ repository: 'https://github.com/tabilet/skills.git', version, commit, files }, null, 2) + '\n');
 }
@@ -26,7 +26,7 @@ export async function stage() {
     git(repo, 'init', '-q'); git(repo, 'fetch', '--depth=1', lock.repository, lock.commit);
   }
   try {
-    const expected = git(repo, 'ls-tree', '-r', '--name-only', lock.commit, 'skills', 'tests/fixtures/parser-conformance.json', 'LICENSE').toString().trim().split('\n').sort();
+    const expected = git(repo, 'ls-tree', '-r', '--name-only', lock.commit, 'skills', 'tests/fixtures/parser-conformance.json', 'tests/fixtures/project-storage.json', 'LICENSE').toString().trim().split('\n').sort();
     if (JSON.stringify(expected) !== JSON.stringify(Object.keys(lock.files).sort())) throw new Error('Upstream lock omits or adds payload files');
     if (JSON.parse(git(repo, 'show', `${lock.commit}:.claude-plugin/plugin.json`)).version !== lock.version) throw new Error('Upstream version does not match its pinned commit');
     const files = new Map();

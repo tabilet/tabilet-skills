@@ -12,6 +12,12 @@ resolved by the supported DSH rc.2 profile. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
+The source checkout includes an unreleased change to one external SQLite
+database per project. Registered linked worktrees share their repository's
+database. Older shared storage is not selected by default; if you have one
+(including from before v2.5.0), you can ask your LLM agent to extract this
+project's history and import it into its SQLite database.
+
 ## Install
 
 Supported target: Linux, Node **24.14.1**, DSH **0.1.5-rc.2**. The test installation
@@ -61,10 +67,12 @@ enumerated by DSH's public registry. Review local overrides before removing them
 - **SQLite:** read-only browsing of the selected project's audit runs, events,
   indexed Markdown documents, and search results. The tab shows index freshness
   and diagnostics, and links to the full local Explorer. It uses the external
-  `TABILET_AUDIT_DB` path or the standalone toolkit's default
-  `${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3`. It never creates or
+  explicit `TABILET_AUDIT_DB` path or the standalone toolkit's project default
+  `${XDG_STATE_HOME:-~/.local/state}/tabilet/projects/<project-id>/audit.sqlite3`.
+  `TABILET_AUDIT_DB=project` selects that default. It never creates or
   refreshes the database. The default path does not enable automatic API-runner
-  auditing; that requires `TABILET_AUDIT_DB` or `--audit-db` on the runner.
+  auditing; that requires `TABILET_AUDIT_DB=project`, an explicit external path,
+  or `--audit-db` on the runner.
   Install the optional toolkit to create or refresh the index and run the
   Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md).
 
