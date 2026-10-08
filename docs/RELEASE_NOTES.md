@@ -1,3 +1,9 @@
+# v2.7.0
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.7.0. Retains the
+read-only SQLite sidebar, Stages view, and all seven canonical skill bundles.
+See [acceptance evidence](ACCEPTANCE.md) for tested gates.
+
 # v2.4.0
 
 The SQLite sidebar now opens the optional external database read-only for the

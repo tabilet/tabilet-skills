@@ -1,3 +1,15 @@
+# v2.7.0 acceptance and publication
+
+The companion pins canonical `tabilet/skills` v2.7.0 at commit
+`91c73fdf89f7a0c520a4f21fec325f4f5b20cfb0` with verified file hashes in `upstream.lock.json`.
+The read-only SQLite sidebar, Stages view, and all seven canonical skill bundles are retained.
+
+| Gate | Result |
+|---|---|
+| Local typecheck, build, unit, and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 46 unit and packed-loader tests, 11 native Web tests, and 11 isolated mixed rc.1 launcher/rc.2 component Web tests. Both Web runs installed the packed archive into disposable profiles and exercised the dashboard without model calls or project writes. |
+| Published archive | [v2.7.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.7.0). The public `tabilet-skills-2.7.0.tgz` is 222,976 bytes, SHA-256 `120eb0b160aef0d50268d9d3a67ea442a80b69a7ad1921064c3f30eaddf472f9`; its public `SHA256SUMS` verifies, and the download matches the locally tested archive byte for byte. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) points to the public v2.7.0 archive and changes only Tabilet's source YAML. |
+
 # v2.4.0 SQLite browser acceptance and publication
 
 The optional SQLite tab now reads the selected project's external database

@@ -5,7 +5,7 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.4.0** pins the canonical v2.4.0 skills and adds read-only SQLite
+Version **2.7.0** pins the canonical v2.7.0 skills and adds read-only SQLite
 audit and Markdown-index browsing to the Memory Bank sidebar. It retains the
 Stages view and stage targeting for Propose, and accepts the Zod 4.6.2 version
 resolved by the supported DSH rc.2 profile. See
@@ -23,19 +23,19 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.4.0/tabilet-skills-2.4.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.4.0/tabilet-skills-2.4.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.7.0/tabilet-skills-2.7.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.7.0/tabilet-skills-2.7.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.4.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.7.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.4.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.7.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/v2.4.0/docs/DSH.md#install-the-seven-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/v2.7.0/docs/DSH.md#install-the-seven-bundles).
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -66,7 +66,7 @@ enumerated by DSH's public registry. Review local overrides before removing them
   refreshes the database. The default path does not enable automatic API-runner
   auditing; that requires `TABILET_AUDIT_DB` or `--audit-db` on the runner.
   Install the optional toolkit to create or refresh the index and run the
-  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.4.0/docs/sqlite.md).
+  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.7.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the

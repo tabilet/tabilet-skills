@@ -1,6 +1,6 @@
 {
   "name": "tabilet-skills",
-  "version": "2.4.0",
+  "version": "2.7.0",
   "description": "Shared memory-bank skills and a read-only project dashboard for DSH.",
   "type": "module",
   "license": "MIT",
