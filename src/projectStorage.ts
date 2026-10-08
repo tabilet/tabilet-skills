@@ -1,8 +1,6 @@
 /** Project database routing shared with the canonical Python toolkit contract. */
-import { createHash } from 'node:crypto';
 import { closeSync, existsSync, openSync, readSync, realpathSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 
 function metadata(path: string): string {
   const descriptor = openSync(path, 'r');
@@ -46,19 +44,6 @@ export function projectStorageRoot(project: string): string {
   }
 }
 
-export function projectStorageId(canonicalProject: string): string {
-  return createHash('sha256').update(canonicalProject, 'utf8').digest('hex');
-}
-
-export function projectDatabasePath(project: string, env: NodeJS.ProcessEnv = process.env): string {
-  const configured = env.TABILET_AUDIT_DB?.trim();
-  const expand = (value: string) => value === '~' ? homedir() : value.startsWith('~/') ? join(homedir(), value.slice(2)) : value;
-  if (configured && configured !== 'project') {
-    const external = expand(configured);
-    if (!isAbsolute(external)) throw new Error('Audit database must be project or an absolute external path');
-    return resolve(external);
-  }
-  const state = expand(env.XDG_STATE_HOME?.trim() || '');
-  const base = state && isAbsolute(state) ? state : join(homedir(), '.local', 'state');
-  return join(canonical(base), 'tabilet', 'projects', projectStorageId(projectStorageRoot(project)), 'audit.sqlite3');
+export function projectDatabasePath(project: string): string {
+  return join(projectStorageRoot(project), 'tabilet', 'audit.sqlite3');
 }

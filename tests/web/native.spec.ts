@@ -101,7 +101,9 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await expect(panel).not.toContainText('Skill catalog unavailable');
   await panel.getByRole('button', { name: 'SQLite', exact: true }).click();
   await expect(panel.getByRole('heading', { name: 'Optional SQLite audit and lookup', exact: true })).toBeVisible();
-  await expect(panel).toContainText('The sidebar opens the external database read-only');
+  await expect(panel).toContainText('The sidebar opens the project database read-only');
+  await expect(panel).toContainText('Audit recording: enabled');
+  await expect(panel).toContainText(`${projects.active}/tabilet/audit.sqlite3`);
   await expect(panel).toContainText('1Audit runs');
   await expect(panel).toContainText('1Events');
   await expect(panel).toContainText('1Indexed documents');
@@ -116,7 +118,7 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await panel.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(panel).toContainText('Build A01 searchable');
   await expect(panel).not.toContainText('secret searchable');
-  await expect(panel).toContainText('Automatic API-runner auditing stays off unless you set TABILET_AUDIT_DB or pass --audit-db to the runner');
+  await expect(panel).toContainText('Audit recording stays off until you manually enable this project');
   await expect(panel.locator('pre').filter({ hasText: `tabilet-audit explorer '${projects.active}' --port 8000` })).toBeVisible();
   await expect(panel.getByRole('link', { name: 'Open local SQLite Explorer ↗' })).toHaveAttribute('href', 'http://127.0.0.1:8000/');
   await expect(panel.getByRole('link', { name: 'Install the optional toolkit ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md#install-and-use-the-optional-toolkit');

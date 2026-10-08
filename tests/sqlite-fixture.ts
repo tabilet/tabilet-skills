@@ -18,6 +18,7 @@ export function createSQLiteFixture(path: string, project: string, other: string
     const active = realpathSync(project), separate = realpathSync(other);
     const owner = projectStorageRoot(project);
     db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('schema', 'tabilet.audit/v4');
+    db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('audit_enabled', '1');
     db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_root', owner);
     db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_workspace:active', owner);
     db.prepare('INSERT INTO schema_meta VALUES (?,?)').run('project_workspace:other', owner);

@@ -30,4 +30,4 @@ for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['l
   if (name === 'linked') await symlink(join(state.root, 'canonical/status-M01.md'), join(project, 'tabilet/memory-bank/status-S01.md'));
 }
 await writeFile('.acceptance/projects.json', JSON.stringify(projects, null, 2));
-createSQLiteFixture(projectDatabasePath(projects.active, state.env), projects.active, projects.retired);
+createSQLiteFixture(projectDatabasePath(projects.active), projects.active, projects.retired);

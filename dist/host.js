@@ -137,15 +137,13 @@ var remote = {
 };
 
 // src/sqlite.ts
-import { existsSync as existsSync2, realpathSync as realpathSync2 } from "node:fs";
-import { relative, resolve as resolve2, sep } from "node:path";
+import { existsSync as existsSync2, lstatSync, realpathSync as realpathSync2 } from "node:fs";
+import { resolve as resolve2 } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 // src/projectStorage.ts
-import { createHash } from "node:crypto";
 import { closeSync, existsSync, openSync, readSync, realpathSync, statSync } from "node:fs";
-import { homedir } from "node:os";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 function metadata(path) {
   const descriptor = openSync(path, "r");
   try {
@@ -184,29 +182,13 @@ function projectStorageRoot(project) {
     if (dirname(candidate) === candidate) return root;
   }
 }
-function projectStorageId(canonicalProject) {
-  return createHash("sha256").update(canonicalProject, "utf8").digest("hex");
-}
-function projectDatabasePath(project, env = process.env) {
-  const configured = env.TABILET_AUDIT_DB?.trim();
-  const expand = (value) => value === "~" ? homedir() : value.startsWith("~/") ? join(homedir(), value.slice(2)) : value;
-  if (configured && configured !== "project") {
-    const external = expand(configured);
-    if (!isAbsolute(external)) throw new Error("Audit database must be project or an absolute external path");
-    return resolve(external);
-  }
-  const state = expand(env.XDG_STATE_HOME?.trim() || "");
-  const base = state && isAbsolute(state) ? state : join(homedir(), ".local", "state");
-  return join(canonical(base), "tabilet", "projects", projectStorageId(projectStorageRoot(project)), "audit.sqlite3");
+function projectDatabasePath(project) {
+  return join(projectStorageRoot(project), "tabilet", "audit.sqlite3");
 }
 
 // src/sqlite.ts
 var PAGE = 20;
 var EMPTY = { runs: 0, events: 0, documents: 0 };
-function insideProject(project, database) {
-  const from = relative(project, database);
-  return from === "" || from !== ".." && !from.startsWith(`..${sep}`);
-}
 function diagnostics(value) {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : [];
@@ -218,26 +200,22 @@ function diagnostics(value) {
 function clipped(value, limit = 4e3) {
   return value == null ? "" : String(value).slice(0, limit);
 }
-function readSQLite(projectPath, query, env = process.env) {
+function readSQLite(projectPath, query) {
   let projectRoot = projectPath;
   try {
     projectRoot = realpathSync2(projectPath);
   } catch {
-    return { state: "error", message: "Selected session project is unavailable.", projectRoot, databasePath: "", counts: { ...EMPTY }, index: null, entries: [], more: false };
+    return { state: "error", message: "Selected session project is unavailable.", projectRoot, databasePath: "", auditEnabled: false, counts: { ...EMPTY }, index: null, entries: [], more: false };
   }
   let path = "";
-  const output = { state: "error", message: "", projectRoot, databasePath: "", counts: { ...EMPTY }, index: null, entries: [], more: false };
+  const output = { state: "error", message: "", projectRoot, databasePath: "", auditEnabled: false, counts: { ...EMPTY }, index: null, entries: [], more: false };
   let owner = "";
   try {
     owner = projectStorageRoot(projectRoot);
-    path = projectDatabasePath(projectRoot, env);
+    path = projectDatabasePath(projectRoot);
     output.databasePath = path;
   } catch (error) {
     output.message = clipped(error);
-    return output;
-  }
-  if (insideProject(projectRoot, path) || insideProject(owner, path)) {
-    output.message = "Audit database must be outside the selected project.";
     return output;
   }
   if (!existsSync2(path)) {
@@ -248,7 +226,14 @@ function readSQLite(projectPath, query, env = process.env) {
   let database;
   try {
     if (realpathSync2(path) !== resolve2(path)) throw new Error("Symlink audit database paths are unsupported");
-    if (insideProject(projectRoot, realpathSync2(path)) || insideProject(owner, realpathSync2(path))) throw new Error("Audit database must be outside the selected project");
+    for (const suffix of ["", "-wal", "-shm", "-journal"]) {
+      try {
+        const entry = lstatSync(path + suffix);
+        if (entry.isSymbolicLink() || !entry.isFile()) throw new Error("Audit storage must be regular files without symlinks");
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+    }
     database = new DatabaseSync(path, { readOnly: true, timeout: 1e3 });
     database.exec("PRAGMA query_only=ON");
     const version = Number(database.prepare("PRAGMA user_version").get().user_version);
@@ -264,6 +249,9 @@ function readSQLite(projectPath, query, env = process.env) {
       return output;
     }
     if (binding.value !== owner) throw new Error("Audit database belongs to a different project");
+    const enabled = database.prepare("SELECT value FROM schema_meta WHERE key='audit_enabled'").get();
+    if (enabled && enabled.value !== "0" && enabled.value !== "1") throw new Error("Invalid saved audit setting");
+    output.auditEnabled = enabled?.value === "1";
     const invalid = database.prepare("SELECT COUNT(*) AS n FROM workspaces w LEFT JOIN schema_meta m ON m.key='project_workspace:' || w.workspace_id WHERE m.value IS NULL OR m.value<>?").get(owner);
     if (Number(invalid.n)) throw new Error("Workspace is not registered to this audit project");
     const workspace = database.prepare("SELECT workspace_id FROM workspaces WHERE project_root=?").get(projectRoot);

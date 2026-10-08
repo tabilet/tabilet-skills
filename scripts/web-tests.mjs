@@ -7,7 +7,6 @@ execFileSync('npm', ['pack', '--ignore-scripts'], { stdio: 'ignore' });
 execFileSync(process.execPath, ['scripts/acceptance-profile.mjs'], { stdio: 'inherit' });
 const state = JSON.parse(readFileSync('.acceptance/profile.json'));
 state.env.XDG_STATE_HOME = join(state.root, 'state');
-state.env.TABILET_AUDIT_DB = 'project';
 writeFileSync('.acceptance/profile.json', JSON.stringify(state, null, 2));
 execFileSync(process.execPath, ['--import', 'tsx', 'scripts/create-fixtures.ts'], { stdio: 'inherit' });
 state.env.DEEPSEEK_API_KEY = 'model-free-fixture';

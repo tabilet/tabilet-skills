@@ -111,11 +111,12 @@ function SQLitePanel({ active, read, navigate }: { active: boolean; read: Dashbo
   const quotedProject = data?.projectRoot ? `'${data.projectRoot.replaceAll("'", "'\\''")}'` : '/absolute/path/to/project';
   return <div>
     <h3>Optional SQLite audit and lookup</h3>
-    <p>Audit records and the Markdown index for this session’s project. The sidebar opens the external database read-only; project Markdown remains authoritative. It never creates or refreshes the index.</p>
+    <p>Audit records and the Markdown index for this session’s project. The sidebar opens the project database read-only; project Markdown remains authoritative. It never creates or refreshes the index.</p>
     <div className="mb-actions"><button onClick={() => setRefresh(n => n + 1)}>Refresh SQLite</button>{(['overview', 'runs', 'index'] as const).map(item => <button key={item} aria-pressed={section === item || (item === 'runs' && section === 'events')} onClick={() => switchTo(item)}>{item === 'index' ? 'Markdown index' : item[0].toUpperCase() + item.slice(1)}</button>)}</div>
     {loading && <p role="status">Reading SQLite…</p>}{error && <p role="alert">{error}</p>}
     {data && <><p role={data.state === 'ready' ? 'status' : 'alert'}>{data.message}</p><p>Project: <code>{data.projectRoot}</code><br />Database: <code>{data.databasePath || 'Unavailable'}</code></p>
       {data.state === 'ready' && <>
+        <p>Audit recording: <strong>{data.auditEnabled ? 'enabled' : 'disabled'}</strong></p>
         <div className="mb-counts"><div><b>{data.counts.runs}</b><span>Audit runs</span></div><div><b>{data.counts.events}</b><span>Events</span></div><div><b>{data.counts.documents}</b><span>Indexed documents</span></div></div>
         <p>Index: {data.index?.refreshedAt ? `refreshed ${data.index.refreshedAt}` : 'not refreshed'} · {data.index?.complete === true ? 'complete' : data.index?.complete === false ? 'incomplete' : 'unknown'}. Indexed content is a snapshot and may be stale.</p>
         {!!data.index?.diagnostics.length && <details><summary>{data.index.diagnostics.length} index diagnostic{data.index.diagnostics.length === 1 ? '' : 's'}</summary><ul>{data.index.diagnostics.map((item, i) => <li key={i}>{item}</li>)}</ul></details>}
@@ -129,8 +130,10 @@ function SQLitePanel({ active, read, navigate }: { active: boolean; read: Dashbo
     <h3>Open the full local Explorer</h3><p>The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:</p>
     <pre><code>tabilet-audit explorer {quotedProject} --port 8000</code></pre>
     <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
-    <p>Each project uses an external database under <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/projects/<project-id>/audit.sqlite3'}</code>. Linked worktrees share their repository’s database. Set <code>TABILET_AUDIT_DB=project</code> for the project default, or choose an absolute external path before starting DSH. To rebuild the index, run <code>tabilet-audit index sync {quotedProject}</code> in a terminal.</p>
-    <p>This default path applies to standalone <code>tabilet-audit</code> commands. Automatic API-runner auditing stays off unless you set <code>TABILET_AUDIT_DB</code> or pass <code>--audit-db</code> to the runner.</p>
+    <p>The database is always <code>tabilet/audit.sqlite3</code>. Linked worktrees share the primary checkout’s file. Commit <code>tabilet/.gitignore</code> with <code>/audit.sqlite3*</code> to keep the database and SQLite sidecars out of Git.</p>
+    <p>Audit recording stays off until you manually enable this project. Index refresh does not enable it. Run these commands in a terminal:</p>
+    <pre><code>{`tabilet-audit audit enable ${quotedProject}\ntabilet-audit audit status ${quotedProject}\ntabilet-audit audit disable ${quotedProject}\ntabilet-audit index sync ${quotedProject}`}</code></pre>
+    <p>To discard a broken database, stop its agents and Explorer, disable recording, then delete <code>tabilet/audit.sqlite3</code> and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact.</p>
     <p><a href="https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
   </div>;
 }

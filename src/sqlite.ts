@@ -1,6 +1,6 @@
-/** Bounded, project-scoped reads of the optional external Tabilet database. */
-import { existsSync, realpathSync } from 'node:fs';
-import { relative, resolve, sep } from 'node:path';
+/** Bounded, project-scoped reads of the optional project Tabilet database. */
+import { existsSync, lstatSync, realpathSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { projectDatabasePath, projectStorageRoot } from './projectStorage.js';
 
@@ -9,7 +9,7 @@ export interface SQLiteQuery { section: SQLiteSection; offset: number; runId?: s
 export interface SQLiteEntry { id: string; title: string; meta: string; detail?: string; path?: string; line?: number }
 export interface SQLiteView {
   state: 'ready' | 'missing' | 'unregistered' | 'unsupported' | 'error';
-  message: string; projectRoot: string; databasePath: string;
+  message: string; projectRoot: string; databasePath: string; auditEnabled: boolean;
   counts: { runs: number; events: number; documents: number };
   index: { refreshedAt: string | null; complete: boolean | null; diagnostics: string[] } | null;
   entries: SQLiteEntry[]; more: boolean;
@@ -17,10 +17,6 @@ export interface SQLiteView {
 
 const PAGE = 20;
 const EMPTY = { runs: 0, events: 0, documents: 0 };
-function insideProject(project: string, database: string): boolean {
-  const from = relative(project, database);
-  return from === '' || (from !== '..' && !from.startsWith(`..${sep}`));
-}
 function diagnostics(value: unknown): string[] {
   try {
     const parsed: unknown = typeof value === 'string' ? JSON.parse(value) : [];
@@ -30,21 +26,25 @@ function diagnostics(value: unknown): string[] {
 function clipped(value: unknown, limit = 4000): string { return value == null ? '' : String(value).slice(0, limit); }
 
 /** Opens SQLite read-only, never creates or refreshes the index, and returns only this checkout's rows. */
-export function readSQLite(projectPath: string, query: SQLiteQuery, env: NodeJS.ProcessEnv = process.env): SQLiteView {
+export function readSQLite(projectPath: string, query: SQLiteQuery): SQLiteView {
   let projectRoot = projectPath;
   try { projectRoot = realpathSync(projectPath); }
-  catch { return { state: 'error', message: 'Selected session project is unavailable.', projectRoot, databasePath: '', counts: { ...EMPTY }, index: null, entries: [], more: false }; }
+  catch { return { state: 'error', message: 'Selected session project is unavailable.', projectRoot, databasePath: '', auditEnabled: false, counts: { ...EMPTY }, index: null, entries: [], more: false }; }
   let path = '';
-  const output: SQLiteView = { state: 'error', message: '', projectRoot, databasePath: '', counts: { ...EMPTY }, index: null, entries: [], more: false };
+  const output: SQLiteView = { state: 'error', message: '', projectRoot, databasePath: '', auditEnabled: false, counts: { ...EMPTY }, index: null, entries: [], more: false };
   let owner = '';
-  try { owner = projectStorageRoot(projectRoot); path = projectDatabasePath(projectRoot, env); output.databasePath = path; }
+  try { owner = projectStorageRoot(projectRoot); path = projectDatabasePath(projectRoot); output.databasePath = path; }
   catch (error) { output.message = clipped(error); return output; }
-  if (insideProject(projectRoot, path) || insideProject(owner, path)) { output.message = 'Audit database must be outside the selected project.'; return output; }
   if (!existsSync(path)) { output.state = 'missing'; output.message = 'No audit database at this path. Install and run the optional toolkit to create an index.'; return output; }
   let database: DatabaseSync | undefined;
   try {
     if (realpathSync(path) !== resolve(path)) throw new Error('Symlink audit database paths are unsupported');
-    if (insideProject(projectRoot, realpathSync(path)) || insideProject(owner, realpathSync(path))) throw new Error('Audit database must be outside the selected project');
+    for (const suffix of ['', '-wal', '-shm', '-journal']) {
+      try {
+        const entry = lstatSync(path + suffix);
+        if (entry.isSymbolicLink() || !entry.isFile()) throw new Error('Audit storage must be regular files without symlinks');
+      } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    }
     database = new DatabaseSync(path, { readOnly: true, timeout: 1000 });
     database.exec('PRAGMA query_only=ON');
     const version = Number((database.prepare('PRAGMA user_version').get() as { user_version: number }).user_version);
@@ -52,6 +52,9 @@ export function readSQLite(projectPath: string, query: SQLiteQuery, env: NodeJS.
     const binding = database.prepare("SELECT value FROM schema_meta WHERE key='project_root'").get() as { value: string } | undefined;
     if (!binding) { output.state = 'unsupported'; output.message = 'Older shared database selected. Use the project database; existing history can be extracted separately.'; return output; }
     if (binding.value !== owner) throw new Error('Audit database belongs to a different project');
+    const enabled = database.prepare("SELECT value FROM schema_meta WHERE key='audit_enabled'").get() as { value: string } | undefined;
+    if (enabled && enabled.value !== '0' && enabled.value !== '1') throw new Error('Invalid saved audit setting');
+    output.auditEnabled = enabled?.value === '1';
     const invalid = database.prepare("SELECT COUNT(*) AS n FROM workspaces w LEFT JOIN schema_meta m ON m.key='project_workspace:' || w.workspace_id WHERE m.value IS NULL OR m.value<>?").get(owner) as { n: number };
     if (Number(invalid.n)) throw new Error('Workspace is not registered to this audit project');
     const workspace = database.prepare('SELECT workspace_id FROM workspaces WHERE project_root=?').get(projectRoot) as { workspace_id: string } | undefined;
