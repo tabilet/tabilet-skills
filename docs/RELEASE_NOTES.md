@@ -1,3 +1,11 @@
+# v2.8.0
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.8.0. Includes the
+autonomous goal execution refresh policy (`SUGGESTED_UPDATE: auto`), grant decision
+markers (`[ ]`, `[+]`, `[-]`, `[~]`), top-level `GLOBAL:` ambient authority, and
+SHA256 launch checksum verification. Retains the read-only SQLite sidebar, Stages view,
+and all seven canonical skill bundles. See [acceptance evidence](ACCEPTANCE.md) for tested gates.
+
 # v2.7.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.7.0. Retains the

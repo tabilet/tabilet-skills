@@ -913,7 +913,7 @@ function SQLitePanel({ active, read, navigate }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "http://127.0.0.1:8000/", target: "_blank", rel: "noreferrer", children: "Open local SQLite Explorer \u2197" }),
       " \xB7 ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.7.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.8.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       "The default database is ",
@@ -936,7 +936,7 @@ function SQLitePanel({ active, read, navigate }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "--audit-db" }),
       " to the runner."
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.7.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.8.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {

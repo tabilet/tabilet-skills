@@ -1,3 +1,15 @@
+# v2.8.0 acceptance and publication
+
+The companion pins canonical `tabilet/skills` v2.8.0 at commit
+`297179d3fa93d89cdb54f87a9f173ef0b43f813f` with verified file hashes in `upstream.lock.json`.
+The read-only SQLite sidebar, Stages view, and all seven canonical skill bundles are retained.
+
+| Gate | Result |
+|---|---|
+| Local typecheck, build, unit, and packed DSH acceptance | `npm run verify` passed: TypeScript, build, 47 unit and packed-loader tests, 11 native Web tests, and 11 isolated mixed rc.1 launcher/rc.2 component Web tests. Both Web runs installed the packed archive into disposable profiles and exercised the dashboard without model calls or project writes. |
+| Published archive | [v2.8.0](https://github.com/tabilet/tabilet-skills/releases/tag/v2.8.0). The public `tabilet-skills-2.8.0.tgz` is 245,783 bytes, SHA-256 `def09d3f785fa8eb24d7f131b2344cddc7cee03cdc2bb1b1a7094e469f73e2da`; its public `SHA256SUMS` verifies, and the download matches the locally tested archive byte for byte. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) points to the public v2.8.0 archive and changes only Tabilet's source YAML. |
+
 # v2.7.0 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.7.0 at commit

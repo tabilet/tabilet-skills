@@ -128,10 +128,10 @@ function SQLitePanel({ active, read, navigate }: { active: boolean; read: Dashbo
     </>}
     <h3>Open the full local Explorer</h3><p>The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:</p>
     <pre><code>tabilet-audit explorer {quotedProject} --port 8000</code></pre>
-    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.7.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
+    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.8.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
     <p>The default database is <code>{'${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3'}</code>. Set <code>TABILET_AUDIT_DB</code> to choose another external path before starting DSH. To rebuild the index, run <code>tabilet-audit index sync {quotedProject}</code> in a terminal.</p>
     <p>This default path applies to standalone <code>tabilet-audit</code> commands. Automatic API-runner auditing stays off unless you set <code>TABILET_AUDIT_DB</code> or pass <code>--audit-db</code> to the runner.</p>
-    <p><a href="https://github.com/tabilet/skills/blob/v2.7.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+    <p><a href="https://github.com/tabilet/skills/blob/v2.8.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
   </div>;
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: Reader; path: string; snapshot?: Snapshot; navigate: DashboardProps['navigate']; visible: boolean }) {

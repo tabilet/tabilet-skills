@@ -1,5 +1,12 @@
 # Publication status
 
+## v2.8.0 canonical release update
+
+The companion pins the canonical [v2.8.0 release](https://github.com/tabilet/skills/releases/tag/v2.8.0)
+by commit and file hashes. Its [v2.8.0 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.8.0)
+serves the tested archive and checksum. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+points to that archive.
+
 ## v2.7.0 canonical release update
 
 The companion pins the canonical [v2.7.0 release](https://github.com/tabilet/skills/releases/tag/v2.7.0)
