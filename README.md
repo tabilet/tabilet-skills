@@ -5,7 +5,7 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.10.1** pins the canonical v2.10.1 skills and adds read-only SQLite
+Version **2.10.2** pins the canonical v2.10.1 skills and adds read-only SQLite
 audit and Markdown-index browsing to the Memory Bank sidebar. It retains the
 Stages view and stage targeting for Propose, and accepts the Zod 4.6.2 version
 resolved by the supported DSH rc.2 profile. See
@@ -29,15 +29,15 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.10.1/tabilet-skills-2.10.1.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.10.1/tabilet-skills-2.10.1.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.10.2/tabilet-skills-2.10.2.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.10.2/tabilet-skills-2.10.2.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.10.1 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.10.2 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.1).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.2).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical

@@ -1,5 +1,13 @@
 # Publication status
 
+## v2.10.2 project database update
+
+This companion-only release keeps the canonical [v2.10.1 pin](https://github.com/tabilet/skills/releases/tag/v2.10.1)
+and reads the selected project's `tabilet/audit.sqlite3` instead of an external
+path. Its [v2.10.2 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.2)
+serves the tested archive and checksum. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+points to that archive.
+
 ## v2.10.1 canonical release update
 
 The companion pins the canonical [v2.10.1 release](https://github.com/tabilet/skills/releases/tag/v2.10.1)

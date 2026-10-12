@@ -1,16 +1,17 @@
-# Unreleased project database candidate
+# v2.10.2 acceptance and publication
 
-The source checkout reads the selected project's `tabilet/audit.sqlite3`, resolved
+The companion reads the selected project's `tabilet/audit.sqlite3`, resolved
 with the canonical path contract, and validates its project binding without
 creating or changing storage. It pins canonical v2.10.1 (commit
 `f410fed2013a8815eb8e6baef861060b1e2d8dad`), including the shared
-`tests/fixtures/project-storage.json` fixture. The published package version and
-the v2.10.1 archive are unchanged.
+`tests/fixtures/project-storage.json` fixture. The canonical repository stays at
+v2.10.1; only the companion version changes.
 
 | Gate | Result |
 |---|---|
-| Companion verification | On the tree rebased onto the published v2.10.1 companion: TypeScript, build, 53 unit and packed-loader tests, 11 native Web/headless tests, and 11 isolated mixed rc.1 launcher/rc.2 component tests passed. |
-| Publication | No release, archive or catalog update for this candidate. |
+| Local typecheck, build, unit, and packed DSH acceptance | TypeScript, build, 53 unit and packed-loader tests, 11 native Web/headless tests, and 11 isolated mixed rc.1 launcher/rc.2 component tests passed. |
+| Published archive | [v2.10.2](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.2). The `tabilet-skills-2.10.2.tgz` archive is 252,801 bytes, SHA-256 `9ee6dbb86ce9c0db81043018ec7a4a5b13950093a29119a9e85bad015fcf2c5f`; packing twice produced the identical hash, and the archive contains all seven canonical skills. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) points to the v2.10.2 archive and changes only Tabilet's source YAML. |
 
 # v2.10.1 acceptance and publication
 
