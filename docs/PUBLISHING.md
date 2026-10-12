@@ -1,5 +1,14 @@
 # Publication status
 
+## v2.10.1 canonical release update
+
+The companion pins the canonical [v2.10.1 release](https://github.com/tabilet/skills/releases/tag/v2.10.1)
+by commit and file hashes. It supersedes canonical v2.9.0 and v2.10.0, which
+shipped invalid YAML front matter in `memory-bank-init` that strict loaders such
+as DSH drop. Its [v2.10.1 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.1)
+serves the tested archive and checksum. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+points to that archive.
+
 ## v2.8.0 canonical release update
 
 The companion pins the canonical [v2.8.0 release](https://github.com/tabilet/skills/releases/tag/v2.8.0)

@@ -1,3 +1,22 @@
+# v2.10.1 acceptance and publication
+
+The companion pins canonical `tabilet/skills` v2.10.1 at commit
+`f410fed2013a8815eb8e6baef861060b1e2d8dad` with verified file hashes in `upstream.lock.json`.
+The read-only SQLite sidebar, Stages view, and all seven canonical skill bundles are retained.
+
+Canonical v2.9.0 and v2.10.0 are not published as separate DSH releases. This
+release carries both, and it is pinned to v2.10.1 rather than v2.10.0 because
+v2.10.0 shipped `memory-bank-init` front matter that is not valid YAML. The
+companion's own packed test caught it: DSH's strict loader dropped the skill and
+loaded six of seven. v2.10.1 quotes that `argument-hint` and adds a front-matter
+lint to the canonical repository check.
+
+| Gate | Result |
+|---|---|
+| Local typecheck, build, unit, and packed DSH acceptance | `npm run verify` gates passed: TypeScript, build, 47 unit and packed-loader tests, 11 native Web tests, and 11 isolated mixed rc.1 launcher/rc.2 component Web tests. Both Web runs installed the packed archive into disposable profiles and made no model requests. |
+| Published archive | [v2.10.1](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.1). The `tabilet-skills-2.10.1.tgz` archive is 251,601 bytes, SHA-256 `b7d91f35794c7131e2c3c59e79a12060cfa642a6b13b4d2d85ab11a692d259db`; packing twice produced the identical hash, and the archive contains all seven canonical skills. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) points to the v2.10.1 archive and changes only Tabilet's source YAML. |
+
 # v2.8.0 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.8.0 at commit

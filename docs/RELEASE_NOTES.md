@@ -1,3 +1,12 @@
+# v2.10.1
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.10.1, which
+includes the bounded verification-attempt gate and expensive-check planning
+(v2.10.0), the declarative `--environment` planning option (v2.9.0), and a fix
+for invalid `memory-bank-init` front matter that DSH previously dropped. All
+seven skills load. Retains the read-only SQLite sidebar, Stages view, and all
+seven canonical skill bundles. See [acceptance evidence](ACCEPTANCE.md) for tested gates.
+
 # v2.8.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.8.0. Includes the
