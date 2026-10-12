@@ -1,3 +1,15 @@
+# Unreleased
+
+The SQLite sidebar reads the canonical per-project database at
+`tabilet/audit.sqlite3` instead of an external path. Registered linked worktrees
+share the primary checkout's file while their indexed Markdown stays scoped to
+the selected checkout. The sidebar remains read-only, never creates, enables or
+refreshes storage, rejects symlinked storage and a database bound to a different
+project, reports an older shared file as unsupported, and shows the project's
+manual audit setting with the commands to enable, check and disable it. It
+pins the canonical `tests/fixtures/project-storage.json` path-resolution
+fixture shared with the Python toolkit. Not yet released.
+
 # v2.10.1
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.10.1, which

@@ -1,3 +1,17 @@
+# Unreleased project database candidate
+
+The source checkout reads the selected project's `tabilet/audit.sqlite3`, resolved
+with the canonical path contract, and validates its project binding without
+creating or changing storage. It pins canonical v2.10.1 (commit
+`f410fed2013a8815eb8e6baef861060b1e2d8dad`), including the shared
+`tests/fixtures/project-storage.json` fixture. The published package version and
+the v2.10.1 archive are unchanged.
+
+| Gate | Result |
+|---|---|
+| Companion verification | On the tree rebased onto the published v2.10.1 companion: TypeScript, build, 53 unit and packed-loader tests, 11 native Web/headless tests, and 11 isolated mixed rc.1 launcher/rc.2 component tests passed. |
+| Publication | No release, archive or catalog update for this candidate. |
+
 # v2.10.1 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.10.1 at commit

@@ -810,7 +810,7 @@ function SQLitePanel({ active, read, navigate }) {
   const quotedProject = data?.projectRoot ? `'${data.projectRoot.replaceAll("'", "'\\''")}'` : "/absolute/path/to/project";
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Optional SQLite audit and lookup" }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Audit records and the Markdown index for this session\u2019s project. The sidebar opens the external database read-only; project Markdown remains authoritative. It never creates or refreshes the index." }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Audit records and the Markdown index for this session\u2019s project. The sidebar opens the project database read-only; project Markdown remains authoritative. It never creates or refreshes the index." }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-actions", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setRefresh((n) => n + 1), children: "Refresh SQLite" }),
       ["overview", "runs", "index"].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { "aria-pressed": section === item || item === "runs" && section === "events", onClick: () => switchTo(item), children: item === "index" ? "Markdown index" : item[0].toUpperCase() + item.slice(1) }, item))
@@ -827,6 +827,10 @@ function SQLitePanel({ active, read, navigate }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: data.databasePath || "Unavailable" })
       ] }),
       data.state === "ready" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+          "Audit recording: ",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: data.auditEnabled ? "enabled" : "disabled" })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-counts", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: data.counts.runs }),
@@ -916,25 +920,23 @@ function SQLitePanel({ active, read, navigate }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-      "The default database is ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "${XDG_STATE_HOME:-~/.local/state}/tabilet/audit.sqlite3" }),
-      ". Set ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
-      " to choose another external path before starting DSH. To rebuild the index, run ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", { children: [
-        "tabilet-audit index sync ",
-        quotedProject
-      ] }),
-      " in a terminal."
+      "The database is always ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/audit.sqlite3" }),
+      ". Linked worktrees share the primary checkout\u2019s file. Commit ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/.gitignore" }),
+      " with ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "/audit.sqlite3*" }),
+      " to keep the database and SQLite sidecars out of Git."
     ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Audit recording stays off until you manually enable this project. Index refresh does not enable it. Run these commands in a terminal:" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: `tabilet-audit audit enable ${quotedProject}
+tabilet-audit audit status ${quotedProject}
+tabilet-audit audit disable ${quotedProject}
+tabilet-audit index sync ${quotedProject}` }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
-      "This default path applies to standalone ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet-audit" }),
-      " commands. Automatic API-runner auditing stays off unless you set ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "TABILET_AUDIT_DB" }),
-      " or pass ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "--audit-db" }),
-      " to the runner."
+      "To discard a broken database, stop its agents and Explorer, disable recording, then delete ",
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/audit.sqlite3" }),
+      " and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact."
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });

@@ -41,6 +41,7 @@
     "skills/memory-bank-upgrade/assets/template/tabilet/memory-bank/tech-stack.md": "b466850c3cd486814c7bd49b833c9f8759d0b03733ee4f94d6368de978245c08",
     "skills/memory-bank-upgrade/migrate-v1.5-to-v2.py": "8d69707341562889071d8d2076e56f4c5c0c7f564762938579ab5dbfd7927fd8",
     "skills/memory-bank-upgrade/references/optional-audit.md": "e8a5db1e7fd98d17ffb7bdc97ca2b1084541194ce939f77f9269d87b01959603",
-    "tests/fixtures/parser-conformance.json": "64e381bc807c7a545462d31734c2eee201cbfe411589ce190af761ac753d0315"
+    "tests/fixtures/parser-conformance.json": "64e381bc807c7a545462d31734c2eee201cbfe411589ce190af761ac753d0315",
+    "tests/fixtures/project-storage.json": "999ae64e74963e0f38a3a8c07c66619fa0c8215efd5ff9a6fdc79f7cb4d30d07"
   }
 }
