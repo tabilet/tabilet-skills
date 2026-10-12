@@ -20831,6 +20831,9 @@ var sqliteViewSchema = external_exports.object({
   entries: external_exports.array(external_exports.object({ id: external_exports.string(), title: external_exports.string(), meta: external_exports.string(), detail: external_exports.string().optional(), path: external_exports.string().optional(), line: external_exports.number().optional() })),
   more: external_exports.boolean()
 });
+function strict(typeSymbol, schema) {
+  return { mode: "strict", typeSymbol, schema, create: () => schema };
+}
 var remote = {
   package: "tabilet-skills",
   descriptors: [{
@@ -20839,9 +20842,9 @@ var remote = {
     namespace: "tabiletMemory",
     method: "sources",
     invocation: { kind: "direct" },
-    parameters: [{ name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: external_exports.string().min(1) } }],
+    parameters: [{ name: "sessionId", wire: "sessionId", source: "json", codec: strict("tabilet-skills#SessionId", external_exports.string().min(1)) }],
     cancellation: { parameter: "signal" },
-    result: { mode: "strict", typeSymbol: "tabilet-skills#SourceCatalog", schema: catalogSchema }
+    result: strict("tabilet-skills#SourceCatalog", catalogSchema)
   }, {
     id: "tabilet-skills#tabiletMemory/sqlite",
     service: "tabiletMemory",
@@ -20849,11 +20852,11 @@ var remote = {
     method: "sqlite",
     invocation: { kind: "direct" },
     parameters: [
-      { name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: external_exports.string().min(1) } },
-      { name: "query", wire: "query", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteQuery", schema: sqliteQuerySchema } }
+      { name: "sessionId", wire: "sessionId", source: "json", codec: strict("tabilet-skills#SessionId", external_exports.string().min(1)) },
+      { name: "query", wire: "query", source: "json", codec: strict("tabilet-skills#SQLiteQuery", sqliteQuerySchema) }
     ],
     cancellation: { parameter: "signal" },
-    result: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteView", schema: sqliteViewSchema }
+    result: strict("tabilet-skills#SQLiteView", sqliteViewSchema)
   }]
 };
 

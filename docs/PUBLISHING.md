@@ -1,5 +1,13 @@
 # Publication status
 
+## v2.10.3 DSH rc.2 launcher fix
+
+This companion-only release fixes plugin activation on the DSH 0.2.0-rc.2 launcher and
+keeps the canonical [v2.10.1 pin](https://github.com/tabilet/skills/releases/tag/v2.10.1).
+Its [v2.10.3 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.3)
+serves the tested archive and checksum. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+points to that archive.
+
 ## v2.10.2 project database update
 
 This companion-only release keeps the canonical [v2.10.1 pin](https://github.com/tabilet/skills/releases/tag/v2.10.1)

@@ -1,6 +1,6 @@
 {
   "name": "tabilet-skills",
-  "version": "2.10.2",
+  "version": "2.10.3",
   "description": "Shared memory-bank skills and a read-only project dashboard for DSH.",
   "type": "module",
   "license": "MIT",
@@ -54,10 +54,10 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-skill-filesystem": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-skill-filesystem": "^0.1.5-rc.1 || ^0.2.0-rc.2",
     "react": ">=18.3.1 <20",
-    "@deepseek-ai/dsh-typert-protocol": "^0.1.5-rc.1",
-    "@deepseek-ai/dsh-util-workspace-path": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.5-rc.1 || ^0.2.0-rc.2",
+    "@deepseek-ai/dsh-util-workspace-path": "^0.1.5-rc.1 || ^0.2.0-rc.2",
     "zod": "^4.6.2"
   },
   "devDependencies": {

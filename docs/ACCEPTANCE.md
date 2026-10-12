@@ -1,3 +1,15 @@
+# v2.10.3 acceptance and publication
+
+Companion-only fix for activation on the DSH 0.2.0-rc.2 launcher. The canonical
+pin stays at v2.10.1 (commit `f410fed2013a8815eb8e6baef861060b1e2d8dad`).
+
+| Gate | Result |
+|---|---|
+| Local typecheck, build, unit, and packed DSH acceptance | TypeScript, build, unit and packed-loader tests, 11 native Web/headless tests, and 11 isolated mixed rc.1 launcher/rc.2 component tests passed. |
+| rc.2 launcher activation | The packed archive installed without a version exemption into a disposable profile on `@deepseek-ai/dsh@0.2.0-rc.2`; headless Chromium loaded the Web UI with no "Failed to load plugins". The Memory Bank panel was not exercised in that profile, and the repo suites still run on the pinned 0.1.5-rc.2 graph (a 0.2.x test graph remains open). |
+| Published archive | [v2.10.3](https://github.com/tabilet/tabilet-skills/releases/tag/v2.10.3). `tabilet-skills-2.10.3.tgz` is 252,853 bytes, SHA-256 `d0202938d3633f11a54283ffa26d305769b8e085d3757fc864b4241254bb83ac`; packing twice produced the identical archive. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) is updated to the v2.10.3 archive and changes only Tabilet's source YAML. |
+
 # v2.10.2 acceptance and publication
 
 The companion reads the selected project's `tabilet/audit.sqlite3`, resolved

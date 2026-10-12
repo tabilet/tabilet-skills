@@ -1,6 +1,6 @@
 /** One read-only metadata endpoint; shared strict Host/Client wire contract. */
 import { z } from 'zod';
-import type { TypertRemoteContribution, RemoteResult } from '@deepseek-ai/dsh-typert-protocol';
+import type { TypertRemoteContribution, TypertCodec, RemoteResult } from '@deepseek-ai/dsh-typert-protocol';
 import type { SessionId } from '@deepseek-ai/dsh-session/types';
 import type { SQLiteQuery, SQLiteView } from './sqlite.ts';
 export const sourceSchema = z.object({ name: z.string(), source: z.string(), provider: z.string(), location: z.string().optional() });
@@ -13,18 +13,22 @@ export const sqliteViewSchema = z.object({
   index: z.object({ refreshedAt: z.string().nullable(), complete: z.boolean().nullable(), diagnostics: z.array(z.string()) }).nullable(),
   entries: z.array(z.object({ id: z.string(), title: z.string(), meta: z.string(), detail: z.string().optional(), path: z.string().optional(), line: z.number().optional() })), more: z.boolean(),
 });
+/** Strict codec readable by the rc.1 (`schema`) and rc.2 (`create`) Typert runtimes. */
+function strict(typeSymbol: string, schema: z.ZodType): TypertCodec {
+  return { mode: 'strict', typeSymbol, schema, create: () => schema } as unknown as TypertCodec;
+}
 export const remote: TypertRemoteContribution = {
   package: 'tabilet-skills', descriptors: [{
     id: 'tabilet-skills#tabiletMemory/sources', service: 'tabiletMemory', namespace: 'tabiletMemory', method: 'sources', invocation: { kind: 'direct' },
-    parameters: [{ name: 'sessionId', wire: 'sessionId', source: 'json', codec: { mode: 'strict', typeSymbol: 'tabilet-skills#SessionId', schema: z.string().min(1) } }],
-    cancellation: { parameter: 'signal' }, result: { mode: 'strict', typeSymbol: 'tabilet-skills#SourceCatalog', schema: catalogSchema },
+    parameters: [{ name: 'sessionId', wire: 'sessionId', source: 'json', codec: strict('tabilet-skills#SessionId', z.string().min(1)) }],
+    cancellation: { parameter: 'signal' }, result: strict('tabilet-skills#SourceCatalog', catalogSchema),
   }, {
     id: 'tabilet-skills#tabiletMemory/sqlite', service: 'tabiletMemory', namespace: 'tabiletMemory', method: 'sqlite', invocation: { kind: 'direct' },
     parameters: [
-      { name: 'sessionId', wire: 'sessionId', source: 'json', codec: { mode: 'strict', typeSymbol: 'tabilet-skills#SessionId', schema: z.string().min(1) } },
-      { name: 'query', wire: 'query', source: 'json', codec: { mode: 'strict', typeSymbol: 'tabilet-skills#SQLiteQuery', schema: sqliteQuerySchema } },
+      { name: 'sessionId', wire: 'sessionId', source: 'json', codec: strict('tabilet-skills#SessionId', z.string().min(1)) },
+      { name: 'query', wire: 'query', source: 'json', codec: strict('tabilet-skills#SQLiteQuery', sqliteQuerySchema) },
     ],
-    cancellation: { parameter: 'signal' }, result: { mode: 'strict', typeSymbol: 'tabilet-skills#SQLiteView', schema: sqliteViewSchema },
+    cancellation: { parameter: 'signal' }, result: strict('tabilet-skills#SQLiteView', sqliteViewSchema),
   }],
 };
 declare module '@deepseek-ai/dsh-typert-protocol' {

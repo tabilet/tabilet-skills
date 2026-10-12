@@ -110,6 +110,9 @@ var sqliteViewSchema = z.object({
   entries: z.array(z.object({ id: z.string(), title: z.string(), meta: z.string(), detail: z.string().optional(), path: z.string().optional(), line: z.number().optional() })),
   more: z.boolean()
 });
+function strict(typeSymbol, schema) {
+  return { mode: "strict", typeSymbol, schema, create: () => schema };
+}
 var remote = {
   package: "tabilet-skills",
   descriptors: [{
@@ -118,9 +121,9 @@ var remote = {
     namespace: "tabiletMemory",
     method: "sources",
     invocation: { kind: "direct" },
-    parameters: [{ name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: z.string().min(1) } }],
+    parameters: [{ name: "sessionId", wire: "sessionId", source: "json", codec: strict("tabilet-skills#SessionId", z.string().min(1)) }],
     cancellation: { parameter: "signal" },
-    result: { mode: "strict", typeSymbol: "tabilet-skills#SourceCatalog", schema: catalogSchema }
+    result: strict("tabilet-skills#SourceCatalog", catalogSchema)
   }, {
     id: "tabilet-skills#tabiletMemory/sqlite",
     service: "tabiletMemory",
@@ -128,11 +131,11 @@ var remote = {
     method: "sqlite",
     invocation: { kind: "direct" },
     parameters: [
-      { name: "sessionId", wire: "sessionId", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SessionId", schema: z.string().min(1) } },
-      { name: "query", wire: "query", source: "json", codec: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteQuery", schema: sqliteQuerySchema } }
+      { name: "sessionId", wire: "sessionId", source: "json", codec: strict("tabilet-skills#SessionId", z.string().min(1)) },
+      { name: "query", wire: "query", source: "json", codec: strict("tabilet-skills#SQLiteQuery", sqliteQuerySchema) }
     ],
     cancellation: { parameter: "signal" },
-    result: { mode: "strict", typeSymbol: "tabilet-skills#SQLiteView", schema: sqliteViewSchema }
+    result: strict("tabilet-skills#SQLiteView", sqliteViewSchema)
   }]
 };
 

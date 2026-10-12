@@ -1,3 +1,13 @@
+# v2.10.3
+
+Compatibility fix; the canonical `tabilet/skills` pin stays at v2.10.1. The
+2.10.2 package failed to activate on the DSH 0.2.0-rc.2 launcher
+(`@deepseek-ai/dsh@latest`): rc.2 requires a `create()` factory on every strict
+Typert codec, so the Web client stopped at "Failed to load plugins". The remote
+descriptors now carry both `schema` (rc.1) and `create` (rc.2), and the
+declared `peerDependencies` and `engines.dsh` accept `^0.1.5-rc.1 || ^0.2.0-rc.2`.
+No dashboard behavior changes. See [acceptance evidence](ACCEPTANCE.md).
+
 # v2.10.2
 
 Companion-only release; it pins canonical `tabilet/skills` v2.10.1 unchanged.
