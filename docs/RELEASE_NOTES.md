@@ -1,3 +1,15 @@
+# v2.11.0
+
+Pins all seven shared skills to canonical `tabilet/skills` v2.11.0. Incorporates
+corrective planning (`CORRECTIVE_PLANNING: auto|confirm`) and interactive
+approval email alerts (`--email ADDRESS` via Cloudflare REST helper) into Goal
+and Next. Incorporates declarative `--test` verification profiles (`standard`,
+`browserlight`, `golight`, `rustlight`, `tslight`, `jslight`, `pythonlight`)
+and testing standards into `init`, `propose`, `reconcile`, and `tech-stack.md`.
+Preserves plugin activation across DSH 0.1.5-rc.1 and 0.2.0-rc.2 launchers,
+the read-only SQLite sidebar, Stages view, and all seven canonical skill
+bundles. See [acceptance evidence](ACCEPTANCE.md) for tested gates.
+
 # v2.10.3
 
 Compatibility fix; the canonical `tabilet/skills` pin stays at v2.10.1. The

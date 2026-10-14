@@ -917,7 +917,7 @@ function SQLitePanel({ active, read, navigate }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "http://127.0.0.1:8000/", target: "_blank", rel: "noreferrer", children: "Open local SQLite Explorer \u2197" }),
       " \xB7 ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       "The database is always ",
@@ -938,7 +938,7 @@ tabilet-audit index sync ${quotedProject}` }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/audit.sqlite3" }),
       " and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact."
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.10.1/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {

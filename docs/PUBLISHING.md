@@ -1,5 +1,14 @@
 # Publication status
 
+## v2.11.0 canonical release update
+
+The companion pins the canonical [v2.11.0 release](https://github.com/tabilet/skills/releases/tag/v2.11.0)
+by commit and file hashes in `upstream.lock.json`. It incorporates corrective planning,
+interactive approval email alerts, and declarative testing profiles into the shared
+skill payload. Its [v2.11.0 GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.11.0)
+serves the tested archive and checksum. [Catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+points to that archive.
+
 ## v2.10.3 DSH rc.2 launcher fix
 
 This companion-only release fixes plugin activation on the DSH 0.2.0-rc.2 launcher and
