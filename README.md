@@ -5,16 +5,17 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.11.0** pins the canonical v2.11.0 skills, loads on the DSH 0.2.0-rc.2 launcher, and adds read-only SQLite
-audit and Markdown-index browsing to the Memory Bank sidebar. It retains the
-Stages view and stage targeting for Propose, and accepts the Zod 4.6.2 version
-resolved by the supported DSH rc.2 profile. See
+Version **2.13.0** pins the canonical v2.13.0 skills, including bundled goal
+protocols and fingerprint registries, project addenda, user-selected model policy,
+and hardened approval email. It retains the read-only SQLite dashboard, Stages
+view and stage targeting for Propose. It loads on the DSH 0.2.0-rc.2 launcher and
+accepts the Zod 4.6.2 version resolved by the supported DSH rc.2 profile. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
-The source checkout includes unreleased manual audit opt-in and one SQLite
-database per project at `tabilet/audit.sqlite3`. Registered linked worktrees share
-their repository's database. Older shared storage is not selected by default; if you have one
+Each project can manually enable audit recording in its own database at
+`tabilet/audit.sqlite3`. Registered linked worktrees share their repository's
+database. Older shared storage is not selected by default; if you have one
 (including from before v2.5.0), you can ask your LLM agent to extract this
 project's history and import it into its SQLite database.
 
@@ -29,19 +30,19 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.11.0/tabilet-skills-2.11.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.11.0/tabilet-skills-2.11.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.13.0/tabilet-skills-2.13.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.13.0/tabilet-skills-2.13.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.11.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.13.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.11.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.13.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/v2.11.0/docs/DSH.md#install-the-seven-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/v2.13.0/docs/DSH.md#install-the-seven-bundles).
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -76,7 +77,7 @@ enumerated by DSH's public registry. Review local overrides before removing them
   `/audit.sqlite3*`. To discard broken storage, stop writers and delete the
   database and sidecars; missing storage leaves audit disabled.
   Install the optional toolkit to create or refresh the index and run the
-  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md).
+  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.13.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the

@@ -1,5 +1,14 @@
 # Publication status
 
+## v2.13.0 release candidate
+
+The companion pins the canonical [v2.13.0 release](https://github.com/tabilet/skills/releases/tag/v2.13.0)
+by immutable commit and file hashes. Local typecheck, build, packed-loader,
+native Web/headless and mixed-launcher acceptance passed. The prepared archive
+and checksum are recorded in [acceptance evidence](ACCEPTANCE.md).
+GitHub archive publication and the update to [catalog PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423)
+remain pending. npm publication is not required for this GitHub archive route.
+
 ## v2.11.0 canonical release update
 
 The companion pins the canonical [v2.11.0 release](https://github.com/tabilet/skills/releases/tag/v2.11.0)

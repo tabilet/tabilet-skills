@@ -1,3 +1,23 @@
+# v2.13.0
+
+Pins all seven canonical skills to `tabilet/skills` v2.13.0. Goal protocols and
+fingerprint registries ship inside complete skill bundles; project
+`tabilet/GOAL.md` files are optional addenda. Protocol identities normalize CRLF
+to LF and compare hashes rather than release labels. Legacy launches and paused
+runs resolve missing or changed identity explicitly, preserving grants and limits.
+
+Includes opt-in, provider-neutral `MODEL_POLICY` with user-selected models and
+optional host-supported effort, fresh read-only whole-milestone review, and
+evidence-preserving lease cleanup. Approval email handles worker-start failures,
+large Unicode summaries and malformed arguments without weakening duplicate or
+uncertain-delivery suppression. These are instruction-level workflow contracts;
+the companion does not execute workflows or approve actions.
+
+Retains the read-only project SQLite dashboard and Stages view, the Zod 4.6.2
+peer minimum, and the rc.1/rc.2 launcher compatibility fix. Installing updated
+skills never migrates project files or changes personal DSH profiles. See
+[acceptance evidence](ACCEPTANCE.md) for verified release gates and limits.
+
 # v2.11.0
 
 Pins all seven shared skills to canonical `tabilet/skills` v2.11.0. Incorporates

@@ -1,3 +1,19 @@
+# v2.13.0 acceptance and release candidate
+
+The companion pins canonical `tabilet/skills` v2.13.0 at commit
+`e314ebc7ac34d4d7f810ad2930708660c437a5a4` with verified file hashes in `upstream.lock.json`.
+The package contains complete protocol registries, opt-in model-policy references
+and the hardened approval-email helpers. The dashboard remains read-only.
+
+| Gate | Result |
+|---|---|
+| Canonical release | [v2.13.0](https://github.com/tabilet/skills/releases/tag/v2.13.0). All 44 repository checks, strict MkDocs and DSH compatibility passed; hosted Docker, audit-platform, DSH, explorer and documentation checks passed. |
+| Local typecheck, build, unit and packed-loader acceptance | `npm run verify` passed: TypeScript, build, 55 unit/packed-loader tests, 11 native Web/headless tests, and 11 isolated mixed rc.1 launcher/rc.2 component tests. Tests use disposable profiles and a local fixture provider, with no paid or live model calls. |
+| Prepared archive | `tabilet-skills-2.13.0.tgz`, 358,782 bytes, SHA-256 `ea1537907d6cbac622d0383e656680cf04d0e48651d2864eac3ada802baa9f3b`. Packing twice produced identical bytes. All seven skills and their locked resources are included; no install scripts, DSH runtime, credentials or bytecode are bundled. |
+| Release boundary | The locked test graph remains DSH 0.1.5-rc.2, plus the isolated rc.1 launcher. The 0.2.0-rc.2 activation fix is retained; this run does not certify a full 0.2.x graph or real-model workflow quality. No personal DSH installation was changed. |
+| GitHub publication | Pending tag/archive upload and public-download verification. |
+| Catalog | [PR #6423](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6423) will be updated to the v2.13.0 public archive after publication; maintainer merge is a separate gate. |
+
 # v2.11.0 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.11.0 at commit
