@@ -1,12 +1,16 @@
 # Publication status
 
-## v2.15.0 release candidate
+## v2.15.0 release and catalog submission
 
 The companion pins the canonical [v2.15.0 source tag](https://github.com/tabilet/skills/tree/v2.15.0)
 by immutable commit and file hashes. Local typecheck, build, packed-loader,
 native Web/headless and mixed-launcher acceptance passed; the archive hash and
 release boundaries are recorded in [acceptance evidence](ACCEPTANCE.md).
-GitHub asset publication, hosted verification and the new catalog PR are pending.
+The [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.15.0)
+serves the tested archive and checksum; anonymous downloads match both files.
+[Catalog PR #9296](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/9296)
+changes only Tabilet's source YAML. Local entry/submission checks and hosted main/tag companion verification pass.
+Hosted catalog verification and maintainer merge remain pending.
 The previous v2.13.0 catalog submission #6423 has merged. npm publication is not
 required for this GitHub archive route. No personal DSH installation was changed.
 
