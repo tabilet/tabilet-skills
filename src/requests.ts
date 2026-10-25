@@ -1,3 +1,4 @@
+import { validRecordId } from './parser.ts';
 export const commands = ['next', 'goal', 'propose', 'reconcile', 'upgrade', 'init', 'archive'] as const;
 export type Command = typeof commands[number];
 export interface RequestOptions { order?: string; completion?: string; policy?: 'task' | 'none'; requestedChange?: string; stage?: string; review?: string; scope?: string; resume?: boolean }
@@ -7,9 +8,9 @@ export function prepare(command: Command, options: RequestOptions = {}): string 
     case 'next': return `${prefix} ${options.resume ? 'Resume the sole in-progress row' : 'Select the next actionable row'} using the current milestone priority, dependencies, and skill selection rules. Re-read the ledger before selecting work; surface conflicts. A task marker does not establish exclusive ownership. EXTERNAL_MUTATIONS: none.`;
     case 'goal': {
       const ids = options.order?.split(/\s*(?:->|,|\n)\s*/).filter(Boolean) || [];
-      if (!ids.length || ids.some(id => !/^[A-Z](?:0[1-9]|[1-9][0-9])$/.test(id)) || new Set(ids).size !== ids.length) throw new Error('Enter a unique explicit milestone order, such as M01 -> M02.');
+      if (!ids.length || ids.some(id => !validRecordId.test(id)) || new Set(ids).size !== ids.length) throw new Error('Enter a unique explicit milestone order, such as M01 -> M02 or M01-01.');
       if (!options.completion?.trim()) throw new Error('Enter the completion conditions.');
-      return `${prefix} Follow the project tabilet/GOAL.md for ${ids.join(' -> ')}.\nCompletion conditions: ${options.completion.trim()}\nCOMMIT_POLICY: ${options.policy || 'task'}\nEXTERNAL_MUTATIONS: none\nReconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
+      return `${prefix} Follow the bundled memory-bank goal protocol with applicable project addenda.\nSTATUS_ORDER: ${ids.join(' -> ')}\nCompletion conditions: ${options.completion.trim()}\nCOMMIT_POLICY: ${options.policy || 'task'}\nOPTION_POLICY: confirm\nOPTIMIZE_POLICY: none\nEXTERNAL_MUTATIONS: none\nAUTHORIZATION_GRANTS: {}\nResolve GOAL_IDENTITY and reconcile permanent root/child IDs, declared parents and dependencies against the current active and retired records before execution. Options remain deferred unless explicitly approved; cancellation and supersession do not prove completion.`;
     }
     case 'propose': {
       if (!options.requestedChange?.trim()) throw new Error('Enter the requested change.');

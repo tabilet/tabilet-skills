@@ -66,7 +66,13 @@ var markers = {
   "`[X]`": "cancelled",
   "`[-]`": "historical"
 };
-var validId = /^[A-Z](?:0[1-9]|[1-9][0-9])$/;
+var validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9])(?:-(?:0[1-9]|[1-9][0-9]))?$/;
+function recordIdentity(name) {
+  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/);
+  if (root) return { id: root[1], kind: "status" };
+  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]))-((?:0[1-9]|[1-9][0-9]))\.md$/);
+  if (child) return { id: `${child[2]}-${child[3]}`, kind: child[1], parent: child[2] };
+}
 var linesOf = (text) => text.split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/);
 function unfencedLines(text) {
   let char = "", length = 0;
@@ -171,7 +177,7 @@ function fencedDocument(text) {
   return lines.slice(1, -1).join("");
 }
 function retiredRecord(text, name) {
-  const id = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/)?.[1];
+  const identity = recordIdentity(name), id = identity?.id;
   requireThat(id, "invalid retired status ID; use 01 through 99");
   const lines = splitKeepEnds(text);
   const headings = unfencedLines(text).filter(([, s]) => s.startsWith("## "));
@@ -187,26 +193,29 @@ function retiredRecord(text, name) {
   requireThat(required2.every((k) => metadata[k]), "missing retirement metadata");
   requireThat(metadata.Milestone === id, "retired milestone ID does not match its filename");
   requireThat([`memory-bank/${name}`, `tabilet/memory-bank/${name}`].includes(metadata["Source status"]), "source status path does not match the retired ID");
-  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata["Source specification"]), "missing original milestone specification anchor");
+  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata["Source specification"]) || identity?.kind !== "status" && metadata["Source specification"] === `tabilet/memory-bank/${name}`, "missing original milestone specification anchor");
   requireThat(["completed", "cancelled", "superseded"].includes(metadata.Outcome), "invalid retirement outcome");
   requireThat(/^\d{4}-\d{2}-\d{2}$/.test(metadata.Retired) && !metadata.Retired.startsWith("0000") && Number.isFinite(Date.parse(metadata.Retired)) && new Date(metadata.Retired).toISOString().slice(0, 10) === metadata.Retired, "retirement date must use YYYY-MM-DD");
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), "evidence must be a full commit or unversioned");
   requireThat(["clean", "includes uncommitted changes", "unversioned"].includes(metadata.Worktree), "invalid worktree provenance");
   requireThat(metadata.Evidence === "unversioned" === (metadata.Worktree === "unversioned"), "inconsistent unversioned provenance");
-  if (metadata.Review === "legacy")
+  const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(""));
+  const status = fencedDocument(lines.slice(headings[1][0]).join(""));
+  const rows = statusRows(status);
+  const rowlessDisposition = identity?.kind === "option" && ["cancelled", "superseded"].includes(metadata.Outcome) && !rows.length;
+  if (rowlessDisposition && metadata.Review === "not applicable" && metadata["Review iterations"] === "0") {
+  } else if (metadata.Review === "legacy")
     requireThat(metadata["Review iterations"] === "not recorded" && !!metadata["Legacy closure"] && metadata.Outcome === "completed", "legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note");
   else
     requireThat(metadata.Review === "passed" && /^(?:[1-9]|10)$/.test(metadata["Review iterations"]), "retirement requires a passed review within 10 iterations");
   requireThat(metadata.Outcome === "completed" || metadata.Disposition, "cancellation or supersession needs its authorized disposition");
   requireThat(metadata.Outcome !== "superseded" || metadata.Successor, "supersession needs its accepted successor");
-  const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(""));
-  const status = fencedDocument(lines.slice(headings[1][0]).join(""));
   requireThat(specification.trim() && status.trim(), "retired source documents are empty");
   const specHeadings = unfencedLines(specification).filter(([, s]) => s.startsWith("## "));
-  requireThat(specHeadings.length === 1 && new RegExp("^## " + id + "(?:\\s|$)").test(specHeadings[0][1]), "retired specification does not match its milestone ID");
-  const problems = statusMarkerProblems(status), rows = statusRows(status);
+  requireThat(specHeadings.length >= 1 && (identity?.kind !== "status" || specHeadings.length === 1) && new RegExp("^## " + id + "(?:\\s|$)").test(specHeadings[0][1]), "retired specification does not match its milestone ID");
+  const problems = statusMarkerProblems(status);
   requireThat(!problems.length, "retired task has an " + problems.join("; "));
-  requireThat(rows.length && rows.every((r) => !["pending", "in_progress", "blocked"].includes(r.state)), "retired status must contain only closed task rows");
+  requireThat((rows.length || rowlessDisposition) && rows.every((r) => !["pending", "in_progress", "blocked"].includes(r.state)), "retired status must contain only closed task rows");
   requireThat(rows.every((r) => r.state !== "historical" || /\bsuccessor\b\s*:?\s+\S/i.test(r.cells.slice(2).join(" "))), "closed-historical row has no named successor");
   return { metadata, specification, status };
 }
@@ -244,7 +253,8 @@ function reviewEvidence(text) {
 
 // src/reader.ts
 var MAX_FILE_BYTES = 2 * 1024 * 1024;
-var activeName = /^status-([A-Z]\d{2})\.md$/;
+var activeName = /^(?:status-[A-Z]\d{2}|(?:amend|option)-[A-Z]\d{2}-\d{2})\.md$/;
+var declaredName = /^(?:status|amend|option)(?:-.*)?\.md$/;
 var basename = (p) => p.slice(p.lastIndexOf("/") + 1);
 var Reader = class {
   constructor(port) {
@@ -330,7 +340,7 @@ var Reader = class {
     await attempt("AGENTS.md");
     const stages = layout === "legacy" ? void 0 : await attempt("tabilet/stages.md", true);
     if (stages) issues.push(...stageOverview(stages.text).problems.map((problem) => `${stages.path}: ${problem}`));
-    let goalAvailable = false;
+    let goalAvailable = layout === "v2" || layout === "new";
     try {
       await this.port.stat(`${base}GOAL.md`, signal);
       goalAvailable = true;
@@ -343,10 +353,14 @@ var Reader = class {
     for (const link of milestone ? localLinks(milestone.text, milestone.path) : []) if (activeName.test(basename(link.path))) activePaths.add(link.path);
     const milestones = [];
     for (const path of [...activePaths].sort()) {
-      const id = basename(path).match(activeName)[1];
-      if (!validId.test(id)) issues.push(`${path}: invalid permanent ID`);
+      const identity = recordIdentity(basename(path));
+      if (!identity) {
+        issues.push(`${path}: invalid permanent ID`);
+        continue;
+      }
+      const { id, kind, parent } = identity;
       const title = milestone && unfencedLines(milestone.text).find(([, s]) => new RegExp("^## " + id + "(?:\\s|$)").test(s))?.[1].slice(3);
-      milestones.push({ id, path, title: title || id });
+      milestones.push({ id, path, title: title || id, kind, ...parent ? { parent } : {} });
     }
     const activeDocuments = /* @__PURE__ */ new Map();
     for (let offset = 0; offset < milestones.length; offset += 12) {
@@ -356,7 +370,8 @@ var Reader = class {
       }));
     }
     const identities = /* @__PURE__ */ new Set(), aliases = /* @__PURE__ */ new Set();
-    for (const { id, path } of milestones) {
+    for (const milestone2 of milestones) {
+      const { id, path, kind, parent } = milestone2;
       const doc = activeDocuments.get(path);
       if (!doc) continue;
       const identity = JSON.stringify([id, doc.absolutePath]);
@@ -366,8 +381,13 @@ var Reader = class {
       }
       identities.add(identity);
       const rows = statusRows(doc.text);
+      if (parent) {
+        const declarations = unfencedLines(doc.text).flatMap(([, line]) => line.match(/^(?:Parent:|\*\*Parent:\*\*)\s+(\S+)\s*$/)?.[1] || []);
+        if (declarations.length !== 1 || declarations[0] !== parent) issues.push(`${path}: child must declare exactly Parent: ${parent}`);
+        milestone2.title = unfencedLines(doc.text).find(([, line]) => new RegExp("^## " + id + "(?:\\s|$)").test(line))?.[1].slice(3) || `${id} \u2014 ${kind === "amend" ? "Required amendment" : "Deferred option"}`;
+      }
       issues.push(...statusMarkerProblems(doc.text).map((p) => `${path}: ${p}`));
-      if (!rows.length) issues.push(`${path}: no recognized task rows`);
+      if (!rows.length && kind !== "option") issues.push(`${path}: no recognized task rows`);
       const items = /* @__PURE__ */ new Set();
       for (const row of rows) {
         if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
@@ -380,12 +400,12 @@ var Reader = class {
     for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = /* @__PURE__ */ new Set();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
-      if (!/^[A-Z]\d{2}$/.test(row.cells[0])) continue;
+      if (!/^[A-Z]\d{2}(?:-\d{2})?$/.test(row.cells[0])) continue;
       const id = row.cells[0];
       if (indexedHistory.has(id)) issues.push(`Duplicate history index ID: ${id}`);
       indexedHistory.add(id);
       const link = localLinks(row.cells.join(" | "), historyIndex.path).find((l) => activeName.test(basename(l.path)));
-      if (!validId.test(id) || row.cells.length !== 5 || !["completed", "cancelled", "superseded"].includes(row.cells[1]) || !link || basename(link.path) !== `status-${id}.md`) issues.push(`Invalid history index entry: ${id}`);
+      if (!validRecordId.test(id) || row.cells.length !== 5 || !["completed", "cancelled", "superseded"].includes(row.cells[1]) || !link || recordIdentity(basename(link.path))?.id !== id) issues.push(`Invalid history index entry: ${id}`);
       if (link) {
         history.push({ id, path: link.path, label: `${id} \u2014 ${row.cells[1]}`, outcome: row.cells[1], retired: row.cells[2] });
         try {
@@ -396,24 +416,30 @@ var Reader = class {
         }
       }
     }
+    const retiredFiles = /* @__PURE__ */ new Map();
     for (const e of historyEntries) if (activeName.test(e.name)) {
-      const id = e.name.match(activeName)[1];
-      if (!validId.test(id)) issues.push(`${e.name}: invalid retired permanent ID`);
+      const id = recordIdentity(e.name)?.id;
+      if (!id) {
+        issues.push(`${e.name}: invalid retired permanent ID`);
+        continue;
+      }
+      if (retiredFiles.has(id)) issues.push(`Duplicate retired ID across file kinds: ${id}`);
+      retiredFiles.set(id, e.name);
       if (!indexedHistory.has(id)) {
         issues.push(`${id}: retired record is missing from history index`);
         history.push({ id, path: `${historyDir}/${e.name}`, label: `${id} \u2014 unindexed` });
       }
     }
-    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
+    for (const e of historyEntries) if (declaredName.test(e.name) && (!activeName.test(e.name) || !recordIdentity(e.name))) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
     for (const { id } of milestones) if (history.some((h) => h.id === id)) issues.push(`Duplicate active/retired ID: ${id}; retirement may be interrupted`);
     if (milestone) {
       const declared = /* @__PURE__ */ new Set();
       for (const [, s] of unfencedLines(milestone.text)) {
-        const m = s.match(/^## ([A-Z]\d{2})(?:\s|$)/);
+        const m = s.match(/^## ([A-Z]\d{2}(?:-\d{2})?)(?:\s|$)/);
         if (m) declared.add(m[1]);
       }
       for (const row of tableRows(milestone.text)) {
-        const id = row.cells[0].replace(/^`|`$/g, "").match(/^(?:\[)?([A-Z]\d{2})(?:\]\(.*\))?$/)?.[1];
+        const id = row.cells[0].replace(/^`|`$/g, "").match(/^(?:\[)?([A-Z]\d{2}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1];
         if (id) declared.add(id);
       }
       for (const id of declared) {
@@ -421,7 +447,10 @@ var Reader = class {
         if (indexedHistory.has(id)) issues.push(`${id}: retired ID remains in active milestone index/specification`);
       }
     }
-    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
+    for (const e of bankEntries) if (declaredName.test(e.name) && (!activeName.test(e.name) || !recordIdentity(e.name))) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
+    const knownIds = /* @__PURE__ */ new Set([...milestones.map((m) => m.id), ...indexedHistory]);
+    for (const milestone2 of milestones) if (milestone2.parent && !knownIds.has(milestone2.parent)) issues.push(`${milestone2.id}: orphan child milestone; missing parent ${milestone2.parent}`);
+    for (const id of indexedHistory) if (id.includes("-") && !knownIds.has(id.split("-")[0])) issues.push(`${id}: orphan retired child; missing parent ${id.split("-")[0]}`);
     const ids = /* @__PURE__ */ new Set();
     for (const m of milestones) {
       if (ids.has(m.id)) issues.push(`Duplicate active ID: ${m.id}`);
@@ -459,13 +488,17 @@ function prepare(command, options = {}) {
       return `${prefix} ${options.resume ? "Resume the sole in-progress row" : "Select the next actionable row"} using the current milestone priority, dependencies, and skill selection rules. Re-read the ledger before selecting work; surface conflicts. A task marker does not establish exclusive ownership. EXTERNAL_MUTATIONS: none.`;
     case "goal": {
       const ids = options.order?.split(/\s*(?:->|,|\n)\s*/).filter(Boolean) || [];
-      if (!ids.length || ids.some((id) => !/^[A-Z](?:0[1-9]|[1-9][0-9])$/.test(id)) || new Set(ids).size !== ids.length) throw new Error("Enter a unique explicit milestone order, such as M01 -> M02.");
+      if (!ids.length || ids.some((id) => !validRecordId.test(id)) || new Set(ids).size !== ids.length) throw new Error("Enter a unique explicit milestone order, such as M01 -> M02 or M01-01.");
       if (!options.completion?.trim()) throw new Error("Enter the completion conditions.");
-      return `${prefix} Follow the project tabilet/GOAL.md for ${ids.join(" -> ")}.
+      return `${prefix} Follow the bundled memory-bank goal protocol with applicable project addenda.
+STATUS_ORDER: ${ids.join(" -> ")}
 Completion conditions: ${options.completion.trim()}
 COMMIT_POLICY: ${options.policy || "task"}
+OPTION_POLICY: confirm
+OPTIMIZE_POLICY: none
 EXTERNAL_MUTATIONS: none
-Reconcile permanent IDs against the current active and retired records before execution. Cancellation and supersession do not prove completion.`;
+AUTHORIZATION_GRANTS: {}
+Resolve GOAL_IDENTITY and reconcile permanent root/child IDs, declared parents and dependencies against the current active and retired records before execution. Options remain deferred unless explicitly approved; cancellation and supersession do not prove completion.`;
     }
     case "propose": {
       if (!options.requestedChange?.trim()) throw new Error("Enter the requested change.");
@@ -628,6 +661,11 @@ function Dashboard({ sessionId, visible, port, composer, sources, sqlite, naviga
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "Active milestones" }),
       snapshot?.milestones.length ? snapshot.milestones.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-record", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: m.title }),
+        m.parent && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+          m.kind === "amend" ? "Required amendment" : "Option",
+          " \xB7 parent ",
+          m.parent
+        ] }),
         sourceButton(m.path)
       ] }, m.path)) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: snapshot?.history.some((h) => h.id) ? "No active milestones. Retired identities are indexed below History." : "No active milestones found." }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: "In progress" }),
@@ -647,7 +685,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, sqlite, naviga
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: t.cells.slice(2).join(" | ") }),
         sourceButton(t.path, t.line)
       ] }, `${t.path}:${t.line}`)),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mb-note", children: "Markers record task state. They do not establish exclusive ownership or milestone acceptance. Historical document validity is checked when opened." })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "mb-note", children: "Markers record task state. They do not establish exclusive ownership or milestone acceptance. Options require explicit owner approval before execution and do not block parent closure. Historical document validity is checked when opened." })
     ] }),
     view === "Tasks" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "mb-filters", children: [
@@ -694,7 +732,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, sqlite, naviga
     ] }),
     view === "Acceptance" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Recorded evidence is shown verbatim. Terminal rows alone do not establish acceptance. Unlabelled or ambiguous counters remain unknown." }),
-      snapshot?.documents.filter((d) => /status-[A-Z]\d{2}\.md$/.test(d.path)).map((d) => {
+      snapshot?.documents.filter((d) => recordIdentity(d.path.split("/").at(-1))).map((d) => {
         const evidence = reviewEvidence(d.text);
         return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", { className: "mb-record", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { children: d.path.split("/").at(-1) }),
@@ -775,7 +813,7 @@ function Dashboard({ sessionId, visible, port, composer, sources, sqlite, naviga
       !composer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Composer capability unavailable; requests can be copied." })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SQLitePanel, { active: visible && view === "SQLite", read: sqlite, navigate }),
-    command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: [...snapshot?.issues || [], ...command === "goal" && !snapshot?.goalAvailable ? ["Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing."] : []], close: closePreview }, `${sessionId}:${command}`)
+    command && (snapshot?.layout === "v2" || snapshot?.layout === "new") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequestPreview, { command, composer, resume: progress.length === 1, issues: snapshot?.issues || [], close: closePreview }, `${sessionId}:${command}`)
   ] });
 }
 function SQLitePanel({ active, read, navigate }) {
@@ -917,7 +955,7 @@ function SQLitePanel({ active, read, navigate }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "http://127.0.0.1:8000/", target: "_blank", rel: "noreferrer", children: "Open local SQLite Explorer \u2197" }),
       " \xB7 ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       "The database is always ",
@@ -938,7 +976,7 @@ tabilet-audit index sync ${quotedProject}` }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/audit.sqlite3" }),
       " and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact."
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {
@@ -951,7 +989,7 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }) {
     void reader.document(path, controller.signal).then((d) => {
       if (controller.signal.aborted) return;
       setDoc(d);
-      if (/status-[A-Z]\d{2}\.md$/.test(path) && snapshot?.history.some((h) => h.path === path)) {
+      if (recordIdentity(path.split("/").at(-1)) && snapshot?.history.some((h) => h.path === path)) {
         try {
           const record2 = retiredRecord(d.text, path.split("/").at(-1));
           const indexed = snapshot.history.find((h) => h.path === path);

@@ -1,3 +1,20 @@
+# v2.15.0 acceptance and publication
+
+The companion pins canonical `tabilet/skills` v2.15.0 at immutable commit
+`9659b63dc771d35147e9ae2e09f1122515c462c4` and verifies every payload hash.
+The dashboard reads root/amendment/option records; workflow previews never execute
+or approve work. The seven bundles include the updated goal identity and option
+policies. Personal DSH installations and project records were not changed.
+
+| Gate | Result |
+|---|---|
+| Canonical source | Published Git tag [v2.15.0](https://github.com/tabilet/skills/tree/v2.15.0). All 45 local repository checks pass. The upstream hosted registry check exposed unpublished historical v2.13.2/v2.13.3 tags; their existing refs were pushed without moving any tag. A fresh clone now reproduces the registry exactly; hosted re-verification is pending. |
+| Local verification | `npm run verify` passed: TypeScript, build, 66 unit/packed-loader tests, 12 native Web/headless tests, and 12 isolated mixed rc.1 launcher/rc.2 component tests. Six child-retirement fixtures match the canonical Python parser; negative cases cover malformed IDs, missing/duplicate parents, shared child-number collisions and invalid rowless retirement. |
+| Packed artifact | `tabilet-skills-2.15.0.tgz`, 392,595 bytes, SHA-256 `c592c9679d38ca961cd893537709dfae1f57718182cca561b1ac97a715006945`. Repeated packing produced identical bytes. Final packed-loader tests pass. All runtime/payload bytes match the browser-tested archive; only README installation guidance changed afterward. Two focused native child/Goal and headless checks also pass. The archive contains all seven complete skills, with no install hooks, bundled DSH runtime, credentials or bytecode. |
+| Runtime boundary | Linux, Node 24.14.1 and the locked DSH 0.1.5-rc.2 graph, plus an isolated rc.1 launcher. This does not certify a full 0.2.x component graph, paid model quality or automatic workflow approval. Existing rc.2 activation and Zod peer compatibility remain. |
+| Publication | GitHub assets, anonymous download verification and hosted companion checks are pending. |
+| Catalog | A new source-YAML-only PR is pending; the previous v2.13.0 PR #6423 has merged. Marketplace availability requires maintainer merge. |
+
 # v2.13.0 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.13.0 at commit

@@ -1,0 +1,105 @@
+[
+  {
+    "name": "required-amendment",
+    "file": "amend-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** completed\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/amend-M01-01.md\n**Source specification.** tabilet/memory-bank/amend-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** passed\n**Review iterations.** 2\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\n| repair | `[+]` | Verified |\n````\n",
+    "record": {
+      "metadata": {
+        "Milestone": "M01-01",
+        "Outcome": "completed",
+        "Retired": "2026-10-25",
+        "Source status": "tabilet/memory-bank/amend-M01-01.md",
+        "Source specification": "tabilet/memory-bank/amend-M01-01.md",
+        "Evidence": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "Worktree": "clean",
+        "Review": "passed",
+        "Review iterations": "2",
+        "Verification": "Offline fixtures",
+        "Consolidated into": "No current-truth change"
+      },
+      "specification": "## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n",
+      "status": "Parent: M01\n\n| repair | `[+]` | Verified |\n"
+    }
+  },
+  {
+    "name": "implemented-option",
+    "file": "option-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** completed\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/option-M01-01.md\n**Source specification.** tabilet/memory-bank/option-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** passed\n**Review iterations.** 2\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\n| repair | `[+]` | Verified |\n````\n",
+    "record": {
+      "metadata": {
+        "Milestone": "M01-01",
+        "Outcome": "completed",
+        "Retired": "2026-10-25",
+        "Source status": "tabilet/memory-bank/option-M01-01.md",
+        "Source specification": "tabilet/memory-bank/option-M01-01.md",
+        "Evidence": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "Worktree": "clean",
+        "Review": "passed",
+        "Review iterations": "2",
+        "Verification": "Offline fixtures",
+        "Consolidated into": "No current-truth change"
+      },
+      "specification": "## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n",
+      "status": "Parent: M01\n\n| repair | `[+]` | Verified |\n"
+    }
+  },
+  {
+    "name": "declined-rowless-option",
+    "file": "option-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** cancelled\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/option-M01-01.md\n**Source specification.** tabilet/memory-bank/option-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** not applicable\n**Review iterations.** 0\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n**Disposition.** Owner explicitly declined; no required obligation transferred.\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\nOwner declined without implementation.\n````\n",
+    "record": {
+      "metadata": {
+        "Milestone": "M01-01",
+        "Outcome": "cancelled",
+        "Retired": "2026-10-25",
+        "Source status": "tabilet/memory-bank/option-M01-01.md",
+        "Source specification": "tabilet/memory-bank/option-M01-01.md",
+        "Evidence": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "Worktree": "clean",
+        "Review": "not applicable",
+        "Review iterations": "0",
+        "Verification": "Offline fixtures",
+        "Consolidated into": "No current-truth change",
+        "Disposition": "Owner explicitly declined; no required obligation transferred."
+      },
+      "specification": "## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n",
+      "status": "Parent: M01\n\nOwner declined without implementation.\n"
+    }
+  },
+  {
+    "name": "superseded-rowless-option",
+    "file": "option-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** superseded\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/option-M01-01.md\n**Source specification.** tabilet/memory-bank/option-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** not applicable\n**Review iterations.** 0\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n**Disposition.** Owner explicitly declined; no required obligation transferred.\n**Successor.** M02\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\nOwner declined without implementation.\n````\n",
+    "record": {
+      "metadata": {
+        "Milestone": "M01-01",
+        "Outcome": "superseded",
+        "Retired": "2026-10-25",
+        "Source status": "tabilet/memory-bank/option-M01-01.md",
+        "Source specification": "tabilet/memory-bank/option-M01-01.md",
+        "Evidence": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "Worktree": "clean",
+        "Review": "not applicable",
+        "Review iterations": "0",
+        "Verification": "Offline fixtures",
+        "Consolidated into": "No current-truth change",
+        "Disposition": "Owner explicitly declined; no required obligation transferred.",
+        "Successor": "M02"
+      },
+      "specification": "## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n",
+      "status": "Parent: M01\n\nOwner declined without implementation.\n"
+    }
+  },
+  {
+    "name": "rowless-amendment",
+    "file": "amend-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** completed\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/amend-M01-01.md\n**Source specification.** tabilet/memory-bank/amend-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** not applicable\n**Review iterations.** 0\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\nOwner declined without implementation.\n````\n",
+    "invalid": true
+  },
+  {
+    "name": "rowless-completed-option",
+    "file": "option-M01-01.md",
+    "text": "# Retired M01-01\n\n**Milestone.** M01-01\n**Outcome.** completed\n**Retired.** 2026-10-25\n**Source status.** tabilet/memory-bank/option-M01-01.md\n**Source specification.** tabilet/memory-bank/option-M01-01.md\n**Evidence.** aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n**Worktree.** clean\n**Review.** not applicable\n**Review iterations.** 0\n**Verification.** Offline fixtures\n**Consolidated into.** No current-truth change\n\n## Milestone specification\n\n````markdown\n## M01-01 \u2014 Child\n\nParent: M01\n\n## Scope\nPreserve original acceptance.\n````\n\n## Status record\n\n````markdown\nParent: M01\n\nOwner declined without implementation.\n````\n",
+    "invalid": true
+  }
+]

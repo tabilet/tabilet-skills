@@ -1,5 +1,15 @@
 # Publication status
 
+## v2.15.0 release candidate
+
+The companion pins the canonical [v2.15.0 source tag](https://github.com/tabilet/skills/tree/v2.15.0)
+by immutable commit and file hashes. Local typecheck, build, packed-loader,
+native Web/headless and mixed-launcher acceptance passed; the archive hash and
+release boundaries are recorded in [acceptance evidence](ACCEPTANCE.md).
+GitHub asset publication, hosted verification and the new catalog PR are pending.
+The previous v2.13.0 catalog submission #6423 has merged. npm publication is not
+required for this GitHub archive route. No personal DSH installation was changed.
+
 ## v2.13.0 canonical release update
 
 The companion pins the canonical [v2.13.0 release](https://github.com/tabilet/skills/releases/tag/v2.13.0)

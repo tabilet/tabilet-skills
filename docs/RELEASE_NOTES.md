@@ -1,3 +1,31 @@
+# v2.15.0
+
+Pins all seven canonical skills and their complete resources to `tabilet/skills`
+v2.15.0, immutable commit `9659b63dc771d35147e9ae2e09f1122515c462c4`.
+Includes required amendments, deferred options and `OPTION_POLICY`, plus the
+opt-in reflection, run reporting, light-profile and local-verification policy
+updates since v2.13.0. Reflection stays off unless explicitly requested and
+requires separately installed tools and enabled project auditing.
+
+The read-only dashboard discovers `amend-M01-01.md` and `option-M01-02.md`,
+shows their parent and kind, checks parent declarations and shared child IDs,
+and reads child retirement records on demand. Declined rowless options retain
+their disposition without inventing completed tasks. Six offline retirement
+fixtures were generated against the pinned canonical Python parser.
+
+Goal previews select the bundled protocol with optional project addenda and
+accept child IDs; a project-owned `tabilet/GOAL.md` is no longer required.
+Previews retain `EXTERNAL_MUTATIONS: none`, use empty authorization grants,
+and default to `OPTION_POLICY: confirm` and `OPTIMIZE_POLICY: none`. Preparation
+still does not submit, approve, call a model, or change project records.
+The SQLite toolkit link now points to the matching v2.15.0 guide.
+
+The stock protocol fingerprint changed. Existing paused goals require the
+usual identity-transition approval, preserving grants, denials, counters,
+attempts and limits. Installing this companion does not migrate project rules.
+The supported runtime graph and Zod peer range remain unchanged. See
+[acceptance evidence](ACCEPTANCE.md) for the tested release boundaries.
+
 # v2.13.0
 
 Pins all seven canonical skills to `tabilet/skills` v2.13.0. Goal protocols and

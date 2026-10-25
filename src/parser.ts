@@ -7,6 +7,13 @@ export type State = typeof markers[keyof typeof markers];
 export interface TableRow { cells: string[]; line: number }
 export interface TaskRow extends TableRow { item: string; state: State }
 export const validId = /^[A-Z](?:0[1-9]|[1-9][0-9])$/;
+export const validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9])(?:-(?:0[1-9]|[1-9][0-9]))?$/;
+export function recordIdentity(name: string): { id: string; kind: 'status' | 'amend' | 'option'; parent?: string } | undefined {
+  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/);
+  if (root) return { id: root[1], kind: 'status' };
+  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]))-((?:0[1-9]|[1-9][0-9]))\.md$/);
+  if (child) return { id: `${child[2]}-${child[3]}`, kind: child[1] as 'amend' | 'option', parent: child[2] };
+}
 const linesOf = (text: string) => text.split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/);
 export function unfencedLines(text: string): [number, string][] {
   let char = '', length = 0;
@@ -103,7 +110,7 @@ function fencedDocument(text: string): string {
 }
 export interface RetiredRecord { metadata: Record<string, string>; specification: string; status: string }
 export function retiredRecord(text: string, name: string): RetiredRecord {
-  const id = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/)?.[1];
+  const identity = recordIdentity(name), id = identity?.id;
   requireThat(id, 'invalid retired status ID; use 01 through 99');
   const lines = splitKeepEnds(text);
   const headings = unfencedLines(text).filter(([, s]) => s.startsWith('## '));
@@ -119,26 +126,31 @@ export function retiredRecord(text: string, name: string): RetiredRecord {
   requireThat(required.every(k => metadata[k]), 'missing retirement metadata');
   requireThat(metadata.Milestone === id, 'retired milestone ID does not match its filename');
   requireThat([`memory-bank/${name}`, `tabilet/memory-bank/${name}`].includes(metadata['Source status']), 'source status path does not match the retired ID');
-  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata['Source specification']), 'missing original milestone specification anchor');
+  requireThat(/^(?:tabilet\/)?memory-bank\/milestone\.md#\S+$/.test(metadata['Source specification']) ||
+    (identity?.kind !== 'status' && metadata['Source specification'] === `tabilet/memory-bank/${name}`), 'missing original milestone specification anchor');
   requireThat(['completed', 'cancelled', 'superseded'].includes(metadata.Outcome), 'invalid retirement outcome');
   requireThat(/^\d{4}-\d{2}-\d{2}$/.test(metadata.Retired) && !metadata.Retired.startsWith('0000') && Number.isFinite(Date.parse(metadata.Retired)) && new Date(metadata.Retired).toISOString().slice(0, 10) === metadata.Retired, 'retirement date must use YYYY-MM-DD');
   requireThat(/^(?:[0-9a-f]{40}|[0-9a-f]{64}|unversioned)$/.test(metadata.Evidence), 'evidence must be a full commit or unversioned');
   requireThat(['clean', 'includes uncommitted changes', 'unversioned'].includes(metadata.Worktree), 'invalid worktree provenance');
   requireThat((metadata.Evidence === 'unversioned') === (metadata.Worktree === 'unversioned'), 'inconsistent unversioned provenance');
-  if (metadata.Review === 'legacy')
+  const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(''));
+  const status = fencedDocument(lines.slice(headings[1][0]).join(''));
+  const rows = statusRows(status);
+  const rowlessDisposition = identity?.kind === 'option' && ['cancelled', 'superseded'].includes(metadata.Outcome) && !rows.length;
+  if (rowlessDisposition && metadata.Review === 'not applicable' && metadata['Review iterations'] === '0') {
+    // A declined or superseded rowless option records a disposition, not acceptance.
+  } else if (metadata.Review === 'legacy')
     requireThat(metadata['Review iterations'] === 'not recorded' && !!metadata['Legacy closure'] && metadata.Outcome === 'completed', 'legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note');
   else
     requireThat(metadata.Review === 'passed' && /^(?:[1-9]|10)$/.test(metadata['Review iterations']), 'retirement requires a passed review within 10 iterations');
   requireThat(metadata.Outcome === 'completed' || metadata.Disposition, 'cancellation or supersession needs its authorized disposition');
   requireThat(metadata.Outcome !== 'superseded' || metadata.Successor, 'supersession needs its accepted successor');
-  const specification = fencedDocument(lines.slice(headings[0][0], headings[1][0] - 1).join(''));
-  const status = fencedDocument(lines.slice(headings[1][0]).join(''));
   requireThat(specification.trim() && status.trim(), 'retired source documents are empty');
   const specHeadings = unfencedLines(specification).filter(([, s]) => s.startsWith('## '));
-  requireThat(specHeadings.length === 1 && new RegExp('^## ' + id + '(?:\\s|$)').test(specHeadings[0][1]), 'retired specification does not match its milestone ID');
-  const problems = statusMarkerProblems(status), rows = statusRows(status);
+  requireThat(specHeadings.length >= 1 && (identity?.kind !== 'status' || specHeadings.length === 1) && new RegExp('^## ' + id + '(?:\\s|$)').test(specHeadings[0][1]), 'retired specification does not match its milestone ID');
+  const problems = statusMarkerProblems(status);
   requireThat(!problems.length, 'retired task has an ' + problems.join('; '));
-  requireThat(rows.length && rows.every(r => !['pending', 'in_progress', 'blocked'].includes(r.state)), 'retired status must contain only closed task rows');
+  requireThat((rows.length || rowlessDisposition) && rows.every(r => !['pending', 'in_progress', 'blocked'].includes(r.state)), 'retired status must contain only closed task rows');
   requireThat(rows.every(r => r.state !== 'historical' || /\bsuccessor\b\s*:?\s+\S/i.test(r.cells.slice(2).join(' '))), 'closed-historical row has no named successor');
   return { metadata, specification, status };
 }

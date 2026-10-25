@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Reader, type Document, type FilePort, type Snapshot } from './reader.ts';
-import { markers, retiredRecord, reviewEvidence, stageOverview, type State } from './parser.ts';
+import { markers, recordIdentity, retiredRecord, reviewEvidence, stageOverview, type State } from './parser.ts';
 import { commands, insertPrepared, prepare, type Command, type Composer } from './requests.ts';
 import type { SkillSource } from './dsh.ts';
 import type { SQLiteQuery, SQLiteView } from './sqlite.ts';
@@ -67,10 +67,10 @@ export function Dashboard({ sessionId, visible, port, composer, sources, sqlite,
     {view === 'Overview' && <div>
       <div className="mb-counts">{Object.entries(markers).map(([marker, value]) => <button key={value} onClick={() => { setState(value); setView('Tasks'); }}><b>{tasks.filter(t => t.state === value).length}</b><span>{marker.replaceAll('`', '')} {labels[value]}</span></button>)}</div>
       <h3>Current stage</h3><p>{stages?.current || (stageDocument ? 'Unresolved in stages.md' : 'One implicit stage; no stages.md')}</p>
-      <h3>Active milestones</h3>{snapshot?.milestones.length ? snapshot.milestones.map(m => <div key={m.path} className="mb-record"><strong>{m.title}</strong>{sourceButton(m.path)}</div>) : <p>{snapshot?.history.some(h => h.id) ? 'No active milestones. Retired identities are indexed below History.' : 'No active milestones found.'}</p>}
+      <h3>Active milestones</h3>{snapshot?.milestones.length ? snapshot.milestones.map(m => <div key={m.path} className="mb-record"><strong>{m.title}</strong>{m.parent && <small>{m.kind === 'amend' ? 'Required amendment' : 'Option'} · parent {m.parent}</small>}{sourceButton(m.path)}</div>) : <p>{snapshot?.history.some(h => h.id) ? 'No active milestones. Retired identities are indexed below History.' : 'No active milestones found.'}</p>}
       <h3>In progress</h3>{progress.length ? progress.map(t => <div className="mb-record" key={`${t.path}:${t.line}`}>{t.id} · {t.item}{sourceButton(t.path, t.line)}</div>) : <p>No row is in progress.</p>}
       <h3>Blocked</h3>{tasks.filter(t => t.state === 'blocked').map(t => <div className="mb-record" key={`${t.path}:${t.line}`}><strong>{t.id} · {t.item}</strong><p>{t.cells.slice(2).join(' | ')}</p>{sourceButton(t.path, t.line)}</div>)}
-      <p className="mb-note">Markers record task state. They do not establish exclusive ownership or milestone acceptance. Historical document validity is checked when opened.</p>
+      <p className="mb-note">Markers record task state. They do not establish exclusive ownership or milestone acceptance. Options require explicit owner approval before execution and do not block parent closure. Historical document validity is checked when opened.</p>
     </div>}
     {view === 'Tasks' && <div>
       <div className="mb-filters"><label>Search<input value={search} onChange={e => setSearch(e.target.value)} placeholder="Task text or notes" /></label>
@@ -79,7 +79,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, sqlite,
       <label>State<select value={state} onChange={e => setState(e.target.value)}><option value="">All states</option>{Object.entries(labels).map(([s, label]) => <option key={s} value={s}>{label}</option>)}</select></label></div>
       <p>{filtered.length} matching rows</p>{filtered.map(t => <article className="mb-record" key={`${t.path}:${t.line}`}><small>{t.id} · {labels[t.state]}</small><h3>{t.item}</h3><pre>{t.cells.slice(2).join('\n\n')}</pre>{sourceButton(t.path, t.line)}</article>)}
     </div>}
-    {view === 'Acceptance' && <div><p>Recorded evidence is shown verbatim. Terminal rows alone do not establish acceptance. Unlabelled or ambiguous counters remain unknown.</p>{snapshot?.documents.filter(d => /status-[A-Z]\d{2}\.md$/.test(d.path)).map(d => {
+    {view === 'Acceptance' && <div><p>Recorded evidence is shown verbatim. Terminal rows alone do not establish acceptance. Unlabelled or ambiguous counters remain unknown.</p>{snapshot?.documents.filter(d => recordIdentity(d.path.split('/').at(-1)!)).map(d => {
       const evidence = reviewEvidence(d.text);
       return <article className="mb-record" key={d.path}><h3>{d.path.split('/').at(-1)}</h3><p>Current review counter: <strong>{evidence.counter}</strong></p>{evidence.evidence.length ? evidence.evidence.map(([line, s]) => <div key={line}><pre>{s}</pre>{sourceButton(d.path, line)}</div>) : <p>Verification and review evidence: Unknown</p>}</article>;
     })}</div>}
@@ -89,7 +89,7 @@ export function Dashboard({ sessionId, visible, port, composer, sources, sqlite,
     {view === 'Compatibility' && <div><h3>Project records</h3>{snapshot?.issues.length ? <ul>{snapshot.issues.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p>No active-ledger conflicts detected. Historical bodies are verified only when opened.</p>}
       <h3>Winning skill sources</h3>{catalogError && <p role="alert">Skill catalog unavailable: {catalogError}</p>}{commands.map(c => { const skill = catalog.find(s => s.name === `memory-bank-${c}`); return <div className="mb-record" key={c}><strong>memory-bank-{c}</strong>{skill ? <><p>{skill.source}{skill.provider ? ` · ${skill.provider}` : ''}</p>{skill.location && <pre>{skill.location}</pre>}{skill.provider !== 'tabilet-skills' && <p>Duplicate: the bundled copy is shadowed by this winning override.</p>}</> : <p>Not reported by the current session catalog.</p>}</div>; })}<p>DSH resolves precedence. Its public catalog reports winners; other shadowed copies may exist. Installing skills does not upgrade project rules. Use the explicit Upgrade workflow.</p>{!composer && <p>Composer capability unavailable; requests can be copied.</p>}</div>}
     <SQLitePanel active={visible && view === 'SQLite'} read={sqlite} navigate={navigate} />
-    {command && (snapshot?.layout === 'v2' || snapshot?.layout === 'new') && <RequestPreview key={`${sessionId}:${command}`} command={command} composer={composer} resume={progress.length === 1} issues={[...(snapshot?.issues || []), ...(command === 'goal' && !snapshot?.goalAvailable ? ['Project tabilet/GOAL.md is missing or unreadable; the skill must resolve this before executing.'] : [])]} close={closePreview} />}
+    {command && (snapshot?.layout === 'v2' || snapshot?.layout === 'new') && <RequestPreview key={`${sessionId}:${command}`} command={command} composer={composer} resume={progress.length === 1} issues={snapshot?.issues || []} close={closePreview} />}
   </section>;
 }
 function SQLitePanel({ active, read, navigate }: { active: boolean; read: DashboardProps['sqlite']; navigate: DashboardProps['navigate'] }) {
@@ -129,12 +129,12 @@ function SQLitePanel({ active, read, navigate }: { active: boolean; read: Dashbo
     </>}
     <h3>Open the full local Explorer</h3><p>The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:</p>
     <pre><code>tabilet-audit explorer {quotedProject} --port 8000</code></pre>
-    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
+    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
     <p>The database is always <code>tabilet/audit.sqlite3</code>. Linked worktrees share the primary checkout’s file. Commit <code>tabilet/.gitignore</code> with <code>/audit.sqlite3*</code> to keep the database and SQLite sidecars out of Git.</p>
     <p>Audit recording stays off until you manually enable this project. Index refresh does not enable it. Run these commands in a terminal:</p>
     <pre><code>{`tabilet-audit audit enable ${quotedProject}\ntabilet-audit audit status ${quotedProject}\ntabilet-audit audit disable ${quotedProject}\ntabilet-audit index sync ${quotedProject}`}</code></pre>
     <p>To discard a broken database, stop its agents and Explorer, disable recording, then delete <code>tabilet/audit.sqlite3</code> and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact.</p>
-    <p><a href="https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+    <p><a href="https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
   </div>;
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: Reader; path: string; snapshot?: Snapshot; navigate: DashboardProps['navigate']; visible: boolean }) {
@@ -145,7 +145,7 @@ function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: R
     void reader.document(path, controller.signal).then(d => {
       if (controller.signal.aborted) return;
       setDoc(d);
-      if (/status-[A-Z]\d{2}\.md$/.test(path) && snapshot?.history.some(h => h.path === path)) {
+      if (recordIdentity(path.split('/').at(-1)!) && snapshot?.history.some(h => h.path === path)) {
         try {
           const record = retiredRecord(d.text, path.split('/').at(-1)!);
           const indexed = snapshot.history.find(h => h.path === path);

@@ -1,4 +1,4 @@
-import { localLinks, reviewEvidence, stageOverview, statusMarkerProblems, statusRows, tableRows, unfencedLines, validId, type TaskRow } from './parser.ts';
+import { localLinks, recordIdentity, reviewEvidence, stageOverview, statusMarkerProblems, statusRows, tableRows, unfencedLines, validRecordId, type TaskRow } from './parser.ts';
 
 export interface FileInfo { version: string; absolutePath: string; bytes?: number }
 export interface FileText extends FileInfo { text: string }
@@ -13,12 +13,13 @@ export interface Task extends TaskRow { id: string; path: string }
 export interface Historical { id?: string; path: string; label: string; outcome?: string; retired?: string }
 export interface Snapshot {
   documents: Document[]; tasks: Task[]; history: Historical[]; issues: string[];
-  milestones: { id: string; path: string; title: string }[];
+  milestones: { id: string; path: string; title: string; kind: 'status' | 'amend' | 'option'; parent?: string }[];
   refreshedAt: number; complete: boolean;
   goalAvailable: boolean; layout: 'v2' | 'legacy' | 'mixed' | 'new';
 }
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
-const activeName = /^status-([A-Z]\d{2})\.md$/;
+const activeName = /^(?:status-[A-Z]\d{2}|(?:amend|option)-[A-Z]\d{2}-\d{2})\.md$/;
+const declaredName = /^(?:status|amend|option)(?:-.*)?\.md$/;
 const basename = (p: string) => p.slice(p.lastIndexOf('/') + 1);
 export class Reader {
   private cache = new Map<string, Document>();
@@ -79,7 +80,8 @@ export class Reader {
     await attempt('AGENTS.md');
     const stages = layout === 'legacy' ? undefined : await attempt('tabilet/stages.md', true);
     if (stages) issues.push(...stageOverview(stages.text).problems.map(problem => `${stages.path}: ${problem}`));
-    let goalAvailable = false;
+    // Stock goal instructions ship with the installed skill, not the project.
+    let goalAvailable = layout === 'v2' || layout === 'new';
     try { await this.port.stat(`${base}GOAL.md`, signal); goalAvailable = true; } catch { signal.throwIfAborted(); }
     const historyLink = milestone && localLinks(milestone.text, milestone.path).find(l => /(?:^|\/)history\/index\.md$/.test(l.path));
     const historyIndex = await attempt(historyLink?.path || `${historyDir}/index.md`, true);
@@ -87,10 +89,11 @@ export class Reader {
     for (const link of milestone ? localLinks(milestone.text, milestone.path) : []) if (activeName.test(basename(link.path))) activePaths.add(link.path);
     const milestones: Snapshot['milestones'] = [];
     for (const path of [...activePaths].sort()) {
-      const id = basename(path).match(activeName)![1];
-      if (!validId.test(id)) issues.push(`${path}: invalid permanent ID`);
+      const identity = recordIdentity(basename(path));
+      if (!identity) { issues.push(`${path}: invalid permanent ID`); continue; }
+      const { id, kind, parent } = identity;
       const title = milestone && unfencedLines(milestone.text).find(([, s]) => new RegExp('^## ' + id + '(?:\\s|$)').test(s))?.[1].slice(3);
-      milestones.push({ id, path, title: title || id });
+      milestones.push({ id, path, title: title || id, kind, ...(parent ? { parent } : {}) });
     }
     // Bounded parallelism keeps large ledgers responsive without flooding Remote.
     const activeDocuments = new Map<string, Document>();
@@ -102,14 +105,20 @@ export class Reader {
     // An indexed absolute path and directory discovery may name the same file.
     // Only the host's file identity can establish this; matching contents cannot.
     const identities = new Set<string>(), aliases = new Set<string>();
-    for (const { id, path } of milestones) {
+    for (const milestone of milestones) {
+      const { id, path, kind, parent } = milestone;
       const doc = activeDocuments.get(path); if (!doc) continue;
       const identity = JSON.stringify([id, doc.absolutePath]);
       if (identities.has(identity)) { aliases.add(path); continue; }
       identities.add(identity);
       const rows = statusRows(doc.text);
+      if (parent) {
+        const declarations = unfencedLines(doc.text).flatMap(([, line]) => line.match(/^(?:Parent:|\*\*Parent:\*\*)\s+(\S+)\s*$/)?.[1] || []);
+        if (declarations.length !== 1 || declarations[0] !== parent) issues.push(`${path}: child must declare exactly Parent: ${parent}`);
+        milestone.title = unfencedLines(doc.text).find(([, line]) => new RegExp('^## ' + id + '(?:\\s|$)').test(line))?.[1].slice(3) || `${id} — ${kind === 'amend' ? 'Required amendment' : 'Deferred option'}`;
+      }
       issues.push(...statusMarkerProblems(doc.text).map(p => `${path}: ${p}`));
-      if (!rows.length) issues.push(`${path}: no recognized task rows`);
+      if (!rows.length && kind !== 'option') issues.push(`${path}: no recognized task rows`);
       const items = new Set<string>();
       for (const row of rows) {
         if (items.has(row.item)) issues.push(`${path}: duplicate row identity ${row.item}`);
@@ -121,38 +130,44 @@ export class Reader {
     for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = new Set<string>();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
-      if (!/^[A-Z]\d{2}$/.test(row.cells[0])) continue;
+      if (!/^[A-Z]\d{2}(?:-\d{2})?$/.test(row.cells[0])) continue;
       const id = row.cells[0];
       if (indexedHistory.has(id)) issues.push(`Duplicate history index ID: ${id}`);
       indexedHistory.add(id);
       const link = localLinks(row.cells.join(' | '), historyIndex.path).find(l => activeName.test(basename(l.path)));
-      if (!validId.test(id) || row.cells.length !== 5 || !['completed', 'cancelled', 'superseded'].includes(row.cells[1]) || !link || basename(link.path) !== `status-${id}.md`) issues.push(`Invalid history index entry: ${id}`);
+      if (!validRecordId.test(id) || row.cells.length !== 5 || !['completed', 'cancelled', 'superseded'].includes(row.cells[1]) || !link || recordIdentity(basename(link.path))?.id !== id) issues.push(`Invalid history index entry: ${id}`);
       if (link) {
         history.push({ id, path: link.path, label: `${id} — ${row.cells[1]}`, outcome: row.cells[1], retired: row.cells[2] });
         try { await this.port.stat(link.path, signal); } catch (e) { signal.throwIfAborted(); issues.push(`${link.path}: ${String(e)}`); }
       }
     }
+    const retiredFiles = new Map<string, string>();
     for (const e of historyEntries) if (activeName.test(e.name)) {
-      const id = e.name.match(activeName)![1];
-      if (!validId.test(id)) issues.push(`${e.name}: invalid retired permanent ID`);
+      const id = recordIdentity(e.name)?.id;
+      if (!id) { issues.push(`${e.name}: invalid retired permanent ID`); continue; }
+      if (retiredFiles.has(id)) issues.push(`Duplicate retired ID across file kinds: ${id}`);
+      retiredFiles.set(id, e.name);
       if (!indexedHistory.has(id)) { issues.push(`${id}: retired record is missing from history index`); history.push({ id, path: `${historyDir}/${e.name}`, label: `${id} — unindexed` }); }
     }
-    for (const e of historyEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
+    for (const e of historyEntries) if (declaredName.test(e.name) && (!activeName.test(e.name) || !recordIdentity(e.name))) issues.push(`Unsupported retired status filename: ${historyDir}/${e.name}`);
     for (const { id } of milestones) if (history.some(h => h.id === id)) issues.push(`Duplicate active/retired ID: ${id}; retirement may be interrupted`);
     if (milestone) {
       const declared = new Set<string>();
       for (const [, s] of unfencedLines(milestone.text)) {
-        const m = s.match(/^## ([A-Z]\d{2})(?:\s|$)/); if (m) declared.add(m[1]);
+        const m = s.match(/^## ([A-Z]\d{2}(?:-\d{2})?)(?:\s|$)/); if (m) declared.add(m[1]);
       }
       for (const row of tableRows(milestone.text)) {
-        const id = row.cells[0].replace(/^`|`$/g, '').match(/^(?:\[)?([A-Z]\d{2})(?:\]\(.*\))?$/)?.[1]; if (id) declared.add(id);
+        const id = row.cells[0].replace(/^`|`$/g, '').match(/^(?:\[)?([A-Z]\d{2}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1]; if (id) declared.add(id);
       }
       for (const id of declared) {
         if (!milestones.some(m => m.id === id && documents.some(d => d.path === m.path))) issues.push(`${id}: active specification/index has no active status file`);
         if (indexedHistory.has(id)) issues.push(`${id}: retired ID remains in active milestone index/specification`);
       }
     }
-    for (const e of bankEntries) if (/^status.*\.md$/.test(e.name) && !activeName.test(e.name)) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
+    for (const e of bankEntries) if (declaredName.test(e.name) && (!activeName.test(e.name) || !recordIdentity(e.name))) issues.push(`Unsupported legacy status structure: ${bank}/${e.name}`);
+    const knownIds = new Set([...milestones.map(m => m.id), ...indexedHistory]);
+    for (const milestone of milestones) if (milestone.parent && !knownIds.has(milestone.parent)) issues.push(`${milestone.id}: orphan child milestone; missing parent ${milestone.parent}`);
+    for (const id of indexedHistory) if (id.includes('-') && !knownIds.has(id.split('-')[0])) issues.push(`${id}: orphan retired child; missing parent ${id.split('-')[0]}`);
     const ids = new Set<string>();
     for (const m of milestones) { if (ids.has(m.id)) issues.push(`Duplicate active ID: ${m.id}`); ids.add(m.id); }
     if (tasks.filter(t => t.state === 'in_progress').length > 1) issues.push('Multiple rows are in progress; reconcile the ledger before selecting work');

@@ -5,13 +5,23 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.13.0** pins the canonical v2.13.0 skills, including bundled goal
-protocols and fingerprint registries, project addenda, user-selected model policy,
-and hardened approval email. It retains the read-only SQLite dashboard, Stages
-view and stage targeting for Propose. It loads on the DSH 0.2.0-rc.2 launcher and
+Version **2.15.0** pins the canonical v2.15.0 skills, including required
+amendments, deferred options, optional offline reflection, bundled goal protocols
+and fingerprint registries, project addenda, user-selected model policy, and
+approval email. The dashboard reads root and child milestone files and their
+retired records; options require owner approval and do not block parent closure.
+Goal previews select the bundled protocol without requiring a project-owned
+`tabilet/GOAL.md`. Reflection stays off in previews and needs separately enabled
+project auditing and the optional toolkit when explicitly requested. It retains
+the read-only SQLite dashboard, Stages view and stage targeting for Propose.
+It loads on the DSH 0.2.0-rc.2 launcher and
 accepts the Zod 4.6.2 version resolved by the supported DSH rc.2 profile. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
+
+The v2.15.0 stock protocol has a new fingerprint. Existing paused goals require
+approval of that identity transition before adopting it; installing this package
+does not migrate project rules, approve grants or reset counters and limits.
 
 Each project can manually enable audit recording in its own database at
 `tabilet/audit.sqlite3`. Registered linked worktrees share their repository's
@@ -30,19 +40,20 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.13.0/tabilet-skills-2.13.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.13.0/tabilet-skills-2.13.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.15.0/tabilet-skills-2.15.0.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.15.0/tabilet-skills-2.15.0.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.13.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.15.0 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.13.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.15.0).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
-[filesystem installation](https://github.com/tabilet/skills/blob/v2.13.0/docs/DSH.md#install-the-seven-bundles).
+[filesystem installation](https://github.com/tabilet/skills/blob/main/docs/DSH.md#install-the-seven-bundles).
+Select the `v2.15.0` source tag when following that guide.
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -50,8 +61,9 @@ enumerated by DSH's public registry. Review local overrides before removing them
 
 ## Read project records
 
-- **Overview:** active milestones, all six marker counts, blocked rows, and work
-  in progress.
+- **Overview:** active root milestones, required `amend-M01-01.md` and deferred
+  `option-M01-02.md` children with their parents, all six marker counts, blocked
+  rows, and work in progress. Child kinds share one permanent number sequence.
 - **Tasks:** milestone, lane, and state filters, text search, full task notes,
   and source navigation.
 - **Acceptance:** recorded verification/review lines and an explicit current
@@ -77,7 +89,7 @@ enumerated by DSH's public registry. Review local overrides before removing them
   `/audit.sqlite3*`. To discard broken storage, stop writers and delete the
   database and sidecars; missing storage leaves audit disabled.
   Install the optional toolkit to create or refresh the index and run the
-  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.13.0/docs/sqlite.md).
+  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the

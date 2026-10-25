@@ -6,7 +6,7 @@ import { projectDatabasePath } from '../src/projectStorage.ts';
 const state = JSON.parse(await readFile('.acceptance/profile.json', 'utf8'));
 const cases = JSON.parse(await readFile('payload/tests/fixtures/parser-conformance.json', 'utf8'));
 const projects: Record<string, string> = {};
-for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['linked', 0], ['draft', 1], ['new', 0]] as const) {
+for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['linked', 0], ['draft', 1], ['new', 0], ['children', 1]] as const) {
   const files = activeFixture(count), project = join(state.root, name); projects[name] = project;
   if (name === 'new') { files.clear(); files.set('AGENTS.md', '# New project\n'); }
   if (name === 'legacy') { for (const [path, body] of [...files]) { if (path.startsWith('tabilet/')) { files.delete(path); files.set(path.slice('tabilet/'.length), body); } } files.set('memory-bank/status.md', '| Legacy | [ ] |'); files.delete('memory-bank/lessons.md'); }
@@ -26,6 +26,10 @@ for (const [name, count] of [['active', 120], ['legacy', 1], ['retired', 0], ['l
   if (name === 'active') files.set('tabilet/memory-bank/milestone.md', files.get('tabilet/memory-bank/milestone.md')! + `\n[Absolute alias](${join(project, 'tabilet/memory-bank/status-A01.md')})\n`);
   if (name === 'active') files.set('tabilet/memory-bank/product.md', '# Product\n<script>globalThis.TABILET_UNSAFE = true</script>\n![Remote image](https://example.invalid/tracker.png)\n');
   if (name === 'active') files.set('tabilet/stages.md', '# Stages\n\n**Current stage.** STG-01\n\n## STG-01\n**Name.** First delivery\n**Intent.** Complete the current horizon\n\n## STG-02\n**Name.** Later idea\n**Intent.** Preliminary expansion\n');
+  if (name === 'children') {
+    files.set('tabilet/memory-bank/amend-A01-01.md', '## A01-01 — Required repair\nParent: A01\n\n**Review iterations.** 2\n**Verification.** Offline fixtures passed.\n\n| repair | `[ ]` | Preserve acceptance |');
+    files.set('tabilet/memory-bank/option-A01-02.md', '## A01-02 — Later possibility\nParent: A01\nDeferred; no task rows.');
+  }
   for (const [path, text] of files) { await mkdir(dirname(join(project, path)), { recursive: true }); await writeFile(join(project, path), text); }
   if (name === 'linked') await symlink(join(state.root, 'canonical/status-M01.md'), join(project, 'tabilet/memory-bank/status-S01.md'));
 }

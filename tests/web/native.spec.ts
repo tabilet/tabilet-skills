@@ -121,8 +121,8 @@ test('native packed plugin renders a large project with safe memory, full tasks,
   await expect(panel).toContainText('Audit recording stays off until you manually enable this project');
   await expect(panel.locator('pre').filter({ hasText: `tabilet-audit explorer '${projects.active}' --port 8000` })).toBeVisible();
   await expect(panel.getByRole('link', { name: 'Open local SQLite Explorer ↗' })).toHaveAttribute('href', 'http://127.0.0.1:8000/');
-  await expect(panel.getByRole('link', { name: 'Install the optional toolkit ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md#install-and-use-the-optional-toolkit');
-  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.11.0/docs/sqlite.md');
+  await expect(panel.getByRole('link', { name: 'Install the optional toolkit ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md#install-and-use-the-optional-toolkit');
+  await expect(panel.getByRole('link', { name: 'Read the SQLite audit and lookup guide ↗' })).toHaveAttribute('href', 'https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md');
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original); expect(errors).toEqual([]);
 });
 test('external edits and linked canonical edits become visible within ten seconds', async ({ page }) => {
@@ -178,6 +178,28 @@ test('all seven previews are reviewable, keyboard accessible, and cause no submi
     await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
   }
   expect((await calls()).length).toBe(count); expect(await hashTree(projects.active)).toEqual(original);
+});
+test('v2.15 children and bundled Goal preview work without a project GOAL.md', async ({ page }) => {
+  const before = await hashTree(projects.children), count = (await calls()).length;
+  const panel = await open(page, 'children');
+  await expect(panel).toContainText('Required amendment · parent A01');
+  await expect(panel).toContainText('Option · parent A01');
+  await expect(panel).toContainText('Later possibility');
+  await panel.getByRole('button', { name: 'Acceptance', exact: true }).click();
+  await expect(panel).toContainText('amend-A01-01.md');
+  await expect(panel).toContainText('Current review counter: 2/10');
+  await panel.getByText('Prepare a workflow request', { exact: true }).click();
+  await panel.getByRole('button', { name: 'Goal', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Milestone order').fill('A01-01 -> A01');
+  await dialog.getByLabel('Completion conditions').fill('Required repair and parent accepted');
+  const preview = dialog.getByLabel('Request preview', { exact: true });
+  await expect(preview).toHaveValue(/bundled memory-bank goal protocol/);
+  await expect(preview).toHaveValue(/OPTION_POLICY: confirm/);
+  await expect(dialog).not.toContainText('GOAL.md is missing');
+  await expect(dialog).not.toContainText('compatibility issue');
+  expect((await calls()).length).toBe(count);
+  expect(await hashTree(projects.children)).toEqual(before);
 });
 test('the user sends a Propose request only after inserting it', async ({ page }) => {
   const panel = await open(page), count = (await calls()).length;

@@ -1,12 +1,23 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { localLinks, retiredRecord, reviewEvidence, stageOverview, statusMarkerProblems, statusRows } from '../src/parser.ts';
+import { localLinks, recordIdentity, retiredRecord, reviewEvidence, stageOverview, statusMarkerProblems, statusRows } from '../src/parser.ts';
 const fixtures = JSON.parse(await readFile(new URL('../payload/tests/fixtures/parser-conformance.json', import.meta.url), 'utf8'));
 for (const c of fixtures) test(`canonical Python parity: ${c.name}`, () => {
   if (c.kind === 'status') { assert.deepEqual(statusRows(c.text), c.rows); assert.deepEqual(statusMarkerProblems(c.text), c.problems); }
   else if (c.invalid) assert.throws(() => retiredRecord(c.text, c.file));
   else assert.deepEqual(JSON.parse(JSON.stringify(retiredRecord(c.text, c.file))), c.record);
+});
+const children = JSON.parse(await readFile(new URL('./fixtures/child-conformance.json', import.meta.url), 'utf8'));
+for (const c of children) test(`canonical v2.15 child-retirement parity: ${c.name}`, () => {
+  if (c.invalid) assert.throws(() => retiredRecord(c.text, c.file));
+  else assert.deepEqual(JSON.parse(JSON.stringify(retiredRecord(c.text, c.file))), c.record);
+});
+test('root and child filenames share permanent identities and reject malformed sequences', () => {
+  assert.deepEqual(recordIdentity('status-M01.md'), { id: 'M01', kind: 'status' });
+  assert.deepEqual(recordIdentity('amend-M01-01.md'), { id: 'M01-01', kind: 'amend', parent: 'M01' });
+  assert.equal(recordIdentity('option-M01-01.md')?.id, 'M01-01');
+  for (const name of ['status-M01-01.md','amend-M00-01.md','option-M01-00.md','option-M01-100.md','amend-M01-1.md','../amend-M01-01.md']) assert.equal(recordIdentity(name), undefined, name);
 });
 test('review counters are explicit, current, bounded, and not inferred from task markers', () => {
   assert.equal(reviewEvidence('| 1 | `[+]` | Review iteration 2 |').counter, 'Unknown');

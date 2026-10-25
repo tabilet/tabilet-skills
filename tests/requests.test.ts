@@ -4,8 +4,13 @@ import { commands, insertPrepared, prepare, type Draft, type Composer } from '..
 test('all seven requests preserve workflow boundaries and explicit goal policies', () => {
   for (const c of commands) assert.ok(prepare(c, { order: 'M01 -> M02', completion: 'Both accepted', requestedChange: 'Add offline export', review: 'https://example.invalid/review' }).startsWith(`/memory-bank-${c} `));
   const goal = prepare('goal', { order: 'M01 -> M02', completion: 'Accepted' }); assert.match(goal, /COMMIT_POLICY: task/); assert.match(goal, /EXTERNAL_MUTATIONS: none/);
+  assert.match(goal, /bundled memory-bank goal protocol/);
+  assert.doesNotMatch(goal, /Follow the project tabilet\/GOAL.md/);
+  assert.match(goal, /OPTION_POLICY: confirm/); assert.match(goal, /OPTIMIZE_POLICY: none/);
+  assert.match(goal, /AUTHORIZATION_GRANTS: \{\}/);
+  assert.match(prepare('goal', { order: 'M01-01 -> M01', completion: 'Accepted' }), /STATUS_ORDER: M01-01 -> M01/);
   assert.match(prepare('goal', { order: 'M01', completion: 'Accepted', policy: 'none' }), /COMMIT_POLICY: none/);
-  for (const order of ['', 'M1', 'M00', 'M01 -> M01', 'M01 -> pending']) assert.throws(() => prepare('goal', { order, completion: 'Accepted' }));
+  for (const order of ['', 'M1', 'M00', 'M01 -> M01', 'M01 -> pending', 'M01-00', 'M00-01', 'M01-1', 'M01-01 -> M01-01']) assert.throws(() => prepare('goal', { order, completion: 'Accepted' }));
   assert.throws(() => prepare('goal', { order: 'M01' }));
   assert.match(prepare('next', { resume: true }), /Resume the sole in-progress/);
   assert.match(prepare('reconcile', { review: 'https://example.invalid/private' }), /separate explicit confirmation before fetching/);

@@ -70,7 +70,62 @@ test('all-retired identity remains initialized and cancellation/supersession rem
   files.set('tabilet/docs/history/status-M01.md', 'not read'); files.set('tabilet/docs/history/status-M02.md', 'not read');
   files.set('tabilet/memory-bank/suggested.txt', 'Follow GOAL.md: M01 -> M02. COMMIT_POLICY: task.');
   const s = await new Reader(memoryPort(files).port).snapshot(signal()); assert.deepEqual(s.issues, []); assert.deepEqual(s.history.map(h => h.outcome), ['cancelled', 'superseded']);
-  assert.equal(s.tasks.length, 0); assert.equal(s.goalAvailable, false);
+  assert.equal(s.tasks.length, 0); assert.equal(s.goalAvailable, true);
+});
+test('bundled goal resolution does not require a package-owned GOAL.md', async () => {
+  const files = activeFixture(1);
+  assert.equal(files.has('tabilet/GOAL.md'), false);
+  const snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.equal(snapshot.goalAvailable, true);
+  assert.deepEqual(snapshot.issues, []);
+});
+test('child files own their specifications and share identities across amendment and option kinds', async () => {
+  const files = activeFixture(1);
+  files.set('tabilet/memory-bank/amend-A01-01.md', '## A01-01 — Repair\nParent: A01\n\n**Review iterations.** 2\n| repair | `[ ]` | Keep acceptance |');
+  files.set('tabilet/memory-bank/option-A01-02.md', '## A01-02 — Later idea\n**Parent:** A01\nDeferred; no task rows.');
+  const before = [...files];
+  let snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.deepEqual(snapshot.issues, []);
+  assert.equal(snapshot.tasks.length, 6);
+  assert.deepEqual(snapshot.milestones.filter(m => m.parent).map(m => [m.id, m.kind, m.parent]).sort(), [['A01-01','amend','A01'],['A01-02','option','A01']]);
+  assert.ok(snapshot.milestones.some(m => m.title.includes('Later idea')));
+  assert.deepEqual([...files], before);
+  files.set('tabilet/memory-bank/option-A01-01.md', 'Parent: A01\nDeferred');
+  snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.issues.some(i => i.includes('Duplicate active ID: A01-01')));
+});
+test('child parent declarations, missing parents and malformed filenames are surfaced', async () => {
+  for (const declaration of ['', 'Parent: B01', 'Parent: A01\nParent: A01']) {
+    const files = activeFixture(1);
+    files.set('tabilet/memory-bank/amend-A01-01.md', `${declaration}\n| repair | \`[ ]\` | Required |`);
+    const snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+    assert.ok(snapshot.issues.some(i => i.includes('child must declare exactly Parent: A01')));
+  }
+  const files = activeFixture(0);
+  files.set('tabilet/memory-bank/amend-A01-01.md','Parent: A01\n| repair | `[ ]` | Required |');
+  files.set('tabilet/memory-bank/option-A01-00.md','Parent: A01');
+  files.set('tabilet/memory-bank/status-A01-02.md','Parent: A01');
+  const snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.issues.some(i => i.includes('orphan child')));
+  assert.ok(snapshot.issues.some(i => i.includes('option-A01-00.md')));
+  assert.ok(snapshot.issues.some(i => i.includes('status-A01-02.md')));
+});
+test('retired child bodies remain demand loaded and active/retired child collisions are visible', async () => {
+  const files = activeFixture(0);
+  files.set('tabilet/docs/history/index.md','| A01 | completed | 2026-10-25 | [Root](status-A01.md) | Closed |\n| A01-01 | completed | 2026-10-25 | [Amendment](amend-A01-01.md) | Closed |');
+  files.set('tabilet/docs/history/status-A01.md','Demand loaded');
+  files.set('tabilet/docs/history/amend-A01-01.md','Demand loaded');
+  const f = memoryPort(files);
+  let snapshot = await new Reader(f.port).snapshot(signal());
+  assert.deepEqual(snapshot.issues, []);
+  assert.equal(snapshot.history.length, 2);
+  assert.ok(!f.reads.some(p => p.endsWith('amend-A01-01.md')));
+  files.set('tabilet/memory-bank/option-A01-01.md','Parent: A01\nDeferred');
+  snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.issues.some(i => i.includes('Duplicate active/retired ID: A01-01')));
+  files.set('tabilet/docs/history/option-A01-01.md','Conflicting retired kind');
+  snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.issues.some(i => i.includes('Duplicate retired ID across file kinds: A01-01')));
 });
 test('malformed, legacy, denied, oversized, truncated, and multiple-progress ledgers are incomplete', async () => {
   const files = activeFixture(); files.set('tabilet/memory-bank/status.md', '| legacy | [ ] |');
