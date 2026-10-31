@@ -1,3 +1,18 @@
+# v2.16.1 acceptance and publication
+
+The companion pins canonical `tabilet/skills` v2.16.1 at immutable commit
+`66b8c1e7fdfd4b99f5eda4bd3b30f3561fa8592d`. It supports extended root and child
+IDs and retains read-only project access. Existing nonconforming frozen history
+is not rewritten. Personal DSH installations and project records are not changed.
+
+| Gate | Result |
+|---|---|
+| Canonical source | Published Git tag [v2.16.1](https://github.com/tabilet/skills/tree/v2.16.1); payload generated from the commit and hash-verified. |
+| Local verification | `npm run verify` passed: typecheck, build, 69 unit/packed-loader tests, 12 native Web/headless tests and 12 mixed rc.1 launcher/rc.2 component tests. Tests used disposable profiles and a local fixture provider. |
+| Packed artifact | `tabilet-skills-2.16.1.tgz`, 414,568 bytes, SHA-256 `dfa3368ab3c67e2debe398d344a183fe29526c0fd2e222fa806f66db38d67ade`. Two repeated packs matched the tested archive byte for byte; packed-loader tests covered all seven skills. |
+| Publication and catalog | Pending. Publication, catalog submission and maintainer acceptance are separate gates. |
+| Runtime boundary | Linux, Node 24.14.1 and the locked DSH rc.2 graph plus isolated rc.1 launcher; no paid model-quality claim. |
+
 # v2.15.0 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.15.0 at immutable commit

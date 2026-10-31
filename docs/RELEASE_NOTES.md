@@ -1,3 +1,17 @@
+# v2.16.1
+
+Pins the seven canonical skills to `tabilet/skills` v2.16.1. The read-only
+sidebar and Goal request builder recognize extended root IDs such as M100 and
+M153, including amendment and option records. Frozen history and the API
+runner's ten-iteration ceiling remain unchanged. Interactive review records
+can display explicitly recorded limits above ten without inferring approval.
+
+Includes the v2.16.0 Goal continuity and authorization changes. Installing the
+plugin does not migrate project rules or approve actions. Projects with legacy
+nonconforming frozen history still need separate reconciliation; this release
+does not change their records. The DSH runtime graph and no-model/no-write
+boundaries are unchanged. See [acceptance evidence](ACCEPTANCE.md).
+
 # v2.15.0
 
 Pins all seven canonical skills and their complete resources to `tabilet/skills`

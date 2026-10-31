@@ -1,5 +1,14 @@
 # Publication status
 
+## v2.16.1 release preparation
+
+The companion is being prepared against the canonical [v2.16.1 source tag](https://github.com/tabilet/skills/tree/v2.16.1).
+The current local verification and publication state is recorded in
+[acceptance evidence](ACCEPTANCE.md). GitHub publication and catalog visibility
+are separate gates; do not treat a local archive as a public release or a catalog
+submission as an accepted listing. npm publication is optional.
+
+
 ## v2.15.0 release and catalog submission
 
 The companion pins the canonical [v2.15.0 source tag](https://github.com/tabilet/skills/tree/v2.15.0)

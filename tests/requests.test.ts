@@ -9,6 +9,7 @@ test('all seven requests preserve workflow boundaries and explicit goal policies
   assert.match(goal, /OPTION_POLICY: confirm/); assert.match(goal, /OPTIMIZE_POLICY: none/);
   assert.match(goal, /AUTHORIZATION_GRANTS: \{\}/);
   assert.match(prepare('goal', { order: 'M01-01 -> M01', completion: 'Accepted' }), /STATUS_ORDER: M01-01 -> M01/);
+  assert.match(prepare('goal', { order: 'M99 -> M100 -> M130-01 -> M153', completion: 'Accepted' }), /STATUS_ORDER: M99 -> M100 -> M130-01 -> M153/);
   assert.match(prepare('goal', { order: 'M01', completion: 'Accepted', policy: 'none' }), /COMMIT_POLICY: none/);
   for (const order of ['', 'M1', 'M00', 'M01 -> M01', 'M01 -> pending', 'M01-00', 'M00-01', 'M01-1', 'M01-01 -> M01-01']) assert.throws(() => prepare('goal', { order, completion: 'Accepted' }));
   assert.throws(() => prepare('goal', { order: 'M01' }));

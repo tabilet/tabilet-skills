@@ -19,6 +19,27 @@ test('root and child filenames share permanent identities and reject malformed s
   assert.equal(recordIdentity('option-M01-01.md')?.id, 'M01-01');
   for (const name of ['status-M01-01.md','amend-M00-01.md','option-M01-00.md','option-M01-100.md','amend-M01-1.md','../amend-M01-01.md']) assert.equal(recordIdentity(name), undefined, name);
 });
+test('wide roots and child identities remain canonical through retirement', () => {
+  const completed = fixtures.find((f: { name: string }) => f.name === 'completed');
+  for (const root of ['M99', 'M100', 'M130', 'M153']) {
+    assert.equal(recordIdentity(`status-${root}.md`)?.id, root);
+    for (const kind of ['amend', 'option']) {
+      assert.equal(recordIdentity(`${kind}-${root}-01.md`)?.id, `${root}-01`);
+      const child = children.find((f: { name: string }) => f.name === (kind === 'amend' ? 'required-amendment' : 'implemented-option'));
+      const text = child.text.replaceAll('M01', root).replaceAll('m01', root.toLowerCase());
+      assert.equal(retiredRecord(text, `${kind}-${root}-01.md`).metadata.Milestone, `${root}-01`);
+    }
+    const record = completed.text.replaceAll('M01', root).replaceAll('m01', root.toLowerCase());
+    assert.equal(retiredRecord(record, `status-${root}.md`).metadata.Milestone, root);
+    const extended = record.replace('**Review iterations.** 2', '**Review iterations.** 12\n**Review limit.** 30\n**Review limit approval.** Owner approved 30.');
+    assert.equal(retiredRecord(extended, `status-${root}.md`).metadata['Review iterations'], '12');
+    assert.throws(() => retiredRecord(extended.replace('**Review limit approval.** Owner approved 30.', ''), `status-${root}.md`));
+    assert.throws(() => retiredRecord(record.replace('**Review iterations.** 2', '**Review iterations.** 11'), `status-${root}.md`));
+  }
+  for (const name of ['status-M1.md', 'status-M001.md', 'amend-M100-00.md', 'option-M153-100.md']) assert.equal(recordIdentity(name), undefined);
+  assert.equal(reviewEvidence('**Review iterations.** 12\n**Review limit.** 30').counter, '12/30');
+  assert.equal(reviewEvidence('**Review iterations.** 12').counter, 'Conflicting or invalid');
+});
 test('review counters are explicit, current, bounded, and not inferred from task markers', () => {
   assert.equal(reviewEvidence('| 1 | `[+]` | Review iteration 2 |').counter, 'Unknown');
   assert.equal(reviewEvidence('**Review iterations.** 3\n').counter, '3/10');

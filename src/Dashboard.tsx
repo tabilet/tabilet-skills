@@ -129,12 +129,12 @@ function SQLitePanel({ active, read, navigate }: { active: boolean; read: Dashbo
     </>}
     <h3>Open the full local Explorer</h3><p>The separately installed Explorer has a timeline, task lookup, and richer audit views. Start it for this project, then open the loopback page:</p>
     <pre><code>tabilet-audit explorer {quotedProject} --port 8000</code></pre>
-    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
+    <p><a href="http://127.0.0.1:8000/" target="_blank" rel="noreferrer">Open local SQLite Explorer ↗</a> · <a href="https://github.com/tabilet/skills/blob/v2.16.1/docs/sqlite.md#install-and-use-the-optional-toolkit" target="_blank" rel="noreferrer">Install the optional toolkit ↗</a></p>
     <p>The database is always <code>tabilet/audit.sqlite3</code>. Linked worktrees share the primary checkout’s file. Commit <code>tabilet/.gitignore</code> with <code>/audit.sqlite3*</code> to keep the database and SQLite sidecars out of Git.</p>
     <p>Audit recording stays off until you manually enable this project. Index refresh does not enable it. Run these commands in a terminal:</p>
     <pre><code>{`tabilet-audit audit enable ${quotedProject}\ntabilet-audit audit status ${quotedProject}\ntabilet-audit audit disable ${quotedProject}\ntabilet-audit index sync ${quotedProject}`}</code></pre>
     <p>To discard a broken database, stop its agents and Explorer, disable recording, then delete <code>tabilet/audit.sqlite3</code> and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact.</p>
-    <p><a href="https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
+    <p><a href="https://github.com/tabilet/skills/blob/v2.16.1/docs/sqlite.md" target="_blank" rel="noreferrer">Read the SQLite audit and lookup guide ↗</a></p>
   </div>;
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }: { reader: Reader; path: string; snapshot?: Snapshot; navigate: DashboardProps['navigate']; visible: boolean }) {

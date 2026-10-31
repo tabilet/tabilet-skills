@@ -66,11 +66,11 @@ var markers = {
   "`[X]`": "cancelled",
   "`[-]`": "historical"
 };
-var validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9])(?:-(?:0[1-9]|[1-9][0-9]))?$/;
+var validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9]+)(?:-(?:0[1-9]|[1-9][0-9]))?$/;
 function recordIdentity(name) {
-  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/);
+  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]+))\.md$/);
   if (root) return { id: root[1], kind: "status" };
-  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]))-((?:0[1-9]|[1-9][0-9]))\.md$/);
+  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]+))-((?:0[1-9]|[1-9][0-9]))\.md$/);
   if (child) return { id: `${child[2]}-${child[3]}`, kind: child[1], parent: child[2] };
 }
 var linesOf = (text) => text.split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/);
@@ -178,7 +178,7 @@ function fencedDocument(text) {
 }
 function retiredRecord(text, name) {
   const identity = recordIdentity(name), id = identity?.id;
-  requireThat(id, "invalid retired status ID; use 01 through 99");
+  requireThat(id, "invalid retired status ID or child suffix");
   const lines = splitKeepEnds(text);
   const headings = unfencedLines(text).filter(([, s]) => s.startsWith("## "));
   requireThat(headings.length === 2 && headings[0][1] === "## Milestone specification" && headings[1][1] === "## Status record", "expected Milestone specification and Status record sections");
@@ -206,8 +206,13 @@ function retiredRecord(text, name) {
   if (rowlessDisposition && metadata.Review === "not applicable" && metadata["Review iterations"] === "0") {
   } else if (metadata.Review === "legacy")
     requireThat(metadata["Review iterations"] === "not recorded" && !!metadata["Legacy closure"] && metadata.Outcome === "completed", "legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note");
-  else
-    requireThat(metadata.Review === "passed" && /^(?:[1-9]|10)$/.test(metadata["Review iterations"]), "retirement requires a passed review within 10 iterations");
+  else {
+    const limit = metadata["Review limit"] ?? "10";
+    requireThat(/^[1-9][0-9]*$/.test(limit), "retirement review limit must be a positive integer");
+    requireThat(BigInt(limit) <= 10n || !!metadata["Review limit approval"]?.trim(), "retirement above the default review limit needs approval provenance");
+    const iterations = metadata["Review iterations"];
+    requireThat(metadata.Review === "passed" && /^[1-9][0-9]*$/.test(iterations) && BigInt(iterations) <= BigInt(limit), "retirement requires a passed review within its recorded limit (default 10)");
+  }
   requireThat(metadata.Outcome === "completed" || metadata.Disposition, "cancellation or supersession needs its authorized disposition");
   requireThat(metadata.Outcome !== "superseded" || metadata.Successor, "supersession needs its accepted successor");
   requireThat(specification.trim() && status.trim(), "retired source documents are empty");
@@ -242,18 +247,26 @@ function localLinks(text, source) {
   return links;
 }
 function reviewEvidence(text) {
-  const evidence = unfencedLines(text).filter(([, s]) => /review|verif|acceptance|consolidat/i.test(s));
-  const counters = unfencedLines(text).flatMap(([line, s]) => {
-    const m = s.match(/^(?:\*\*)?(?:Current review iteration|Review iterations|Review iteration|Review counter)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)(?:\s*\/\s*10)?\s*$/i);
-    return m ? [{ line, value: Number(m[1]) }] : [];
+  const lines = unfencedLines(text);
+  const evidence = lines.filter(([, s]) => /review|verif|acceptance|consolidat/i.test(s));
+  const limits = lines.flatMap(([, s]) => {
+    const m = s.match(/^(?:\*\*)?(?:Review limit|REVIEW_MAX_ITERATIONS)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)\s*$/i);
+    return m ? [Number(m[1])] : [];
+  });
+  const ceilings = [...new Set(limits)];
+  const counters = lines.flatMap(([, s]) => {
+    const m = s.match(/^(?:\*\*)?(?:Current review iteration|Review iterations|Review iteration|Review counter)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)(?:\s*\/\s*(\d+))?\s*$/i);
+    return m ? [{ value: Number(m[1]), denominator: m[2] ? Number(m[2]) : void 0 }] : [];
   });
   const values = [...new Set(counters.map((c) => c.value))];
-  return { evidence, counter: values.length === 1 && values[0] >= 1 && values[0] <= 10 ? `${values[0]}/10` : values.length ? "Conflicting or invalid" : "Unknown" };
+  const limit = ceilings.length ? ceilings[0] : 10;
+  const valid = ceilings.length <= 1 && Number.isSafeInteger(limit) && limit > 0 && counters.every((c) => Number.isSafeInteger(c.value) && (c.denominator === void 0 || c.denominator === limit));
+  return { evidence, counter: valid && values.length === 1 && values[0] >= 1 && values[0] <= limit ? `${values[0]}/${limit}` : values.length || !valid ? "Conflicting or invalid" : "Unknown" };
 }
 
 // src/reader.ts
 var MAX_FILE_BYTES = 2 * 1024 * 1024;
-var activeName = /^(?:status-[A-Z]\d{2}|(?:amend|option)-[A-Z]\d{2}-\d{2})\.md$/;
+var activeName = /^(?:status-[A-Z]\d{2,}|(?:amend|option)-[A-Z]\d{2,}-\d{2})\.md$/;
 var declaredName = /^(?:status|amend|option)(?:-.*)?\.md$/;
 var basename = (p) => p.slice(p.lastIndexOf("/") + 1);
 var Reader = class {
@@ -400,7 +413,7 @@ var Reader = class {
     for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = /* @__PURE__ */ new Set();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
-      if (!/^[A-Z]\d{2}(?:-\d{2})?$/.test(row.cells[0])) continue;
+      if (!/^[A-Z]\d{2,}(?:-\d{2})?$/.test(row.cells[0])) continue;
       const id = row.cells[0];
       if (indexedHistory.has(id)) issues.push(`Duplicate history index ID: ${id}`);
       indexedHistory.add(id);
@@ -435,11 +448,11 @@ var Reader = class {
     if (milestone) {
       const declared = /* @__PURE__ */ new Set();
       for (const [, s] of unfencedLines(milestone.text)) {
-        const m = s.match(/^## ([A-Z]\d{2}(?:-\d{2})?)(?:\s|$)/);
+        const m = s.match(/^## ([A-Z]\d{2,}(?:-\d{2})?)(?:\s|$)/);
         if (m) declared.add(m[1]);
       }
       for (const row of tableRows(milestone.text)) {
-        const id = row.cells[0].replace(/^`|`$/g, "").match(/^(?:\[)?([A-Z]\d{2}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1];
+        const id = row.cells[0].replace(/^`|`$/g, "").match(/^(?:\[)?([A-Z]\d{2,}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1];
         if (id) declared.add(id);
       }
       for (const id of declared) {
@@ -955,7 +968,7 @@ function SQLitePanel({ active, read, navigate }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "http://127.0.0.1:8000/", target: "_blank", rel: "noreferrer", children: "Open local SQLite Explorer \u2197" }),
       " \xB7 ",
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.16.1/docs/sqlite.md#install-and-use-the-optional-toolkit", target: "_blank", rel: "noreferrer", children: "Install the optional toolkit \u2197" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
       "The database is always ",
@@ -976,7 +989,7 @@ tabilet-audit index sync ${quotedProject}` }) }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "tabilet/audit.sqlite3" }),
       " and its sidecars. Missing storage leaves auditing disabled; project Markdown remains intact."
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", { href: "https://github.com/tabilet/skills/blob/v2.16.1/docs/sqlite.md", target: "_blank", rel: "noreferrer", children: "Read the SQLite audit and lookup guide \u2197" }) })
   ] });
 }
 function OpenDocument({ reader, path, snapshot, navigate, visible }) {

@@ -5,7 +5,7 @@ The same project Markdown remains usable from DSH, Codex, and Claude Code.
 The canonical skills and project format live in
 [tabilet/skills](https://github.com/tabilet/skills).
 
-Version **2.15.0** pins the canonical v2.15.0 skills, including required
+Version **2.16.1** pins the canonical v2.16.1 skills, including extended milestone IDs, configurable review limits, required
 amendments, deferred options, optional offline reflection, bundled goal protocols
 and fingerprint registries, project addenda, user-selected model policy, and
 approval email. The dashboard reads root and child milestone files and their
@@ -19,7 +19,7 @@ accepts the Zod 4.6.2 version resolved by the supported DSH rc.2 profile. See
 [acceptance and publication status](https://github.com/tabilet/tabilet-skills/blob/main/docs/ACCEPTANCE.md)
 for the separate GitHub, npm, and catalog release gates.
 
-The v2.15.0 stock protocol has a new fingerprint. Existing paused goals require
+The v2.16.1 stock protocol has the v2.16.0 fingerprint. Goals paused on older protocols require
 approval of that identity transition before adopting it; installing this package
 does not migrate project rules, approve grants or reset counters and limits.
 
@@ -40,20 +40,20 @@ resources, and no installation scripts or DSH runtime.
 Install in each profile where you want the skills:
 
 ```bash
-dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.15.0/tabilet-skills-2.15.0.tgz --ignore-scripts
-dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.15.0/tabilet-skills-2.15.0.tgz --ignore-scripts
+dsh plugin --profile web add https://github.com/tabilet/tabilet-skills/releases/download/v2.16.1/tabilet-skills-2.16.1.tgz --ignore-scripts
+dsh plugin --profile headless add https://github.com/tabilet/tabilet-skills/releases/download/v2.16.1/tabilet-skills-2.16.1.tgz --ignore-scripts
 ```
 
 Restart the profile, open a project session, expand the native right sidebar,
-and choose **Memory Bank**. The v2.15.0 headless package loads all seven skills,
+and choose **Memory Bank**. The v2.16.1 headless package loads all seven skills,
 including Propose, without the Web UI.
 You can also replace the package/version with the absolute path to the prebuilt
-archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.15.0).
+archive from the [GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.16.1).
 Git source checkouts require the build step below to generate the complete payload.
 
 For skills without the dashboard, use the canonical
 [filesystem installation](https://github.com/tabilet/skills/blob/main/docs/DSH.md#install-the-seven-bundles).
-Select the `v2.15.0` source tag when following that guide.
+Select the `v2.16.1` source tag when following that guide.
 Both routes use complete canonical skill directories. Project and user overrides
 retain DSH's normal precedence. The Compatibility view reports winning sources
 and marks a bundled copy shadowed by an override. Other shadowed copies are not
@@ -89,7 +89,7 @@ enumerated by DSH's public registry. Review local overrides before removing them
   `/audit.sqlite3*`. To discard broken storage, stop writers and delete the
   database and sidecars; missing storage leaves audit disabled.
   Install the optional toolkit to create or refresh the index and run the
-  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.15.0/docs/sqlite.md).
+  Explorer. See the [SQLite audit and lookup guide](https://github.com/tabilet/skills/blob/v2.16.1/docs/sqlite.md).
 
 The v2 sidebar reads an unmigrated v1.5.0 project with a migration warning and
 offers source navigation. Workflow request controls are hidden until the

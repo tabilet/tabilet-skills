@@ -12,6 +12,26 @@ test('120-file, 17-lane project caches by version, preserves every marker, and d
   files.set('tabilet/memory-bank/status-A01.md', files.get('tabilet/memory-bank/status-A01.md')!.replace('`[~]`', '`[+]`'));
   const b = await reader.snapshot(signal()); assert.equal(b.tasks.filter(t => t.state === 'in_progress').length, 0); assert.equal(f.reads.length, readCount + 1);
 });
+test('wide milestone IDs are discoverable in active files, child records and history index', async () => {
+  const files = activeFixture(0);
+  files.set('tabilet/memory-bank/milestone.md', '# Milestones\n## M130 - Delivery\n**Acceptance.** Works.\n[History](../docs/history/index.md)');
+  files.set('tabilet/memory-bank/status-M130.md', '| ID | State | Notes |\n|---|---|---|\n| T01 | `[ ]` | Ready |');
+  files.set('tabilet/memory-bank/amend-M130-01.md', '## M130-01 - Repair\nParent: M130\n| ID | State | Notes |\n|---|---|---|\n| T01 | `[ ]` | Repair |');
+  files.set('tabilet/docs/history/index.md', '| ID | Outcome | Retired | Record | Notes |\n|---|---|---|---|---|\n| M153 | completed | 2026-09-13 | [M153](status-M153.md) | done |');
+  files.set('tabilet/docs/history/status-M153.md', 'not read');
+  const snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.milestones.some(m => m.id === 'M130'));
+  assert.ok(snapshot.milestones.some(m => m.id === 'M130-01'));
+  assert.ok(!snapshot.issues.some(issue => issue.includes('M153')));
+});
+test('invalid extended roots are reported and archive lanes remain two-digit', async () => {
+  const files = activeFixture(1);
+  files.set('tabilet/memory-bank/status-M001.md', '| x | `[ ]` | bad |');
+  files.set('docs/archive-A100.md', '# Not an archive');
+  const snapshot = await new Reader(memoryPort(files).port).snapshot(signal());
+  assert.ok(snapshot.issues.some(issue => issue.includes('status-M001.md')));
+  assert.equal(snapshot.layout, 'v2');
+});
 test('v1.5 projects remain readable and identifiable without a v2 writable run', async () => {
   const files = new Map([...activeFixture(1)].map(([path, body]) => [path.startsWith('tabilet/') ? path.slice(8) : path, body]));
   files.set('GOAL.md', 'Legacy protocol.');

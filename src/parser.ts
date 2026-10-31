@@ -6,12 +6,12 @@ export const markers = {
 export type State = typeof markers[keyof typeof markers];
 export interface TableRow { cells: string[]; line: number }
 export interface TaskRow extends TableRow { item: string; state: State }
-export const validId = /^[A-Z](?:0[1-9]|[1-9][0-9])$/;
-export const validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9])(?:-(?:0[1-9]|[1-9][0-9]))?$/;
+export const validId = /^[A-Z](?:0[1-9]|[1-9][0-9]+)$/;
+export const validRecordId = /^[A-Z](?:0[1-9]|[1-9][0-9]+)(?:-(?:0[1-9]|[1-9][0-9]))?$/;
 export function recordIdentity(name: string): { id: string; kind: 'status' | 'amend' | 'option'; parent?: string } | undefined {
-  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]))\.md$/);
+  const root = name.match(/^status-([A-Z](?:0[1-9]|[1-9][0-9]+))\.md$/);
   if (root) return { id: root[1], kind: 'status' };
-  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]))-((?:0[1-9]|[1-9][0-9]))\.md$/);
+  const child = name.match(/^(amend|option)-([A-Z](?:0[1-9]|[1-9][0-9]+))-((?:0[1-9]|[1-9][0-9]))\.md$/);
   if (child) return { id: `${child[2]}-${child[3]}`, kind: child[1] as 'amend' | 'option', parent: child[2] };
 }
 const linesOf = (text: string) => text.split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/);
@@ -111,7 +111,7 @@ function fencedDocument(text: string): string {
 export interface RetiredRecord { metadata: Record<string, string>; specification: string; status: string }
 export function retiredRecord(text: string, name: string): RetiredRecord {
   const identity = recordIdentity(name), id = identity?.id;
-  requireThat(id, 'invalid retired status ID; use 01 through 99');
+  requireThat(id, 'invalid retired status ID or child suffix');
   const lines = splitKeepEnds(text);
   const headings = unfencedLines(text).filter(([, s]) => s.startsWith('## '));
   requireThat(headings.length === 2 && headings[0][1] === '## Milestone specification' && headings[1][1] === '## Status record', 'expected Milestone specification and Status record sections');
@@ -141,8 +141,13 @@ export function retiredRecord(text: string, name: string): RetiredRecord {
     // A declined or superseded rowless option records a disposition, not acceptance.
   } else if (metadata.Review === 'legacy')
     requireThat(metadata['Review iterations'] === 'not recorded' && !!metadata['Legacy closure'] && metadata.Outcome === 'completed', 'legacy retirement requires completed outcome, not recorded iterations, and a Legacy closure note');
-  else
-    requireThat(metadata.Review === 'passed' && /^(?:[1-9]|10)$/.test(metadata['Review iterations']), 'retirement requires a passed review within 10 iterations');
+  else {
+    const limit = metadata['Review limit'] ?? '10';
+    requireThat(/^[1-9][0-9]*$/.test(limit), 'retirement review limit must be a positive integer');
+    requireThat(BigInt(limit) <= 10n || !!metadata['Review limit approval']?.trim(), 'retirement above the default review limit needs approval provenance');
+    const iterations = metadata['Review iterations'];
+    requireThat(metadata.Review === 'passed' && /^[1-9][0-9]*$/.test(iterations) && BigInt(iterations) <= BigInt(limit), 'retirement requires a passed review within its recorded limit (default 10)');
+  }
   requireThat(metadata.Outcome === 'completed' || metadata.Disposition, 'cancellation or supersession needs its authorized disposition');
   requireThat(metadata.Outcome !== 'superseded' || metadata.Successor, 'supersession needs its accepted successor');
   requireThat(specification.trim() && status.trim(), 'retired source documents are empty');
@@ -172,12 +177,20 @@ export function localLinks(text: string, source: string): { label: string; path:
 }
 
 export function reviewEvidence(text: string) {
-  const evidence = unfencedLines(text).filter(([, s]) => /review|verif|acceptance|consolidat/i.test(s));
-  // Only explicit current fields qualify; dated log entries remain evidence.
-  const counters = unfencedLines(text).flatMap(([line, s]) => {
-    const m = s.match(/^(?:\*\*)?(?:Current review iteration|Review iterations|Review iteration|Review counter)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)(?:\s*\/\s*10)?\s*$/i);
-    return m ? [{ line, value: Number(m[1]) }] : [];
+  const lines = unfencedLines(text);
+  const evidence = lines.filter(([, s]) => /review|verif|acceptance|consolidat/i.test(s));
+  const limits = lines.flatMap(([, s]) => {
+    const m = s.match(/^(?:\*\*)?(?:Review limit|REVIEW_MAX_ITERATIONS)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)\s*$/i);
+    return m ? [Number(m[1])] : [];
+  });
+  const ceilings = [...new Set(limits)];
+  const counters = lines.flatMap(([, s]) => {
+    const m = s.match(/^(?:\*\*)?(?:Current review iteration|Review iterations|Review iteration|Review counter)(?:\.\*\*|\*\*:|:|\.)\s*(\d+)(?:\s*\/\s*(\d+))?\s*$/i);
+    return m ? [{ value: Number(m[1]), denominator: m[2] ? Number(m[2]) : undefined }] : [];
   });
   const values = [...new Set(counters.map(c => c.value))];
-  return { evidence, counter: values.length === 1 && values[0] >= 1 && values[0] <= 10 ? `${values[0]}/10` : values.length ? 'Conflicting or invalid' : 'Unknown' };
+  const limit = ceilings.length ? ceilings[0] : 10;
+  const valid = ceilings.length <= 1 && Number.isSafeInteger(limit) && limit > 0 &&
+    counters.every(c => Number.isSafeInteger(c.value) && (c.denominator === undefined || c.denominator === limit));
+  return { evidence, counter: valid && values.length === 1 && values[0] >= 1 && values[0] <= limit ? `${values[0]}/${limit}` : values.length || !valid ? 'Conflicting or invalid' : 'Unknown' };
 }

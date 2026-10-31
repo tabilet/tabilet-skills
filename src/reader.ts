@@ -18,7 +18,7 @@ export interface Snapshot {
   goalAvailable: boolean; layout: 'v2' | 'legacy' | 'mixed' | 'new';
 }
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
-const activeName = /^(?:status-[A-Z]\d{2}|(?:amend|option)-[A-Z]\d{2}-\d{2})\.md$/;
+const activeName = /^(?:status-[A-Z]\d{2,}|(?:amend|option)-[A-Z]\d{2,}-\d{2})\.md$/;
 const declaredName = /^(?:status|amend|option)(?:-.*)?\.md$/;
 const basename = (p: string) => p.slice(p.lastIndexOf('/') + 1);
 export class Reader {
@@ -130,7 +130,7 @@ export class Reader {
     for (let i = documents.length - 1; i >= 0; i--) if (aliases.has(documents[i].path)) documents.splice(i, 1);
     const indexedHistory = new Set<string>();
     if (historyIndex) for (const row of tableRows(historyIndex.text)) {
-      if (!/^[A-Z]\d{2}(?:-\d{2})?$/.test(row.cells[0])) continue;
+      if (!/^[A-Z]\d{2,}(?:-\d{2})?$/.test(row.cells[0])) continue;
       const id = row.cells[0];
       if (indexedHistory.has(id)) issues.push(`Duplicate history index ID: ${id}`);
       indexedHistory.add(id);
@@ -154,10 +154,10 @@ export class Reader {
     if (milestone) {
       const declared = new Set<string>();
       for (const [, s] of unfencedLines(milestone.text)) {
-        const m = s.match(/^## ([A-Z]\d{2}(?:-\d{2})?)(?:\s|$)/); if (m) declared.add(m[1]);
+        const m = s.match(/^## ([A-Z]\d{2,}(?:-\d{2})?)(?:\s|$)/); if (m) declared.add(m[1]);
       }
       for (const row of tableRows(milestone.text)) {
-        const id = row.cells[0].replace(/^`|`$/g, '').match(/^(?:\[)?([A-Z]\d{2}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1]; if (id) declared.add(id);
+        const id = row.cells[0].replace(/^`|`$/g, '').match(/^(?:\[)?([A-Z]\d{2,}(?:-\d{2})?)(?:\]\(.*\))?$/)?.[1]; if (id) declared.add(id);
       }
       for (const id of declared) {
         if (!milestones.some(m => m.id === id && documents.some(d => d.path === m.path))) issues.push(`${id}: active specification/index has no active status file`);
