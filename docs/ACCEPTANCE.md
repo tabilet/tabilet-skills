@@ -8,7 +8,9 @@ SQLite toolkit; dashboard behavior and project records are unchanged.
 |---|---|
 | Local verification | `npm run verify` passed: typecheck, build, 69 unit/packed-loader tests, 12 native Web/headless tests and 12 mixed rc.1 launcher/rc.2 component tests. Tests used disposable profiles and a local fixture provider. |
 | Packed artifact | `tabilet-skills-2.16.2.tgz`, 414,571 bytes, SHA-256 `ca89e62a4677cad41dc9d9e26bb73e3310190eca3483d1320e748b739beefe13`. Two repeated packs matched the tested archive byte for byte. |
-| Publication and catalog | Pending. |
+| Publication | [v2.16.2 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.16.2), tag commit `c7f5de0b3e8a7ec46b986b6ce74d54d51e45d919`. Anonymous downloads of the archive and checksum match the tested files. |
+| Hosted verification | Release-commit main and tag checks are running. |
+| Catalog | [PR #10799](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10799) now targets v2.16.2. Local submission checks pass; hosted checks and maintainer acceptance remain pending. |
 
 # v2.16.1 acceptance and publication
 

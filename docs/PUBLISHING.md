@@ -1,10 +1,11 @@
 # Publication status
 
-## v2.16.2 release preparation
+## v2.16.2 release and catalog submission
 
-The companion is being prepared against the canonical v2.16.2 tag. Local
-verification, publication and catalog acceptance are tracked separately in
-[acceptance evidence](ACCEPTANCE.md).
+The [v2.16.2 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.16.2)
+serves the tested archive and checksum. [Catalog PR #10799](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10799)
+now targets that archive and awaits maintainer acceptance. Verification and
+publication evidence are recorded in [acceptance evidence](ACCEPTANCE.md).
 
 ## v2.16.1 release and catalog submission
 
