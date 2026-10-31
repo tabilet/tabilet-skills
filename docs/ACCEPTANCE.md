@@ -10,7 +10,9 @@ is not rewritten. Personal DSH installations and project records are not changed
 | Canonical source | Published Git tag [v2.16.1](https://github.com/tabilet/skills/tree/v2.16.1); payload generated from the commit and hash-verified. |
 | Local verification | `npm run verify` passed: typecheck, build, 69 unit/packed-loader tests, 12 native Web/headless tests and 12 mixed rc.1 launcher/rc.2 component tests. Tests used disposable profiles and a local fixture provider. |
 | Packed artifact | `tabilet-skills-2.16.1.tgz`, 414,568 bytes, SHA-256 `dfa3368ab3c67e2debe398d344a183fe29526c0fd2e222fa806f66db38d67ade`. Two repeated packs matched the tested archive byte for byte; packed-loader tests covered all seven skills. |
-| Publication and catalog | The v2.16.1 tag is pushed. GitHub release creation returned HTTP 403 for the current personal access token; the API reports `contents=write` is required. The release assets and catalog submission remain pending. |
+| Publication | [v2.16.1 release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.16.1), tag commit `38c123a0e615f5c8c29910c4c2a1ccc9ed1a70b7`. Anonymous downloads of the archive and checksum match the tested local files. |
+| Hosted verification | Both release-commit [main](https://github.com/tabilet/tabilet-skills/actions/runs/41160155677) and [tag](https://github.com/tabilet/tabilet-skills/actions/runs/41160155633) checks passed. |
+| Catalog | [PR #10799](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10799) updates the archive URL; local entry and submission checks pass. Maintainer acceptance is pending. |
 | Runtime boundary | Linux, Node 24.14.1 and the locked DSH rc.2 graph plus isolated rc.1 launcher; no paid model-quality claim. |
 
 # v2.15.0 acceptance and publication

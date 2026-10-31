@@ -1,15 +1,14 @@
 # Publication status
 
-## v2.16.1 release preparation
+## v2.16.1 release and catalog submission
 
 The companion is being prepared against the canonical [v2.16.1 source tag](https://github.com/tabilet/skills/tree/v2.16.1).
-Local verification and the reproducible archive are recorded in
-[acceptance evidence](ACCEPTANCE.md). The tag is pushed, but GitHub rejected
-release creation with HTTP 403: the current personal access token lacks the
-required `contents=write` permission. Upload the tested archive and its
-release-specific checksum after access is restored, then submit the validated
-catalog entry. Catalog visibility requires maintainer acceptance. npm
-publication is optional.
+Local and hosted verification, the reproducible archive, and the public
+asset checks are recorded in [acceptance evidence](ACCEPTANCE.md). The
+[GitHub release](https://github.com/tabilet/tabilet-skills/releases/tag/v2.16.1)
+serves the tested archive and checksum. [Catalog PR #10799](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/10799)
+updates the archive URL and awaits maintainer acceptance. npm publication is
+optional.
 
 
 ## v2.15.0 release and catalog submission
