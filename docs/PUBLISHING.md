@@ -1,5 +1,11 @@
 # Publication status
 
+## v2.16.2 release preparation
+
+The companion is being prepared against the canonical v2.16.2 tag. Local
+verification, publication and catalog acceptance are tracked separately in
+[acceptance evidence](ACCEPTANCE.md).
+
 ## v2.16.1 release and catalog submission
 
 The companion is being prepared against the canonical [v2.16.1 source tag](https://github.com/tabilet/skills/tree/v2.16.1).

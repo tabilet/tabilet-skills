@@ -1,3 +1,13 @@
+# v2.16.2
+
+Pins the seven canonical skills to `tabilet/skills` v2.16.2. The upstream
+release improves legacy retirement reading and adds an optional hash-bound
+history correction manifest to its separately installed API runner and SQLite
+toolkit. The companion dashboard remains read-only; installing it does not
+update the toolkit, interpret corrections as authorization, or modify project
+history. Its supported DSH runtime and no-model/no-write boundaries are unchanged.
+See [acceptance evidence](ACCEPTANCE.md).
+
 # v2.16.1
 
 Pins the seven canonical skills to `tabilet/skills` v2.16.1. The read-only

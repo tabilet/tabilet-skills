@@ -1,3 +1,15 @@
+# v2.16.2 acceptance and publication
+
+The companion pins the canonical `tabilet/skills` v2.16.2 tag. The upstream
+history compatibility changes apply to its separately installed runner and
+SQLite toolkit; dashboard behavior and project records are unchanged.
+
+| Gate | Result |
+|---|---|
+| Local verification | `npm run verify` passed: typecheck, build, 69 unit/packed-loader tests, 12 native Web/headless tests and 12 mixed rc.1 launcher/rc.2 component tests. Tests used disposable profiles and a local fixture provider. |
+| Packed artifact | `tabilet-skills-2.16.2.tgz`, 414,571 bytes, SHA-256 `ca89e62a4677cad41dc9d9e26bb73e3310190eca3483d1320e748b739beefe13`. Two repeated packs matched the tested archive byte for byte. |
+| Publication and catalog | Pending. |
+
 # v2.16.1 acceptance and publication
 
 The companion pins canonical `tabilet/skills` v2.16.1 at immutable commit
