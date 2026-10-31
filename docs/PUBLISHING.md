@@ -3,10 +3,13 @@
 ## v2.16.1 release preparation
 
 The companion is being prepared against the canonical [v2.16.1 source tag](https://github.com/tabilet/skills/tree/v2.16.1).
-The current local verification and publication state is recorded in
-[acceptance evidence](ACCEPTANCE.md). GitHub publication and catalog visibility
-are separate gates; do not treat a local archive as a public release or a catalog
-submission as an accepted listing. npm publication is optional.
+Local verification and the reproducible archive are recorded in
+[acceptance evidence](ACCEPTANCE.md). The tag is pushed, but GitHub rejected
+release creation with HTTP 403: the current personal access token lacks the
+required `contents=write` permission. Upload the tested archive and its
+release-specific checksum after access is restored, then submit the validated
+catalog entry. Catalog visibility requires maintainer acceptance. npm
+publication is optional.
 
 
 ## v2.15.0 release and catalog submission
